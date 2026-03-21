@@ -1,0 +1,63 @@
+{
+    "name": "currency-math-audit",
+    "version": "0.1.0",
+    "exports": "./mod.ts",
+
+    "tasks": {
+        "dev": "deno test --watch",
+        "fmt": "deno fmt --config=deno.jsonc ./src ./tests ./deno.jsonc",
+        "lint": "deno lint --config=deno.jsonc ./src ./tests",
+        "coverage:report": "deno task coverage ; deno coverage ./tests/coverage-log --lcov > ./tests/coverage-log/coverage.lcov ; genhtml -o ./tests/coverage-log ./tests/coverage-log/coverage.lcov",
+        "coverage:dev": "deno task coverage ; deno coverage ./tests/coverage-log",
+        "coverage": "deno task test --reporter=dot --coverage=./coverage-log"
+    },
+
+    "license": "MIT",
+
+    "imports": {
+        "@std/assert": "jsr:@std/assert@1",
+        "katex": "npm:katex@^0.16.40"
+    },
+
+    "fmt": {
+        "lineWidth": 120,
+        "indentWidth": 4,
+        "useTabs": false,
+        "semiColons": true,
+        "singleQuote": false,
+        "proseWrap": "preserve",
+        "newLineKind": "lf"
+    },
+
+    "lint": {
+        "exclude": ["!*.ts"],
+        "rules": {
+            "tags": ["recommended"],
+            "include": [
+                "default-param-last",
+                "eqeqeq",
+                "explicit-function-return-type",
+                "explicit-module-boundary-types",
+                "guard-for-in",
+                "no-await-in-loop",
+                "no-boolean-literal-for-arguments",
+                "no-console",
+                "no-const-assign",
+                "no-eval",
+                "no-external-import",
+                "no-inferrable-types",
+                "no-non-null-asserted-optional-chain",
+                "no-non-null-assertion",
+                "no-self-compare",
+                "no-sparse-arrays",
+                "no-sync-fn-in-async-fn",
+                "no-throw-literal",
+                "no-undef",
+                "no-useless-rename",
+                "single-var-declarator",
+                "triple-slash-reference",
+                "verbatim-module-syntax"
+            ]
+        }
+    }
+}

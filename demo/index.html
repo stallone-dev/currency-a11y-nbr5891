@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Auditabilidade Financeira Acessível - WCAG AAA & eMAG</title>
+
+        <!-- Estilos Externos -->
+        <link rel="stylesheet" href="/assets/katex.min.css">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+
+        <header role="banner">
+            <h1>Auditabilidade Financeira (WCAG AAA)</h1>
+            <p>Precisão industrial de 12 casas decimais e rastreabilidade total.</p>
+        </header>
+
+        <main id="main-content" role="main">
+            <!-- Seção do Simulador Interativo -->
+            <section aria-labelledby="simulator-heading">
+                <h2 id="simulator-heading">1. Simulador Interativo</h2>
+                <p>Experimente o cálculo de juros compostos com auditoria verbal em tempo real.</p>
+
+                <form id="f" aria-describedby="sim-desc" style="max-width: 600px">
+                    <p id="sim-desc" class="sr-only">Preencha os campos abaixo para calcular o montante final.</p>
+
+                    <div style="margin-bottom: 1.5rem">
+                        <label for="p"><strong>Valor Principal (R$):</strong></label>
+                        <input type="text" id="p" name="principal" required value="1000" aria-required="true">
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem">
+                        <label for="r"><strong>Taxa de Juros (ex: 0.05 para 5%):</strong></label>
+                        <input type="text" id="r" name="rate" required value="0.05" aria-required="true">
+                    </div>
+
+                    <div style="margin-bottom: 1.5rem">
+                        <label for="t"><strong>Período (Meses):</strong></label>
+                        <input type="number" id="t" name="time" required value="12" aria-required="true" min="1">
+                    </div>
+
+                    <button type="submit">Calcular e Narrar Resultado</button>
+                </form>
+
+                <!-- Região do Resultado Auditável -->
+                <div id="res-box" aria-live="polite" role="region" aria-atomic="true">
+                    <h3 style="margin-top: 0">Resultado da Auditoria:</h3>
+                    <div id="res-txt">Aguardando entrada de dados para iniciar o cálculo...</div>
+                    <div id="res-math" aria-hidden="true" style="margin-top: 2rem"></div>
+                </div>
+            </section>
+
+            <!-- Seção de Galeria de Exemplos -->
+            <section aria-labelledby="examples-heading" style="margin-top: 5rem">
+                <h2 id="examples-heading">2. Galeria de Cenários Reais</h2>
+                <p>Cálculos processados pelo motor <code>AuditableAmount</code> com auditoria verbal ativada.</p>
+
+                <div id="grid" class="grid">
+                    <p class="loading" aria-live="status">Carregando exemplos auditáveis...</p>
+                </div>
+            </section>
+        </main>
+
+        <footer role="contentinfo">
+            <p>
+                &copy; 2026 Currency Math Audit. <br>
+                Padrão WCAG AAA, eMAG e Arredondamento ABNT NBR 5891.
+            </p>
+        </footer>
+
+        <!-- Scripts Externos -->
+        <script src="/assets/katex.min.js"></script>
+        <script src="script.js" type="module"></script>
+    </body>
+</html>
