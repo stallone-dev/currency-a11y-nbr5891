@@ -9,7 +9,7 @@ describe("Cenários Fiscais (Integration)", () => {
         const pv = CurrencyNBR.from(1000);
         const taxaAnual = 0.10;
         const result = pv.mult(
-            CurrencyNBR.from(1).add(taxaAnual).group().pow("1/252")
+            CurrencyNBR.from(1).add(taxaAnual).group().pow("1/252"),
         ).commit(8);
 
         // (1 + 0.10)^(1/252) approx 1.000378...

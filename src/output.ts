@@ -3,7 +3,12 @@ import { formatBigIntToString, formatMonetary } from "./output_helpers/formattin
 import { generateHTML } from "./output_helpers/html_generator.ts";
 import { translateVerbal } from "./output_helpers/verbal_translator.ts";
 import { generateImageBuffer } from "./output_helpers/image_generator.ts";
-import { type CurrencyNBROutputOptions, DEFAULT_OPTIONS, type RoundingMethod, VALID_ROUNDING_METHODS } from "./output_helpers/options.ts";
+import {
+    type CurrencyNBROutputOptions,
+    DEFAULT_OPTIONS,
+    type RoundingMethod,
+    VALID_ROUNDING_METHODS,
+} from "./output_helpers/options.ts";
 import { applyRounding } from "./output_helpers/rounding_manager.ts";
 import { LOCALE_CURRENCY_MAP } from "./output_helpers/locales.ts";
 import { CurrencyNBRError } from "./errors.ts";

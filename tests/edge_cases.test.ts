@@ -30,7 +30,9 @@ describe("Edge Cases e Robustez (logFatal)", () => {
 
         // Sabotagem via injeção de erro em propriedade privada
         Object.defineProperty(val, "activeTermValue", {
-            get: () => { throw new Error("Erro Crítico Inesperado"); },
+            get: () => {
+                throw new Error("Erro Crítico Inesperado");
+            },
             configurable: true,
         });
 
@@ -41,9 +43,9 @@ describe("Edge Cases e Robustez (logFatal)", () => {
             expect((e as any).message).toBe("Erro Crítico Inesperado");
         }
 
-        const fatalLog = records.find(r => 
-            r.level === "fatal" && 
-            (r.properties as any).operation === "group"
+        const fatalLog = records.find((r) =>
+            r.level === "fatal"
+            && (r.properties as any).operation === "group"
         );
 
         expect(fatalLog).toBeDefined();
@@ -55,7 +57,9 @@ describe("Edge Cases e Robustez (logFatal)", () => {
 
         // Sabotagem via injeção de erro em propriedade privada
         Object.defineProperty(val, "accumulatedValue", {
-            get: () => { throw new Error("Unexpected Add Failure"); },
+            get: () => {
+                throw new Error("Unexpected Add Failure");
+            },
             configurable: true,
         });
 
@@ -66,9 +70,9 @@ describe("Edge Cases e Robustez (logFatal)", () => {
             expect((e as any).message).toBe("Unexpected Add Failure");
         }
 
-        const fatalLog = records.find(r => 
-            r.level === "fatal" && 
-            (r.properties as any).operation === "add"
+        const fatalLog = records.find((r) =>
+            r.level === "fatal"
+            && (r.properties as any).operation === "add"
         );
 
         expect(fatalLog).toBeDefined();
@@ -185,7 +189,7 @@ describe("Edge Cases e Robustez (logFatal)", () => {
         });
 
         it("parseStringValue - deve arredondar para cima se a 13ª casa decimal for >= 5", () => {
-            // Nossa escala interna é 12. 
+            // Nossa escala interna é 12.
             // "0.0000000000005" (13 casas) -> 5 >= 5 -> deve virar 1 na 12ª casa
             const result = parseStringValue("0.0000000000005");
             expect(result).toBe(1n);
@@ -259,9 +263,8 @@ describe("Edge Cases e Robustez (logFatal)", () => {
             // 3. Validar Unicode: deve conter o sobrescrito ²
             const unicode = output.toUnicode();
             expect(unicode).toContain("³√(8²)");
-            
+
             expect(output.toString()).toBe("4.00");
         });
     });
 });
-

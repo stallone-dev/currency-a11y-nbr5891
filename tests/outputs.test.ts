@@ -83,22 +83,22 @@ describe("Outputs Exaustivos (Unit)", () => {
 
         it("deve gerar narração verbal para todos os idiomas suportados", () => {
             const locales = ["pt-BR", "en-US", "en-EU", "es-ES", "fr-FR", "zh-CN", "ru-RU", "ja-JP"] as const;
-            
+
             for (const locale of locales) {
                 const outLocale = calc.commit(2, { locale });
                 const verbal = outLocale.toVerbalA11y();
                 expect(verbal).toBeDefined();
                 expect(typeof verbal).toBe("string");
                 expect(verbal.length).toBeGreaterThan(0);
-                
+
                 // Verifica se contém o termo de igualdade correto por língua
-                if (locale === "pt-BR") expect(verbal).toContain(" é igual a ");
-                if (locale === "en-US" || locale === "en-EU") expect(verbal).toContain(" equals ");
-                if (locale === "es-ES") expect(verbal).toContain(" es igual a ");
-                if (locale === "fr-FR") expect(verbal).toContain(" est égal à ");
-                if (locale === "zh-CN") expect(verbal).toContain(" 等于 ");
-                if (locale === "ru-RU") expect(verbal).toContain(" равно ");
-                if (locale === "ja-JP") expect(verbal).toContain(" は ");
+                if (locale === "pt-BR") { expect(verbal).toContain(" é igual a "); }
+                if (locale === "en-US" || locale === "en-EU") { expect(verbal).toContain(" equals "); }
+                if (locale === "es-ES") { expect(verbal).toContain(" es igual a "); }
+                if (locale === "fr-FR") { expect(verbal).toContain(" est égal à "); }
+                if (locale === "zh-CN") { expect(verbal).toContain(" 等于 "); }
+                if (locale === "ru-RU") { expect(verbal).toContain(" равно "); }
+                if (locale === "ja-JP") { expect(verbal).toContain(" は "); }
             }
         });
     });
@@ -125,7 +125,7 @@ describe("Outputs Exaustivos (Unit)", () => {
         it("deve retornar todos os outputs por padrão em formato string JSON", () => {
             const jsonStr = output.toJson();
             const data = JSON.parse(jsonStr);
-            
+
             expect(data.meta).toBeDefined();
             expect(data.toString).toBe("150.75");
             expect(data.toFloatNumber).toBe(150.75);
@@ -139,7 +139,7 @@ describe("Outputs Exaustivos (Unit)", () => {
         it("deve retornar apenas elementos selecionados", () => {
             const jsonStr = output.toJson(["toString", "toBigInt"]);
             const data = JSON.parse(jsonStr);
-            
+
             expect(data.toString).toBe("150.75");
             expect(data.toBigInt).toBe("150750000000000");
             expect(data.toFloatNumber).toBeUndefined();

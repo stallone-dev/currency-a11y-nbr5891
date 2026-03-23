@@ -116,7 +116,9 @@ async function loadExamples() {
                                   <div class="result-label">Resultado numérico:</div>
                                   <div class="card-result-text">${ex.outputs.toString}</div>`;
                 } else if (method === "toJson") {
-                    resultView = `<div class="json-view">${JSON.stringify(JSON.parse(ex.outputs.toJson), null, 2)}</div>`;
+                    resultView = `<div class="json-view">${
+                        JSON.stringify(JSON.parse(ex.outputs.toJson), null, 2)
+                    }</div>`;
                 } else if (method === "verbalMonetary") {
                     resultView = `
                         <div class="result-label">Monetary:</div>

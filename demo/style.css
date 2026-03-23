@@ -21,7 +21,7 @@
 
 /* Barra de Acessibilidade (eMAG) */
 #barra-acessibilidade {
-    background: #333;
+    background: var(--primary);
     color: #fff;
     padding: 0.5rem 2rem;
     display: flex;
@@ -29,6 +29,7 @@
     align-items: center;
     font-size: 0.85rem;
     width: 100%;
+    border-bottom: 1px solid rgba(255,255,255,0.2);
 }
 
 #barra-acessibilidade ul {
@@ -36,19 +37,22 @@
     padding: 0;
     margin: 0;
     display: flex;
-    gap: 15px;
+    gap: 20px;
 }
 
 #barra-acessibilidade a {
     color: #fff;
     text-decoration: none;
-    padding: 5px 8px; /* Touch target increment */
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background 0.2s;
 }
 
 #barra-acessibilidade a:hover,
 #barra-acessibilidade a:focus {
+    background: rgba(255,255,255,0.15);
     text-decoration: underline;
-    outline: 2px solid #fff;
+    outline: 2px solid var(--accent);
 }
 
 body {
@@ -58,17 +62,18 @@ body {
     background-color: var(--bg);
     max-width: 1400px;
     margin: 0 auto;
-    padding: 0 2rem 2rem 2rem;
-    font-size: 100%; /* Respeita config do navegador */
+    padding: 0 0 2rem 0; /* Removido padding topo para a barra encostar */
+    font-size: 100%;
 }
 
 .skip-link {
     position: absolute;
     top: -100px;
-    background: var(--primary);
-    color: white;
+    background: var(--accent);
+    color: var(--primary);
     padding: 1rem;
     z-index: 9999;
+    font-weight: bold;
 }
 
 .skip-link:focus {
@@ -77,7 +82,7 @@ body {
 
 header {
     border-bottom: 5px solid var(--primary);
-    margin: 2rem 0;
+    margin: 2rem; /* Adicionado margem lateral já que o body não tem mais */
 }
 
 /* Headers de Seção */
@@ -91,7 +96,7 @@ h2 {
 
 .nav-links {
     list-style: none;
-    padding: 0;
+    padding: 0 2rem;
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
@@ -103,7 +108,7 @@ h2 {
     text-decoration: none;
     background: var(--primary-light);
     color: var(--primary);
-    padding: 12px 20px; /* Aumentado para touch */
+    padding: 12px 20px;
     border-radius: 5px;
     font-weight: bold;
     border: 1px solid var(--primary);
@@ -122,10 +127,10 @@ h2 {
     display: flex;
     gap: 1rem;
     flex-wrap: wrap;
-    background: #f9f9f9;
+    background: var(--primary-light); /* Ajustado para cinza azulado suave */
     padding: 2rem;
     border-radius: 10px;
-    border: 2px solid var(--border);
+    border: 2px solid var(--primary);
 }
 
 .form-group {
@@ -141,6 +146,7 @@ label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: bold;
+    color: var(--primary);
 }
 
 textarea {
@@ -151,12 +157,13 @@ textarea {
     border: 2px solid var(--border);
     border-radius: 5px;
     resize: vertical;
+    background: #fff;
 }
 
 small {
     display: block;
     margin-top: 5px;
-    color: #666;
+    color: #444;
 }
 
 .error {
@@ -169,19 +176,37 @@ button {
     background: var(--primary);
     color: white;
     border: none;
-    padding: 1rem 2rem; /* 44px+ height garantido */
+    padding: 1rem 2rem;
     font-weight: bold;
     cursor: pointer;
     border-radius: 5px;
     font-size: 1rem;
     min-height: 44px;
+    transition: transform 0.1s;
 }
 
-button:hover {
-    filter: brightness(1.1);
+button:hover,
+button:focus {
+    background: #ffffff;
+    color: var(--primary);
+    border: 2px solid var(--primary);
+    filter: brightness(1);
+    transform: translateY(-1px);
+}
+
+button:active {
+    transform: translateY(0);
 }
 
 /* Interactive Results Grid */
+.interactive-container {
+    margin: 0 2rem;
+}
+
+#h-interactive {
+    margin-left: 2rem;
+}
+
 .output-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -191,9 +216,10 @@ button:hover {
 
 .output-item {
     background: white;
-    border: 1px solid #ddd;
+    border: 1px solid #ccc;
     padding: 1rem;
     border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 
 .output-item.full-width {
@@ -203,10 +229,16 @@ button:hover {
 .output-item strong {
     display: block;
     color: var(--primary);
-    margin-bottom: 5px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--primary-light);
+    padding-bottom: 4px;
 }
 
 /* Cards */
+#categories-container {
+    padding: 0 2rem;
+}
+
 .grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -231,8 +263,13 @@ button:hover {
     }
     #barra-acessibilidade {
         flex-direction: column;
+        padding: 1rem;
         gap: 10px;
         text-align: center;
+    }
+    #barra-acessibilidade ul {
+        flex-direction: column;
+        gap: 5px;
     }
 }
 
@@ -247,7 +284,7 @@ button:hover {
 
 .card-code {
     background: var(--code-bg);
-    color: #fff;
+    color: #eee;
     padding: 10px;
     border-radius: 5px;
     font-family: monospace;
@@ -261,7 +298,6 @@ button:hover {
     padding: 1rem;
     border-radius: 5px;
     margin-top: 10px;
-    font-weight: bold;
 }
 
 /* Views */
@@ -271,7 +307,7 @@ button:hover {
     font-family: monospace;
     font-size: 0.75rem;
     color: #333;
-    background: #f4f4f4;
+    background: #f8f9fa;
     padding: 10px;
     overflow: auto;
     max-height: 200px;
@@ -287,6 +323,7 @@ button:hover {
     background: #fff;
     color: var(--primary);
     max-height: 300px;
+    border-left: 4px solid var(--accent);
 }
 
 .image-output-wrapper {
@@ -312,17 +349,43 @@ button:hover {
     background: white;
     padding: 10px;
     border-radius: 5px;
+    border: 1px solid #eee;
+}
+
+footer {
+    margin: 4rem 2rem 2rem 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--primary-light);
+    text-align: center;
 }
 
 /* Modo Alto Contraste (eMAG) */
 body.alto-contraste {
     --bg: #000000;
     --text: #ffffff;
-    --primary: #ffff00; /* Amarelo de alto contraste */
+    --primary: #ffff00; /* Amarelo */
     --accent: #ffffff;
-    --primary-light: #333333;
+    --primary-light: #1a1a1a;
     --border: #ffffff;
     --code-bg: #000000;
+}
+
+body.alto-contraste #barra-acessibilidade {
+    background: #000 !important;
+    color: #ffff00 !important;
+    border: 1px solid #ffff00 !important;
+}
+
+body.alto-contraste #barra-acessibilidade a {
+    color: #ffff00 !important;
+}
+
+body.alto-contraste #barra-acessibilidade a:hover,
+body.alto-contraste #barra-acessibilidade a:focus {
+    background: #ffff00 !important;
+    color: #000 !important;
+    text-decoration: none;
+    outline: none;
 }
 
 body.alto-contraste a {
@@ -331,15 +394,18 @@ body.alto-contraste a {
 }
 
 body.alto-contraste .card,
-body.alto-contraste .output-item {
-    background: #000;
-    border: 2px solid #fff;
+body.alto-contraste .output-item,
+body.alto-contraste button {
+    background: #ffff00 !important;
+    color: #000000 !important;
+    border: 2px solid #ffffff !important;
 }
 
-body.alto-contraste button {
-    background: #ffff00;
-    color: #000;
-    border: 2px solid #fff;
+body.alto-contraste button:hover,
+body.alto-contraste button:focus {
+    background: #000000 !important;
+    color: #ffff00 !important;
+    border: 2px solid #ffff00 !important;
 }
 
 body.alto-contraste .nav-links a {
@@ -352,4 +418,43 @@ body.alto-contraste .nav-links a:hover,
 body.alto-contraste .nav-links a:focus {
     background: #ffff00;
     color: #000;
+}
+
+body.alto-contraste #res-box h3 {
+    background: #ffff00 !important;
+    color: #000000 !important;
+    padding: 5px;
+    display: inline-block;
+}
+/* Correções específicas para visibilidade em Alto Contraste */
+body.alto-contraste .card-math-render,
+body.alto-contraste .card-math-render *,
+body.alto-contraste .card-math-render .katex,
+body.alto-contraste .card-math-render .base {
+    background: #000000 !important;
+    color: #ffff00 !important;
+}
+
+body.alto-contraste .json-view,
+body.alto-contraste .binary-view,
+body.alto-contraste .binary-view-small,
+body.alto-contraste .result-area,
+body.alto-contraste textarea {
+    background: #000 !important;
+    color: #fff !important;
+    border: 1px solid #ffff00 !important;
+}
+
+body.alto-contraste label,
+body.alto-contraste small,
+body.alto-contraste strong {
+    color: #ffff00 !important;
+}
+
+body.alto-contraste .group-main-header {
+    border-bottom-color: #ffff00;
+}
+
+body.alto-contraste .group-main-header::before {
+    background: #ffff00;
 }

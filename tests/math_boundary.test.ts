@@ -57,7 +57,7 @@ describe("Aritmética e Limites (Unit)", () => {
 
         it("deve aplicar ABNT NBR 5891 (Padrão) explicitamente (Positivos e Negativos)", () => {
             // Positivos: Arredonda para o par mais próximo se for exatamente 5
-            const val1 = CurrencyNBR.from("1.225").commit(2, { roundingMethod: "NBR-5891" }); 
+            const val1 = CurrencyNBR.from("1.225").commit(2, { roundingMethod: "NBR-5891" });
             const val2 = CurrencyNBR.from("1.235").commit(2, { roundingMethod: "NBR-5891" });
             expect(val1.toString()).toBe("1.22");
             expect(val2.toString()).toBe("1.24");

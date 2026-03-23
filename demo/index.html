@@ -49,7 +49,10 @@
                 <li><a href="#footer" accesskey="4">Ir para o rodapé [4]</a></li>
             </ul>
             <ul id="opcoes-acessibilidade">
-                <li><a href="#" id="alto-contraste" aria-pressed="false"><span aria-hidden="true">◐</span> Alto Contraste</a></li>
+                <li>
+                    <a href="#" id="alto-contraste" aria-pressed="false"><span aria-hidden="true">◐</span> Alto
+                        Contraste</a>
+                </li>
             </ul>
         </div>
 
@@ -63,7 +66,7 @@
         <nav id="menu-principal" aria-label="Navegação rápida">
             <ul class="nav-links">
                 <li><a href="#sec-interactive">1. interactive</a></li>
-                
+
                 <li class="nav-group-title">Outputs</li>
                 <li><a href="#sec-verbalMonetary">2. locale</a></li>
                 <li><a href="#sec-roundingShowcase">3. Rounding</a></li>
@@ -132,7 +135,8 @@ CurrencyNBR.from("50000.00")
     // 4. Fecha a expressão matemática geral e gera o output auditável
 
     .commit(2)</textarea>
-                            <small>Use a sintaxe da biblioteca: <code>CurrencyNBR.from(val).add(x).commit(n)</code></small>
+                            <small>Use a sintaxe da biblioteca: <code
+                                >CurrencyNBR.from(val).add(x).commit(n)</code></small>
                         </div>
                         <button type="submit">Executar e Gerar Auditoria</button>
                     </form>
@@ -204,24 +208,24 @@ CurrencyNBR.from("50000.00")
         </div>
         <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
         <script>
-            new window.VLibras.Widget('https://vlibras.gov.br/app');
+            new window.VLibras.Widget("https://vlibras.gov.br/app");
         </script>
 
         <!-- High Contrast & Common Scripts -->
         <script>
             // Alto Contraste (Persistente)
-            const contrastBtn = document.getElementById('alto-contraste');
-            contrastBtn.addEventListener('click', (e) => {
+            const contrastBtn = document.getElementById("alto-contraste");
+            contrastBtn.addEventListener("click", (e) => {
                 e.preventDefault();
-                const isPressed = contrastBtn.getAttribute('aria-pressed') === 'true';
-                document.body.classList.toggle('alto-contraste');
-                contrastBtn.setAttribute('aria-pressed', !isPressed);
-                localStorage.setItem('altoContraste', !isPressed);
+                const isPressed = contrastBtn.getAttribute("aria-pressed") === "true";
+                document.body.classList.toggle("alto-contraste");
+                contrastBtn.setAttribute("aria-pressed", !isPressed);
+                localStorage.setItem("altoContraste", !isPressed);
             });
 
-            if (localStorage.getItem('altoContraste') === 'true') {
-                document.body.classList.add('alto-contraste');
-                contrastBtn.setAttribute('aria-pressed', 'true');
+            if (localStorage.getItem("altoContraste") === "true") {
+                document.body.classList.add("alto-contraste");
+                contrastBtn.setAttribute("aria-pressed", "true");
             }
         </script>
         <script src="script.js" type="module"></script>

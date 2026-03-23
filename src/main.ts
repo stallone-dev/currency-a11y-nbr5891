@@ -292,8 +292,10 @@ export class CurrencyNBR {
             // Divisão BigInt já é inteira (trunca)
             const nextActiveValue = (this.activeTermValue / otherValue) * INTERNAL_SCALE_FACTOR;
 
-            const nextActiveExpr = `\\lfloor \\frac{${this.activeTermExpression}}{${other.getFullLaTeXExpression()}} \\rfloor`;
-            const nextActiveVerbal = `${this.activeTermVerbal}${VERBAL_TOKENS.DIV_INT}${other.getFullVerbalExpression()}`;
+            const nextActiveExpr =
+                `\\lfloor \\frac{${this.activeTermExpression}}{${other.getFullLaTeXExpression()}} \\rfloor`;
+            const nextActiveVerbal =
+                `${this.activeTermVerbal}${VERBAL_TOKENS.DIV_INT}${other.getFullVerbalExpression()}`;
             const nextActiveUnicode = `⌊${this.activeTermUnicode} ÷ ${other.getFullUnicodeExpression()}⌋`;
 
             const result = new CurrencyNBR(

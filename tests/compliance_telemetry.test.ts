@@ -30,7 +30,7 @@ describe("Compliance e Telemetria (Integration)", () => {
                     expect(e.status).toBeGreaterThanOrEqual(400);
                     expect(e.detail).toBeDefined();
                     expect(e.instance).toMatch(/^audit:err:[a-f0-9-]+$/);
-                    
+
                     const json = e.toJSON();
                     expect(json.type).toBe(e.type);
                     expect(json.instance).toBe(e.instance);
@@ -58,8 +58,8 @@ describe("Compliance e Telemetria (Integration)", () => {
             records.length = 0;
             CurrencyNBR.from(100).add(50).commit();
 
-            const inputLog = records.find(r => r.category.join(".") === "currency-nbr-a11y.input");
-            const engineLog = records.find(r => r.category.join(".") === "currency-nbr-a11y.engine.add");
+            const inputLog = records.find((r) => r.category.join(".") === "currency-nbr-a11y.input");
+            const engineLog = records.find((r) => r.category.join(".") === "currency-nbr-a11y.engine.add");
 
             expect(inputLog).toBeDefined();
             expect(inputLog?.level).toBe("debug");
@@ -82,7 +82,7 @@ describe("Compliance e Telemetria (Integration)", () => {
                 // erro ignorado
             }
 
-            const errorLogs = records.filter(r => r.level === "error");
+            const errorLogs = records.filter((r) => r.level === "error");
             for (const log of errorLogs) {
                 const logString = JSON.stringify(log.properties);
                 expect(logString).not.toContain(pii);

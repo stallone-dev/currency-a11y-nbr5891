@@ -477,7 +477,7 @@ async function serveFile(path: string): Promise<Response> {
     }
 }
 
-Deno.serve({ port: 8000 }, async (req) => {
+export default Deno.serve({ port: 8000 }, async (req) => {
     const url = new URL(req.url);
 
     if (url.pathname === "/") { return serveFile(join(__dirname, "index.html")); }
