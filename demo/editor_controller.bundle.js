@@ -25121,8 +25121,7 @@ function setupEditor(containerId) {
   if (!parent) return;
   parent.innerHTML = "";
   const themeCompartment = new Compartment();
-  const startCode = `
-    CurrencyNBR.from("1234567.89")
+  const startCode = `CurrencyNBR.from("1234567.89")
         .pow("353/1141")
         .add(
             CurrencyNBR.from(0.00123).div(
