@@ -39,9 +39,9 @@ export class CalcAUDError extends Error {
 
     /** Extensões de Auditoria Matemática (RFC 7807 permite membros customizados). */
     public readonly math_audit?: {
-        latex?: string | undefined;
-        unicode?: string | undefined;
-        operation?: string | undefined;
+        latex?: string;
+        unicode?: string;
+        operation?: string;
     };
 
     constructor(params: {
@@ -86,9 +86,9 @@ export class CalcAUDError extends Error {
      */
     public toJSON(): {
         math_audit?: {
-            latex?: string | undefined;
-            unicode?: string | undefined;
-            operation?: string | undefined;
+            latex?: string;
+            unicode?: string;
+            operation?: string;
         };
         type: string;
         title: string;
@@ -123,7 +123,7 @@ export class CalcAUDError extends Error {
  * ```
  */
 export function logFatal(error: unknown, context?: Record<string, unknown>): void {
-    const message = error instanceof Error ? error.message : String(error);
+    const message = error instanceof Error ? error.message : error.toString();
     const stack = error instanceof Error ? error.stack : undefined;
 
     // Erros fatais são registrados em um namespace específico para alertas imediatos.

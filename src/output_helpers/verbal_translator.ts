@@ -50,7 +50,7 @@ export function translateVerbal(
 
     // 2. Formatar Números na Expressão
     // Números em ponto flutuante (ex: 10.50) são convertidos para a grafia local (ex: 10,50).
-    output = output.replace(/(\d)\.(\d)/g, `$1${dict.COMMA}$2`);
+    output = output.replaceAll(/(\d)\.(\d)/g, `$1${dict.COMMA}$2`);
 
     // 3. Adicionar o Resultado Final e Metadados de Arredondamento
     const finalResultVerbal = resultValue.replace(".", dict.COMMA);

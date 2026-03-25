@@ -26,9 +26,7 @@ import type { CalcAUDOutputOptions } from "./options.ts";
  * res.toCustomOutput(logProcessor);
  * ```
  */
-export interface ICalcAUDCustomOutput<Toutput> {
-    (this: CalcAUDOutput, context: ICalcAUDCustomOutputContext): Toutput;
-}
+export type ICalcAUDCustomOutput<Toutput> = (this: CalcAUDOutput, context: ICalcAUDCustomOutputContext) => Toutput;
 
 /**
  * Contexto de dados e métodos fornecido aos processadores customizados.

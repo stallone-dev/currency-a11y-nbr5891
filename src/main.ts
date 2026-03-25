@@ -155,7 +155,7 @@ export class CalcAUD {
             return result;
         } catch (e) {
             if (!(e instanceof CalcAUDError)) {
-                logFatal(e, { operation: "from", value: String(value) });
+                logFatal(e, { operation: "from", value: value.toString() });
             }
             throw e;
         }
@@ -212,7 +212,7 @@ export class CalcAUD {
             return result;
         } catch (e) {
             if (!(e instanceof CalcAUDError)) {
-                logFatal(e, { operation: "add", value: String(value) });
+                logFatal(e, { operation: "add", value: value.toString() });
             }
             throw e;
         }
@@ -270,7 +270,7 @@ export class CalcAUD {
             return result;
         } catch (e) {
             if (!(e instanceof CalcAUDError)) {
-                logFatal(e, { operation: "sub", value: String(value) });
+                logFatal(e, { operation: "sub", value: value.toString() });
             }
             throw e;
         }
@@ -333,7 +333,7 @@ export class CalcAUD {
             return result;
         } catch (e) {
             if (!(e instanceof CalcAUDError)) {
-                logFatal(e, { operation: "mult", value: String(value) });
+                logFatal(e, { operation: "mult", value: value.toString() });
             }
             throw e;
         }
@@ -406,7 +406,7 @@ export class CalcAUD {
             return result;
         } catch (e) {
             if (!(e instanceof CalcAUDError)) {
-                logFatal(e, { operation: "div", value: String(value) });
+                logFatal(e, { operation: "div", value: value.toString() });
             }
             throw e;
         }

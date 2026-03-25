@@ -67,7 +67,7 @@ export function parseStringValue(value: string): bigint {
 }
 
 function removeUnderscores(s: string): string {
-    return s.replace(/_/g, "");
+    return s.replaceAll(/_/g, "");
 }
 
 /**

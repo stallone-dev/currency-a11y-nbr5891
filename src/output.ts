@@ -513,7 +513,7 @@ export class CalcAUDOutput {
     private getUnroundedString(): string {
         const full = formatBigIntToString(this.value, INTERNAL_CALCULATION_PRECISION);
         if (full.indexOf(".") !== -1) {
-            return full.replace(/\.?0+$/, "");
+            return full.replace(/0+$/, "").replace(/\.$/, "");
         }
         return full;
     }

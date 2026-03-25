@@ -45,8 +45,8 @@ export function formatBigIntToString(value: bigint, decimals: number): string {
  * @returns A string formatada monetariamente (ex: "R$ 1.234,56").
  */
 export function formatMonetary(formattedString: string, locale = "pt-BR", currency = "BRL"): string {
-    const numberValue = parseFloat(formattedString);
-    if (isNaN(numberValue)) { return formattedString; }
+    const numberValue = Number.parseFloat(formattedString);
+    if (Number.isNaN(numberValue)) { return formattedString; }
 
     // Detectamos a precisão original para forçar o Intl a respeitar as casas decimais solicitadas
     const decimalPart = formattedString.split(".")[1];
