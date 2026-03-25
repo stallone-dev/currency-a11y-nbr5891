@@ -5,8 +5,11 @@
     "license": "Apache-2.0",
 
     "publish": {
-        "exclude": ["./tests", "./demo", "node_modules", "vendor", "GEMINI.md"]
+        "exclude": ["./tests", "./demo", "node_modules", "vendor", "GEMINI.md"],
+        "include": ["mod.ts"]
     },
+    
+    "workspace": ["./demo", "./tests"],
 
     "tasks": {
         "fmt": "deno fmt --config=deno.jsonc ./src ./tests ./deno.jsonc",
@@ -36,7 +39,7 @@
     },
     "nodeModulesDir": "auto",
     "vendor": true,
-    "lock": { "frozen": true },
+    "lock": { "frozen": false },
 
     "fmt": {
         "bracePosition": "sameLine",

@@ -1,5 +1,5 @@
 {
-    "name": "@stallone-dev/currency-nbr-a11y-demo",
+    "name": "@scope/demo",
     "version": "1.0.0",
     "exports": "./server.ts",
     "license": "Apache-2.0",
