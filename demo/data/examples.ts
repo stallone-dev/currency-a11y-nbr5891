@@ -183,12 +183,12 @@ export const getCategorizedExamples = () => {
           title: "Divisão Inteira Euclidiana",
           context: "-10 / 3 = -4 (Piso)",
           code:
-            "CalcAUD.from(-10).divInt(3, { mathDivModStrategy: 'euclidean' }).commit(0)",
+            "CalcAUD.from(-10).divInt(3, 'euclidean').commit(0)",
           outputs: register(
             "outputs",
             "strategy_divint_euclidean",
             mapAllOutputs(
-              CalcAUD.from(-10).divInt(3, { mathDivModStrategy: "euclidean" })
+              CalcAUD.from(-10).divInt(3, "euclidean")
                 .commit(0),
             ),
           ),
@@ -197,12 +197,12 @@ export const getCategorizedExamples = () => {
           title: "Divisão Inteira Truncada",
           context: "-10 / 3 = -3 (Corte zero)",
           code:
-            "CalcAUD.from(-10).divInt(3, { mathDivModStrategy: 'truncated' }).commit(0)",
+            "CalcAUD.from(-10).divInt(3, 'truncated').commit(0)",
           outputs: register(
             "outputs",
             "strategy_divint_truncated",
             mapAllOutputs(
-              CalcAUD.from(-10).divInt(3, { mathDivModStrategy: "truncated" })
+              CalcAUD.from(-10).divInt(3, "truncated")
                 .commit(0),
             ),
           ),
@@ -211,12 +211,12 @@ export const getCategorizedExamples = () => {
           title: "Módulo Euclidiano",
           context: "-10 % 3 = 2 (Resto positivo)",
           code:
-            "CalcAUD.from(-10).mod(3, { mathDivModStrategy: 'euclidean' }).commit(0)",
+            "CalcAUD.from(-10).mod(3, 'euclidean').commit(0)",
           outputs: register(
             "outputs",
             "strategy_mod_euclidean",
             mapAllOutputs(
-              CalcAUD.from(-10).mod(3, { mathDivModStrategy: "euclidean" })
+              CalcAUD.from(-10).mod(3, "euclidean")
                 .commit(0),
             ),
           ),
@@ -225,12 +225,12 @@ export const getCategorizedExamples = () => {
           title: "Módulo Truncado",
           context: "-10 % 3 = -1 (Sinal do dividendo)",
           code:
-            "CalcAUD.from(-10).mod(3, { mathDivModStrategy: 'truncated' }).commit(0)",
+            "CalcAUD.from(-10).mod(3, 'truncated').commit(0)",
           outputs: register(
             "outputs",
             "strategy_mod_truncated",
             mapAllOutputs(
-              CalcAUD.from(-10).mod(3, { mathDivModStrategy: "truncated" })
+              CalcAUD.from(-10).mod(3, "truncated")
                 .commit(0),
             ),
           ),

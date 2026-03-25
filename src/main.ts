@@ -6,7 +6,7 @@ import { toSuperscript } from "./internal/superscript.ts";
 import { wrapLaTeX, wrapUnicode } from "./internal/wrappers.ts";
 import { CalcAUDOutput } from "./output.ts";
 import { DEFAULT_DISPLAY_PRECISION, INTERNAL_SCALE_FACTOR } from "./constants.ts";
-import type { CalcAUDOutputOptions } from "./output_helpers/options.ts";
+import type { CalcAUDOutputOptions, MathDivModStrategy } from "./output_helpers/options.ts";
 import { VERBAL_TOKENS } from "./output_helpers/i18n.ts";
 import { CalcAUDError, logFatal } from "./errors.ts";
 import { Logger } from "./logger.ts";
@@ -408,8 +408,12 @@ export class CalcAUD {
      * Realiza a divisão inteira (quociente) entre o montante atual e um valor.
      *
      * @param value Divisor.
-     * @param options Opções para definir a estratégia (euclidian ou truncated).
+     * @param divStrategy Estratégia de divisão: "euclidean" (padrão) ou "truncated".
      * @returns Nova instância com o resultado da divisão inteira.
+     *
+     * @remarks
+     * **ATENÇÃO:** A estratégia de divisão deve ser definida neste momento!
+     * Opções passadas posteriormente no método `commit()` NÃO afetarão o cálculo realizado aqui.
      *
      * @example
      * ```ts
@@ -418,11 +422,10 @@ export class CalcAUD {
      *
      * // Negativos (Euclidiana vs Truncada)
      * CalcAUD.from(-10).divInt(3); // -4 (Piso)
-     * CalcAUD.from(-10).divInt(3, { mathDivModStrategy: "truncated" }); // -3 (Truncado)
+     * CalcAUD.from(-10).divInt(3, "truncated"); // -3 (Truncado)
      * ```
      */
-    public divInt(value: CalcAUDAllowedValue, options: CalcAUDOutputOptions = {}): CalcAUD {
-        const strategy = options.mathDivModStrategy ?? "euclidean";
+    public divInt(value: CalcAUDAllowedValue, divStrategy: MathDivModStrategy = "euclidean"): CalcAUD {
         const start = performance.now();
         try {
             const other = CalcAUD.from(value);
@@ -443,7 +446,7 @@ export class CalcAUD {
             let nextActiveUnicode: string;
             let nextActiveVerbal: string;
 
-            if (strategy === "euclidean") {
+            if (divStrategy === "euclidean") {
                 // Lógica Euclidiana: O quociente é o piso (floor) da divisão real
                 quotient = this.activeTermValue / otherValue;
                 const remainder = this.activeTermValue % otherValue;
@@ -481,13 +484,13 @@ export class CalcAUD {
             const end = performance.now();
             Logger.getChild(["engine", "divInt"]).debug("Integer division performed {*}", {
                 calcTime: end - start,
-                strategy,
+                strategy: divStrategy,
                 currentAccumulatedResult: (result.accumulatedValue + result.activeTermValue).toString(),
             });
             return result;
         } catch (e) {
             if (!(e instanceof CalcAUDError)) {
-                logFatal(e, { operation: "divInt", value: String(value), options });
+                logFatal(e, { operation: "divInt", value: String(value), divStrategy });
             }
             throw e;
         }
@@ -497,8 +500,12 @@ export class CalcAUD {
      * Calcula o módulo (resto da divisão) entre o montante atual e um valor.
      *
      * @param value Divisor.
-     * @param options Opções para definir a estratégia (euclidian ou truncated).
+     * @param divStrategy Estratégia de divisão: "euclidean" (padrão) ou "truncated".
      * @returns Nova instância com o resultado do módulo.
+     *
+     * @remarks
+     * **ATENÇÃO:** A estratégia de divisão deve ser definida neste momento!
+     * Opções passadas posteriormente no método `commit()` NÃO afetarão o cálculo realizado aqui.
      *
      * @example
      * ```ts
@@ -507,11 +514,10 @@ export class CalcAUD {
      *
      * // Diferença de Estratégia com Negativos
      * CalcAUD.from(-10).mod(3); // 2 (Euclidiano: resto sempre positivo)
-     * CalcAUD.from(-10).mod(3, { mathDivModStrategy: "truncated" }); // -1 (Truncado: segue o sinal do dividendo)
+     * CalcAUD.from(-10).mod(3, "truncated"); // -1 (Truncado: segue o sinal do dividendo)
      * ```
      */
-    public mod(value: CalcAUDAllowedValue, options: CalcAUDOutputOptions = {}): CalcAUD {
-        const strategy = options.mathDivModStrategy ?? "euclidean";
+    public mod(value: CalcAUDAllowedValue, divStrategy: MathDivModStrategy = "euclidean"): CalcAUD {
         const start = performance.now();
         try {
             const other = CalcAUD.from(value);
@@ -532,7 +538,7 @@ export class CalcAUD {
             let nextActiveUnicode: string;
             let nextActiveVerbal: string;
 
-            if (strategy === "euclidean") {
+            if (divStrategy === "euclidean") {
                 // Módulo Euclidiano garante que o resto seja sempre positivo: ((a % n) + n) % n
                 const rawMod = this.activeTermValue % otherValue;
                 const absDivisor = otherValue < 0n ? -otherValue : otherValue;
@@ -565,13 +571,13 @@ export class CalcAUD {
             const end = performance.now();
             Logger.getChild(["engine", "mod"]).debug("Modulo performed {*}", {
                 calcTime: end - start,
-                strategy,
+                strategy: divStrategy,
                 currentAccumulatedResult: (result.accumulatedValue + result.activeTermValue).toString(),
             });
             return result;
         } catch (e) {
             if (!(e instanceof CalcAUDError)) {
-                logFatal(e, { operation: "mod", value: String(value), options });
+                logFatal(e, { operation: "mod", value: String(value), divStrategy });
             }
             throw e;
         }

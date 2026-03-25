@@ -75,12 +75,6 @@ export interface CalcAUDOutputOptions {
      * Se não definido, utiliza a moeda nativa associada ao 'locale'.
      */
     currency?: string;
-
-    /**
-     * Define a estratégia de cálculo para operações de módulo e divisão inteira.
-     * @default "euclidean"
-     */
-    mathDivModStrategy?: MathDivModStrategy;
 }
 
 /**
@@ -90,5 +84,4 @@ export const DEFAULT_OPTIONS: Required<CalcAUDOutputOptions> = {
     roundingMethod: "NBR-5891",
     locale: "pt-BR",
     currency: "BRL",
-    mathDivModStrategy: "euclidean",
 };
