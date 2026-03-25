@@ -10,6 +10,7 @@ import { dirname, fromFileUrl, join } from "@std/path";
 import { CalcAUDError } from "../src/errors.ts";
 import { isRateLimited } from "./logic/rate_limit.ts";
 import { executeExpression } from "./logic/execution.ts";
+import { mapAllOutputs } from "./logic/mapper.ts";
 import { getCategorizedExamples } from "./data/examples.ts";
 import { serveFile } from "./handlers/static.ts";
 
@@ -64,6 +65,7 @@ export default Deno.serve({ port: 8000 }, async (req) => {
             const { expression } = await req.json();
             const output = executeExpression(expression, req);
             return new Response(
+                JSON.stringify(mapAllOutputs(output)),
                 {
                     headers: {
                         "content-type": "application/json",

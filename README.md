@@ -1,6 +1,6 @@
 # 🧮 CalcAUD - Calculadora Auditável
 
-[![JSR](https://jsr.io/badges/@st-all-one/calcaud-nbr-a11y)](https://jsr.io/@st-all-one/calcaud-nbr-a11y)
+[![JSR](https://jsr.io/badges/@st-all-one/calcaud-nbr-a11y?logoColor=f7df1e&color=f7df1e&labelColor=083344)](https://jsr.io/@st-all-one/calcaud-nbr-a11y)
 [![License](https://img.shields.io/github/license/st-all-one/calcaud-nbr-a11y)](LICENSE)
 
 O projeto **CalcAUD** é uma mini-engine para cálculo matemático com rastreio auditável e acessível para uso prático.

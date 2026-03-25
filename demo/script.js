@@ -21,7 +21,16 @@ function updateInteractiveDisplay(data) {
         toVerbalA11y: data.toVerbalA11y,
         toCustomOutput: data.toCustomOutput,
         // toHTML handled separately below
-        toJson: `<div class="json-view">${JSON.stringify(JSON.parse(data.toJson), null, 2)}</div>`,
+        toJson: (function() {
+            if (!data.toJson) return '';
+            try {
+                const parsed = typeof data.toJson === 'string' ? JSON.parse(data.toJson) : data.toJson;
+                return `<div class="json-view">${JSON.stringify(parsed, null, 2)}</div>`;
+            } catch (e) {
+                console.error("Erro no JSON interativo:", e);
+                return `<div class="json-view error">Erro no formato JSON</div>`;
+            }
+        })(),
         toImageBuffer: `
       <div class="image-output-wrapper">
         <div class="binary-view">${data.toImageBufferHex}</div>
@@ -108,7 +117,14 @@ function renderCategory(method, examples, groupType, container) {
                                   <div class="result-label">Resultado numérico:</div>
                                   <div class="card-result-text">${ex.outputs.toString}</div>`;
         } else if (method === "toJson") {
-            resultView = `<div class="json-view">${JSON.stringify(JSON.parse(ex.outputs.toJson), null, 2)}</div>`;
+            try {
+                const jsonValue = ex.outputs.toJson;
+                const parsed = typeof jsonValue === 'string' ? JSON.parse(jsonValue) : jsonValue;
+                resultView = `<div class="json-view">${JSON.stringify(parsed, null, 2)}</div>`;
+            } catch (e) {
+                console.error("Erro ao renderizar JSON:", e);
+                resultView = `<div class="json-view error">Erro no formato JSON</div>`;
+            }
         } else if (method === "verbalMonetary" || method === "currencyOptions") {
             resultView = `
                         <div class="result-label">Monetary:</div>
