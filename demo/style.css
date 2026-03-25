@@ -4,22 +4,22 @@
 
 /* Local Fonts */
 @font-face {
-    font-family: 'JetBrains Mono';
-    src: url('/fonts/JetBrainsMono-Regular.ttf') format('truetype');
+    font-family: "JetBrains Mono";
+    src: url("/fonts/JetBrainsMono-Regular.ttf") format("truetype");
     font-weight: 400;
     font-style: normal;
 }
 
 @font-face {
-    font-family: 'JetBrains Mono';
-    src: url('/fonts/JetBrainsMono-Bold.ttf') format('truetype');
+    font-family: "JetBrains Mono";
+    src: url("/fonts/JetBrainsMono-Bold.ttf") format("truetype");
     font-weight: 700;
     font-style: normal;
 }
 
 @font-face {
-    font-family: 'Fira Code';
-    src: url('/fonts/FiraCode-Regular.ttf') format('truetype');
+    font-family: "Fira Code";
+    src: url("/fonts/FiraCode-Regular.ttf") format("truetype");
     font-weight: 400;
     font-style: normal;
 }
@@ -105,7 +105,6 @@ html {
     /* Thicker scrollbar for Firefox */
 }
 
-
 /* Foco Global Visível (WCAG 2.4.7 AAA) */
 *:focus-visible {
     outline: 0.1875rem solid var(--accent);
@@ -173,7 +172,7 @@ html {
 }
 
 body {
-    font-family: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
     line-height: 1.6;
     color: var(--text);
     background-color: var(--bg);
@@ -440,13 +439,9 @@ button:active {
     /* Permite rolagem interna se o conteúdo for largo */
 }
 
-.output-item.full-width {
-    /* grid-column já tratado em mobile-first */
-}
-
 .result-label {
     font-weight: 600;
-    letter-spacing: 0.025rem
+    letter-spacing: 0.025rem;
 }
 
 .output-item strong {
@@ -791,12 +786,11 @@ html[data-theme="dark"] {
 
     /* Force text color for sandboxed editor iframe content */
     --editor-text: #ffffff;
-}
 
-/* Scrollbar Variables for Dark Mode */
---scrollbar-thumb-bg: var(--primary);
---scrollbar-track-bg: var(--bg);
---scrollbar-thumb-border: var(--bg);
+    /* Scrollbar Variables for Dark Mode */
+    --scrollbar-thumb-bg: var(--primary);
+    --scrollbar-track-bg: var(--bg);
+    --scrollbar-thumb-border: var(--bg);
 }
 
 html[data-theme="dark"] #barra-acessibilidade {

@@ -3,14 +3,12 @@
     "version": "1.0.0",
     "exports": "./server.ts",
     "license": "Apache-2.0",
-
     "tasks": {
         "demo": "deno serve --watch --allow-read server.ts",
         "bundle": "deno run -A npm:esbuild editor_controller.js --bundle --format=esm --outfile=editor_controller.bundle.js"
     },
-
     "imports": {
-        "@currency-nbr-a11y": "../mod.ts",
+        "@calc-aud-nbr-a11y": "../mod.ts",
         "codemirror": "npm:codemirror@^6.0.1",
         "@codemirror/state": "npm:@codemirror/state@^6.4.1",
         "@codemirror/view": "npm:@codemirror/view@^6.26.3",

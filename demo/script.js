@@ -202,7 +202,10 @@ function init() {
       // Sincroniza o tema quando o editor estiver pronto
       const iframe = document.getElementById("editor-iframe");
       if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ type: "THEME_CHANGE", theme: htmlEl.getAttribute("data-theme") }, "*");
+        iframe.contentWindow.postMessage(
+          { type: "THEME_CHANGE", theme: htmlEl.getAttribute("data-theme") },
+          "*",
+        );
       }
     }
   });
@@ -213,7 +216,7 @@ function init() {
       const originalText = btnExecutar.textContent;
       const iframe = document.getElementById("editor-iframe");
 
-      if (!iframe || !iframe.contentWindow) return;
+      if (!iframe || !iframe.contentWindow) { return; }
 
       // Solicita o código ao editor via postMessage
       const expression = await new Promise((resolve) => {
@@ -229,7 +232,7 @@ function init() {
         }, 2000);
       });
 
-      if (!expression) return;
+      if (!expression) { return; }
 
       btnExecutar.disabled = true;
       btnExecutar.textContent = "Processando...";
@@ -241,7 +244,7 @@ function init() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "X-Requested-With": "CurrencyNBR-Demo"
+            "X-Requested-With": "CalcAUD-Demo",
           },
           body: JSON.stringify(payload),
         });

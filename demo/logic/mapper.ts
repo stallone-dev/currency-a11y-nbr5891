@@ -1,10 +1,14 @@
-import type { CurrencyNBROutput } from "@currency-nbr-a11y";
+import type { CalcAUDOutput } from "@calc-aud-nbr-a11y";
 
 /**
- * Mapeia todos os outputs de uma instância CurrencyNBROutput para um objeto JSON.
+ * Mapeia todos os formatos de saída de uma instância CalcAUDOutput para um
+ * objeto serializável, incluindo conversões binárias para visualização na web.
+ *
+ * @param output A instância de saída a ser mapeada.
+ * @returns Objeto contendo todas as representações do cálculo.
  */
 export function mapAllOutputs(
-  output: CurrencyNBROutput,
+  output: CalcAUDOutput,
 ): Record<string, string | number | null> {
   const buffer = output.toImageBuffer();
   const hex = Array.from(buffer).map((b) => b.toString(16).padStart(2, "0"))

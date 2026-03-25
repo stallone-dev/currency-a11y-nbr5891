@@ -1,5 +1,5 @@
 import { dirname, fromFileUrl, join } from "@std/path";
-import { CurrencyNBRError } from "../src/errors.ts";
+import { CalcAUDError } from "../src/errors.ts";
 import { mapAllOutputs } from "./logic/mapper.ts";
 import { isRateLimited } from "./logic/rate_limit.ts";
 import { executeExpression } from "./logic/execution.ts";
@@ -66,7 +66,7 @@ export default Deno.serve({ port: 8000 }, async (req) => {
         },
       );
     } catch (err) {
-      if (err instanceof CurrencyNBRError) {
+      if (err instanceof CalcAUDError) {
         return new Response(JSON.stringify(err.toJSON()), {
           status: err.status,
           headers: { "content-type": "application/problem+json" },

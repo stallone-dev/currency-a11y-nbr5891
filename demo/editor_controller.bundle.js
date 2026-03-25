@@ -25025,11 +25025,13 @@ var autoCloseTags = /* @__PURE__ */ EditorView.inputHandler.of((view, from, to, 
 
 // editor_controller.js
 var _readOnlyCompartment = new Compartment();
-var _FIXED_START = 'CurrencyNBR.from("';
+var _FIXED_START = 'CalcAUD.from("';
 var editorView;
 function initEditor(containerId) {
   const parent = document.getElementById(containerId);
-  if (!parent) return;
+  if (!parent) {
+    return;
+  }
   const startDoc = `${_FIXED_START}50000.00")
   .add("1000.00")
   .group()
@@ -25048,7 +25050,10 @@ ${// Espaço reservado
     EditorView.theme({
       "&": { height: "300px", fontSize: "14px", border: "1px solid #ddd" },
       ".cm-scroller": { overflow: "auto" },
-      ".cm-gutters": { backgroundColor: "#f5f5f5", borderRight: "1px solid #ddd" }
+      ".cm-gutters": {
+        backgroundColor: "#f5f5f5",
+        borderRight: "1px solid #ddd"
+      }
     }),
     // Extensão para faixas somente leitura
     readOnlyRangesExtension(startDoc)
@@ -25065,32 +25070,40 @@ function readOnlyRangesExtension(docText) {
   });
 }
 var readOnlyFilter = EditorState.changeFilter.of((tr) => {
-  if (tr.changes.empty) return true;
+  if (tr.changes.empty) {
+    return true;
+  }
   const doc2 = tr.startState.doc;
   const docString = doc2.toString();
-  const startFixed = 'CurrencyNBR.from("';
+  const startFixed = 'CalcAUD.from("';
   const startLen = startFixed.length;
   const endFixed = ".commit(";
   const endIdx = docString.lastIndexOf(endFixed);
-  if (endIdx === -1) return false;
+  if (endIdx === -1) {
+    return false;
+  }
   let allowed = true;
   tr.changes.iterChanges((fromA, toA) => {
-    if (fromA < startLen) allowed = false;
-    if (toA > endIdx) allowed = false;
+    if (fromA < startLen) {
+      allowed = false;
+    }
+    if (toA > endIdx) {
+      allowed = false;
+    }
   });
   return allowed;
 });
 function customCompletions(context) {
   const word = context.matchBefore(/\w*/);
   if (word && (word.from != word.to || context.explicit)) {
-    if ("CurrencyNBR".startsWith(word.text)) {
+    if ("CalcAUD".startsWith(word.text)) {
       return {
         from: word.from,
         options: [
           {
-            label: "CurrencyNBR.from",
+            label: "CalcAUD.from",
             type: "function",
-            apply: snippet('CurrencyNBR.from("${valor}")'),
+            apply: snippet('CalcAUD.from("${valor}")'),
             detail: "(valor)",
             info: "Inicia um novo c\xE1lculo com o valor fornecido"
           }
@@ -25103,14 +25116,54 @@ function customCompletions(context) {
     return {
       from: dotWord.from,
       options: [
-        { label: ".add", type: "method", apply: snippet('.add("${valor}")'), info: "Adiciona um valor" },
-        { label: ".sub", type: "method", apply: snippet('.sub("${valor}")'), info: "Subtrai um valor" },
-        { label: ".mult", type: "method", apply: snippet('.mult("${valor}")'), info: "Multiplica pelo valor" },
-        { label: ".div", type: "method", apply: snippet('.div("${valor}")'), info: "Divide pelo valor" },
-        { label: ".pow", type: "method", apply: snippet('.pow("${valor}")'), info: "Pot\xEAncia ou Raiz" },
-        { label: ".group", type: "method", apply: snippet(".group()"), info: "Agrupa opera\xE7\xF5es (par\xEAnteses)" },
-        { label: ".mod", type: "method", apply: snippet('.mod("${valor}")'), info: "Resto da divis\xE3o" },
-        { label: ".divInt", type: "method", apply: snippet('.divInt("${valor}")'), info: "Divis\xE3o inteira" }
+        {
+          label: ".add",
+          type: "method",
+          apply: snippet('.add("${valor}")'),
+          info: "Adiciona um valor"
+        },
+        {
+          label: ".sub",
+          type: "method",
+          apply: snippet('.sub("${valor}")'),
+          info: "Subtrai um valor"
+        },
+        {
+          label: ".mult",
+          type: "method",
+          apply: snippet('.mult("${valor}")'),
+          info: "Multiplica pelo valor"
+        },
+        {
+          label: ".div",
+          type: "method",
+          apply: snippet('.div("${valor}")'),
+          info: "Divide pelo valor"
+        },
+        {
+          label: ".pow",
+          type: "method",
+          apply: snippet('.pow("${valor}")'),
+          info: "Pot\xEAncia ou Raiz"
+        },
+        {
+          label: ".group",
+          type: "method",
+          apply: snippet(".group()"),
+          info: "Agrupa opera\xE7\xF5es (par\xEAnteses)"
+        },
+        {
+          label: ".mod",
+          type: "method",
+          apply: snippet('.mod("${valor}")'),
+          info: "Resto da divis\xE3o"
+        },
+        {
+          label: ".divInt",
+          type: "method",
+          apply: snippet('.divInt("${valor}")'),
+          info: "Divis\xE3o inteira"
+        }
       ]
     };
   }
@@ -25118,63 +25171,85 @@ function customCompletions(context) {
 }
 function setupEditor(containerId) {
   const parent = document.getElementById(containerId);
-  if (!parent) return;
+  if (!parent) {
+    return;
+  }
   parent.innerHTML = "";
   const themeCompartment = new Compartment();
-  const startCode = `CurrencyNBR.from("1234567.89")
+  const startCode = `CalcAUD.from("1234567.89")
         .pow("353/1141")
         .add(
-            CurrencyNBR.from(0.00123).div(
-                CurrencyNBR.from(7)
+            CalcAUD.from(0.00123).div(
+                CalcAUD.from(7)
                             .div(11)
             ).group()
             .pow(9)
         )
         .mult(
-            CurrencyNBR.from(3)
+            CalcAUD.from(3)
             .div(
-                CurrencyNBR.from(7)
+                CalcAUD.from(7)
                            .div(13)
             )
             .pow("999/135")
         )
-        .group().div(CurrencyNBR.from(0.0123).div(
-                CurrencyNBR.from(0.007).pow("81/46")
+        .group().div(CalcAUD.from(0.0123).div(
+                CalcAUD.from(0.007).pow("81/46")
             ).group()).pow("49/189")
       .commit(2)`;
-  const getTheme = () => EditorView.theme({
-    "&": { height: "100%", fontSize: "16px", border: "none", background: "#fcfcfc" },
-    ".cm-content, .cm-scroller": { fontFamily: "'JetBrains Mono', 'Fira Code', monospace", padding: "12px", color: "#1a1a1a !important" },
-    ".cm-gutters": { backgroundColor: "#f1f5f9", borderRight: "1px solid var(--primary)", color: "#64748b" },
-    ".cm-activeLine": { backgroundColor: "rgba(0, 51, 102, 0.04)" },
-    ".cm-activeLineGutter": { backgroundColor: "rgba(0, 51, 102, 0.08)", color: "var(--primary)" },
-    "&.cm-focused": { outline: "none" }
-  });
-  editorView = new EditorView({
-    doc: startCode,
-    extensions: [
-      basicSetup,
-      javascript(),
-      keymap.of(defaultKeymap),
-      autocompletion({ override: [customCompletions] }),
-      readOnlyFilter,
-      themeCompartment.of(getTheme())
-    ],
-    parent
-  });
-  window.addEventListener("message", (event) => {
-    if (event.data.type === "THEME_CHANGE") {
-      editorView.dispatch({
-        effects: themeCompartment.reconfigure(getTheme())
-      });
-    }
-  });
+  const getTheme = () => {
+    EditorView.theme({
+      "&": {
+        height: "100%",
+        fontSize: "16px",
+        border: "none",
+        background: "#fcfcfc"
+      },
+      ".cm-content, .cm-scroller": {
+        fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+        padding: "12px",
+        color: "#1a1a1a !important"
+      },
+      ".cm-gutters": {
+        backgroundColor: "#f1f5f9",
+        borderRight: "1px solid var(--primary)",
+        color: "#64748b"
+      },
+      ".cm-activeLine": { backgroundColor: "rgba(0, 51, 102, 0.04)" },
+      ".cm-activeLineGutter": {
+        backgroundColor: "rgba(0, 51, 102, 0.08)",
+        color: "var(--primary)"
+      },
+      "&.cm-focused": { outline: "none" }
+    });
+    editorView = new EditorView({
+      doc: startCode,
+      extensions: [
+        basicSetup,
+        javascript(),
+        keymap.of(defaultKeymap),
+        autocompletion({ override: [customCompletions] }),
+        readOnlyFilter,
+        themeCompartment.of(getTheme())
+      ],
+      parent
+    });
+    window.addEventListener("message", (event) => {
+      if (event.data.type === "THEME_CHANGE") {
+        editorView.dispatch({
+          effects: themeCompartment.reconfigure(getTheme())
+        });
+      }
+    });
+  };
 }
 function getUserCode() {
-  if (!editorView) return null;
+  if (!editorView) {
+    return null;
+  }
   const code = editorView.state.doc.toString();
-  if (!code.startsWith('CurrencyNBR.from("')) {
-    throw new Error(`O c\xF3digo deve come\xE7ar com 'CurrencyNBR.from("'`);
+  if (!code.startsWith('CalcAUD.from("')) {
+    throw new Error(`O c\xF3digo deve come\xE7ar com 'CalcAUD.from("'`);
   }
   if (!code.includes(".commit(")) {
     throw new Error("O c\xF3digo deve terminar com '.commit(...)'");
@@ -25183,7 +25258,9 @@ function getUserCode() {
   const matches = code.match(methodRegex);
   const count = matches ? matches.length : 0;
   if (count > 16) {
-    throw new Error(`Limite de opera\xE7\xF5es excedido. M\xE1ximo: 16. Encontrado: ${count}.`);
+    throw new Error(
+      `Limite de opera\xE7\xF5es excedido. M\xE1ximo: 16. Encontrado: ${count}.`
+    );
   }
   return code;
 }

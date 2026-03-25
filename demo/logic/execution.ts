@@ -1,31 +1,41 @@
-import { CurrencyNBR, CurrencyNBROutput } from "@currency-nbr-a11y";
+//
+import { CalcAUD, CalcAUDOutput } from "@calc-aud-nbr-a11y";
 
+/**
+ * Executa uma expressão de cálculo recebida via string, garantindo a auditoria
+ * e aplicando travas de segurança rigorosas para o ambiente de demonstração.
+ *
+ * @param expression A string contendo o código TypeScript a ser executado.
+ * @param req O objeto de requisição original para validação de headers.
+ * @returns Instância de CalcAUDOutput com o resultado do cálculo.
+ */
 export function executeExpression(
   expression: string,
   req: Request,
-): CurrencyNBROutput {
-  // 1. Validação de Origem e Headers (Bloqueia chamadas diretas fora da demo)
+): CalcAUDOutput {
+  // 1. Validação de Origem e Headers
+  // Bloqueia chamadas diretas via ferramentas como Postman/Curl para evitar abuso da API.
   const requestedWith = req.headers.get("x-requested-with");
 
-  // Em ambiente local, origin pode ser nulo em alguns casos, mas referer e custom header devem estar lá
-  if (requestedWith !== "CurrencyNBR-Demo") {
+  if (requestedWith !== "CalcAUD-Demo") {
     throw new Error("Acesso negado: Chamada direta não permitida.");
   }
 
-  // 2. Limite de Tamanho do Payload (Prevenção de DoS por string gigante)
+  // 2. Segurança: Limite de Tamanho do Payload
   if (expression.length > 2000) {
     throw new Error("Expressão muito longa (Máximo 2000 caracteres).");
   }
 
-  // 3. Validação de Segurança da Sintaxe
-  if (!expression.startsWith('CurrencyNBR.from("')) {
-    throw new Error("A expressão deve iniciar com 'CurrencyNBR.from(\"'");
+  // 3. Validação de Segurança da Sintaxe Core
+  if (!expression.startsWith('CalcAUD.from("')) {
+    throw new Error("A expressão deve iniciar com 'CalcAUD.from(\"'");
   }
   if (!expression.includes(".commit(")) {
     throw new Error("A expressão deve conter '.commit(...)'");
   }
 
-  // 4. Detecção de Código Malicioso (Impede loops e acesso a objetos globais)
+  // 4. Sandbox de Segurança: Detecção de Código Malicioso
+  // Impedimos o acesso a primitivas do Deno, rede, IO e loops infinitos.
   const forbidden = [
     "while",
     "for",
@@ -42,7 +52,7 @@ export function executeExpression(
     throw new Error("Sintaxe não permitida detectada.");
   }
 
-  // 5. Limite de Operações (Expandido para 16)
+  // 5. Governança de Recursos: Limite de Operações
   const methodRegex = /\.(add|sub|mult|div|pow|mod|divInt|group)\b/g;
   const matches = expression.match(methodRegex);
   const count = matches ? matches.length : 0;
@@ -53,14 +63,16 @@ export function executeExpression(
     );
   }
 
-  const fn = new Function("CurrencyNBR", `return ${expression};`);
-  const result = fn(CurrencyNBR);
-  if (
-    !(result instanceof CurrencyNBROutput) && !(result instanceof CurrencyNBR)
-  ) {
+  // 6. Execução Controlada
+  // Injetamos a classe CalcAUD no escopo da função para permitir o encadeamento dinâmico.
+  const fn = new Function("CalcAUD", `return ${expression};`);
+  const result = fn(CalcAUD);
+
+  if (!(result instanceof CalcAUDOutput) && !(result instanceof CalcAUD)) {
     throw new Error(
-      "A expressão deve retornar um CurrencyNBR ou CurrencyNBROutput",
+      "A expressão deve retornar um CalcAUD ou CalcAUDOutput",
     );
   }
-  return result instanceof CurrencyNBR ? result.commit() : result;
+
+  return result instanceof CalcAUD ? result.commit() : result;
 }
