@@ -4,14 +4,12 @@ import { CurrencyNBR } from "../mod.ts";
 
 describe("Parsing e I/O (Unit)", () => {
     describe("Sanitização de Entrada", () => {
-        it("deve fazer parse de string com vírgula (formato BR: '1.234,56')", () => {
-            const result = CurrencyNBR.from("1.234,56").commit(2);
-            expect(result.toString()).toBe("1234.56");
+        it("deve REJEITAR string com vírgula (formato BR: '1.234,56')", () => {
+            expect(() => CurrencyNBR.from("1.234,56")).toThrow();
         });
 
-        it("deve fazer parse de string com ponto (formato US: '1,234.56')", () => {
-            const result = CurrencyNBR.from("1,234.56").commit(2);
-            expect(result.toString()).toBe("1234.56");
+        it("deve REJEITAR string com ponto (formato US: '1,234.56')", () => {
+            expect(() => CurrencyNBR.from("1,234.56")).toThrow();
         });
 
         it("deve fazer parse de inteiro nativo do JS", () => {

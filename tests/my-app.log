@@ -1,0 +1,292 @@
+2026-03-25 01:33:15.941 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 1.259032000000019,
+  value: "100",
+  type: "string",
+  internalValue: "100000000000000"
+}
+2026-03-25 01:33:15.947 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.3763759999999934,
+  value: "50",
+  type: "number",
+  internalValue: "50000000000000"
+}
+2026-03-25 01:33:15.952 +00:00 [DBG] currency-nbr-a11y·engine·add: Addition performed {
+  calcTime: 4.901825000000031,
+  mathState: { latex: "100 + 50", unicode: "100 + 50" },
+  currentAccumulatedResult: "150000000000000",
+  activeTerm: "50000000000000",
+  addingValue: "50000000000000"
+}
+2026-03-25 01:33:15.953 +00:00 [DBG] currency-nbr-a11y·engine·commit: Commit performed {
+  calcTime: 0.1571440000000166,
+  finalValue: "150000000000000",
+  decimals: 6
+}
+2026-03-25 01:33:15.956 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.06711799999999357,
+  value: "100",
+  type: "string",
+  internalValue: "100000000000000"
+}
+2026-03-25 01:33:15.956 +00:00 [DBG] currency-nbr-a11y·engine·commit: Commit performed {
+  calcTime: 0.014456999999993059,
+  finalValue: "100000000000000",
+  decimals: 6
+}
+2026-03-25 01:33:15.957 +00:00 [INF] currency-nbr-a11y·output·string: String output generated { calcTime: 0.33943000000004986, result: "100.000000" }
+2026-03-25 01:33:15.957 +00:00 [INF] currency-nbr-a11y·output·string: String output generated { calcTime: 0.014667000000031294, result: "100.000000" }
+2026-03-25 01:33:15.958 +00:00 [INF] currency-nbr-a11y·output·toMonetary: Monetary output generated {
+  calcTime: 0.6058749999999691,
+  result: "R$ 100,000000",
+  locale: "pt-BR",
+  currency: "BRL"
+}
+2026-03-25 01:33:15.958 +00:00 [INF] currency-nbr-a11y·output·string: String output generated { calcTime: 0.012011999999970158, result: "100.000000" }
+2026-03-25 01:33:15.959 +00:00 [INF] currency-nbr-a11y·output·toLaTeX: LaTeX output generated {
+  calcTime: 0.3898550000000114,
+  result: "$$ 100 = \\text{round}_{NBR}(100, 6) = 100.000000 $$"
+}
+2026-03-25 01:33:15.961 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.05433699999997543,
+  value: "100",
+  type: "string",
+  internalValue: "100000000000000"
+}
+2026-03-25 01:33:15.962 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.059575000000052114,
+  value: "0",
+  type: "number",
+  internalValue: "0"
+}
+2026-03-25 01:33:15.963 +00:00 [ERR] currency-nbr-a11y·errors: Operação Matemática Inválida {
+  type: "https://github.com/st-all-one/currency-nbr-a11y/tree/main/errors/division-by-zero",
+  title: "Operação Matemática Inválida",
+  status: 400,
+  detail: "Tentativa de divisão por um montante acumulado igual a zero.",
+  instance: "audit:err:8707c179-74e3-4acf-a766-60b44234e783",
+  math_audit: {
+    latex: "\\frac{100}{0}",
+    unicode: "100 ÷ 0",
+    operation: "division"
+  },
+  timestamp: "2026-03-25T01:33:15.963Z"
+}
+2026-03-25 01:35:45.654 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.9857430000000136,
+  value: "100",
+  type: "string",
+  internalValue: "100000000000000"
+}
+2026-03-25 01:35:45.660 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.21273800000000165,
+  value: "50",
+  type: "number",
+  internalValue: "50000000000000"
+}
+2026-03-25 01:35:45.665 +00:00 [DBG] currency-nbr-a11y·engine·add: Addition performed {
+  calcTime: 4.557855000000018,
+  mathState: { latex: "100 + 50", unicode: "100 + 50" },
+  currentAccumulatedResult: "150000000000000",
+  activeTerm: "50000000000000",
+  addingValue: "50000000000000"
+}
+2026-03-25 01:35:45.666 +00:00 [DBG] currency-nbr-a11y·engine·commit: Commit performed {
+  calcTime: 0.16852699999998322,
+  finalValue: "150000000000000",
+  decimals: 6
+}
+2026-03-25 01:35:45.669 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.055314000000009855,
+  value: "100",
+  type: "string",
+  internalValue: "100000000000000"
+}
+2026-03-25 01:35:45.669 +00:00 [DBG] currency-nbr-a11y·engine·commit: Commit performed {
+  calcTime: 0.013270000000005666,
+  finalValue: "100000000000000",
+  decimals: 6
+}
+2026-03-25 01:35:45.670 +00:00 [INF] currency-nbr-a11y·output·string: String output generated { calcTime: 0.2843949999999893, result: "100.000000" }
+2026-03-25 01:35:45.670 +00:00 [INF] currency-nbr-a11y·output·string: String output generated { calcTime: 0.014807000000018888, result: "100.000000" }
+2026-03-25 01:35:45.671 +00:00 [INF] currency-nbr-a11y·output·toMonetary: Monetary output generated {
+  calcTime: 0.6176780000000122,
+  result: "R$ 100,000000",
+  locale: "pt-BR",
+  currency: "BRL"
+}
+2026-03-25 01:35:45.671 +00:00 [INF] currency-nbr-a11y·output·string: String output generated { calcTime: 0.016761999999999944, result: "100.000000" }
+2026-03-25 01:35:45.672 +00:00 [INF] currency-nbr-a11y·output·toLaTeX: LaTeX output generated {
+  calcTime: 0.5025100000000009,
+  result: "$$ 100 = \\text{round}_{NBR}(100, 6) = 100.000000 $$"
+}
+2026-03-25 01:35:45.674 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.0499369999999999,
+  value: "100",
+  type: "string",
+  internalValue: "100000000000000"
+}
+2026-03-25 01:35:45.674 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.0407170000000292,
+  value: "0",
+  type: "number",
+  internalValue: "0"
+}
+2026-03-25 01:35:45.676 +00:00 [ERR] currency-nbr-a11y·errors: Operação Matemática Inválida {
+  type: "https://github.com/st-all-one/currency-nbr-a11y/tree/main/errors/division-by-zero",
+  title: "Operação Matemática Inválida",
+  status: 400,
+  detail: "Tentativa de divisão por um montante acumulado igual a zero.",
+  instance: "audit:err:547e647d-9ad5-4677-a9d9-743d649f7894",
+  math_audit: {
+    latex: "\\frac{100}{0}",
+    unicode: "100 ÷ 0",
+    operation: "division"
+  },
+  timestamp: "2026-03-25T01:35:45.676Z"
+}
+2026-03-25 01:36:27.849 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.9789680000000089,
+  value: "100",
+  type: "string",
+  internalValue: "100000000000000"
+}
+2026-03-25 01:36:27.856 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.2528959999999927,
+  value: "50",
+  type: "number",
+  internalValue: "50000000000000"
+}
+2026-03-25 01:36:27.860 +00:00 [DBG] currency-nbr-a11y·engine·add: Addition performed {
+  calcTime: 4.46559400000001,
+  mathState: { latex: "100 + 50", unicode: "100 + 50" },
+  currentAccumulatedResult: "150000000000000",
+  activeTerm: "50000000000000",
+  addingValue: "50000000000000"
+}
+2026-03-25 01:36:27.861 +00:00 [DBG] currency-nbr-a11y·engine·commit: Commit performed {
+  calcTime: 0.17907400000001417,
+  finalValue: "150000000000000",
+  decimals: 6
+}
+2026-03-25 01:36:27.864 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.05852700000002642,
+  value: "100",
+  type: "string",
+  internalValue: "100000000000000"
+}
+2026-03-25 01:36:27.865 +00:00 [DBG] currency-nbr-a11y·engine·commit: Commit performed {
+  calcTime: 0.015434999999968113,
+  finalValue: "100000000000000",
+  decimals: 6
+}
+2026-03-25 01:36:27.865 +00:00 [INF] currency-nbr-a11y·output·string: String output generated { calcTime: 0.327904999999987, result: "100.000000" }
+2026-03-25 01:36:27.866 +00:00 [INF] currency-nbr-a11y·output·string: String output generated { calcTime: 0.016272999999955573, result: "100.000000" }
+2026-03-25 01:36:27.867 +00:00 [INF] currency-nbr-a11y·output·toMonetary: Monetary output generated {
+  calcTime: 0.6535759999999868,
+  result: "R$ 100,000000",
+  locale: "pt-BR",
+  currency: "BRL"
+}
+2026-03-25 01:36:27.867 +00:00 [INF] currency-nbr-a11y·output·string: String output generated { calcTime: 0.011943000000030679, result: "100.000000" }
+2026-03-25 01:36:27.867 +00:00 [INF] currency-nbr-a11y·output·toLaTeX: LaTeX output generated {
+  calcTime: 0.3959319999999593,
+  result: "$$ 100 = \\text{round}_{NBR}(100, 6) = 100.000000 $$"
+}
+2026-03-25 01:36:27.870 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.05671100000000706,
+  value: "100",
+  type: "string",
+  internalValue: "100000000000000"
+}
+2026-03-25 01:36:27.870 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.06285700000000816,
+  value: "0",
+  type: "number",
+  internalValue: "0"
+}
+2026-03-25 01:36:27.872 +00:00 [ERR] currency-nbr-a11y·errors: Operação Matemática Inválida {
+  type: "https://github.com/st-all-one/currency-nbr-a11y/tree/main/errors/division-by-zero",
+  title: "Operação Matemática Inválida",
+  status: 400,
+  detail: "Tentativa de divisão por um montante acumulado igual a zero.",
+  instance: "audit:err:c894b4c5-76a7-48ab-9cbc-c29e31933f40",
+  math_audit: {
+    latex: "\\frac{100}{0}",
+    unicode: "100 ÷ 0",
+    operation: "division"
+  },
+  timestamp: "2026-03-25T01:36:27.872Z"
+}
+2026-03-25 01:36:53.204 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.9634629999999902,
+  value: "100",
+  type: "string",
+  internalValue: "100000000000000"
+}
+2026-03-25 01:36:53.211 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.24290899999999738,
+  value: "50",
+  type: "number",
+  internalValue: "50000000000000"
+}
+2026-03-25 01:36:53.216 +00:00 [DBG] currency-nbr-a11y·engine·add: Addition performed {
+  calcTime: 5.092981000000009,
+  mathState: { latex: "100 + 50", unicode: "100 + 50" },
+  currentAccumulatedResult: "150000000000000",
+  activeTerm: "50000000000000",
+  addingValue: "50000000000000"
+}
+2026-03-25 01:36:53.217 +00:00 [DBG] currency-nbr-a11y·engine·commit: Commit performed {
+  calcTime: 0.14918199999999615,
+  finalValue: "150000000000000",
+  decimals: 6
+}
+2026-03-25 01:36:53.220 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.05335900000000038,
+  value: "100",
+  type: "string",
+  internalValue: "100000000000000"
+}
+2026-03-25 01:36:53.220 +00:00 [DBG] currency-nbr-a11y·engine·commit: Commit performed {
+  calcTime: 0.01704100000000608,
+  finalValue: "100000000000000",
+  decimals: 6
+}
+2026-03-25 01:36:53.221 +00:00 [INF] currency-nbr-a11y·output·string: String output generated { calcTime: 0.2606490000000008, result: "100.000000" }
+2026-03-25 01:36:53.221 +00:00 [INF] currency-nbr-a11y·output·string: String output generated { calcTime: 0.014456999999993059, result: "100.000000" }
+2026-03-25 01:36:53.222 +00:00 [INF] currency-nbr-a11y·output·toMonetary: Monetary output generated {
+  calcTime: 0.6815129999999954,
+  result: "R$ 100,000000",
+  locale: "pt-BR",
+  currency: "BRL"
+}
+2026-03-25 01:36:53.223 +00:00 [INF] currency-nbr-a11y·output·string: String output generated { calcTime: 0.012921000000005733, result: "100.000000" }
+2026-03-25 01:36:53.223 +00:00 [INF] currency-nbr-a11y·output·toLaTeX: LaTeX output generated {
+  calcTime: 0.3965599999999654,
+  result: "$$ 100 = \\text{round}_{NBR}(100, 6) = 100.000000 $$"
+}
+2026-03-25 01:36:53.225 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.04344099999997297,
+  value: "100",
+  type: "string",
+  internalValue: "100000000000000"
+}
+2026-03-25 01:36:53.226 +00:00 [DBG] currency-nbr-a11y·input: Input initialized {
+  calcTime: 0.042113999999969565,
+  value: "0",
+  type: "number",
+  internalValue: "0"
+}
+2026-03-25 01:36:53.227 +00:00 [ERR] currency-nbr-a11y·errors: Operação Matemática Inválida {
+  type: "https://github.com/st-all-one/currency-nbr-a11y/tree/main/errors/division-by-zero",
+  title: "Operação Matemática Inválida",
+  status: 400,
+  detail: "Tentativa de divisão por um montante acumulado igual a zero.",
+  instance: "audit:err:ce6211cd-ff27-45aa-8a28-7b801cb4d7e1",
+  math_audit: {
+    latex: "\\frac{100}{0}",
+    unicode: "100 ÷ 0",
+    operation: "division"
+  },
+  timestamp: "2026-03-25T01:36:53.227Z"
+}

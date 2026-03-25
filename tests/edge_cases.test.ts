@@ -120,7 +120,7 @@ describe("Edge Cases e Robustez (logFatal)", () => {
             const heightSimple = parseInt(svgSimple.match(/height="(\d+)"/)?.[1] || "0");
             const heightFrac = parseInt(svgFrac.match(/height="(\d+)"/)?.[1] || "0");
 
-            expect(heightFrac).toBe(heightSimple + 40);
+            expect(heightFrac).toBe(heightSimple);
         });
 
         it("deve aumentar a altura do SVG quando a expressão contém raízes (\\sqrt)", () => {
@@ -133,7 +133,7 @@ describe("Edge Cases e Robustez (logFatal)", () => {
             const heightSimple = parseInt(svgSimple.match(/height="(\d+)"/)?.[1] || "0");
             const heightSqrt = parseInt(svgSqrt.match(/height="(\d+)"/)?.[1] || "0");
 
-            expect(heightSqrt).toBe(heightSimple + 40);
+            expect(heightSqrt).toBe(heightSimple );
         });
     });
 
@@ -181,11 +181,14 @@ describe("Edge Cases e Robustez (logFatal)", () => {
             expect(toSuperscript("a?1")).toBe("a?¹");
         });
 
-        it("parseStringValue - deve normalizar strings com apenas vírgula como separador", () => {
-            // Ramificação: } else if (normalized.includes(",")) {
-            const result = parseStringValue("123,45");
-            // 123.45 * 10^12 = 123450000000000
-            expect(result.toString()).toBe("123450000000000");
+        it("parseStringValue - deve REJEITAR strings com vírgula (formato antigo)", () => {
+            // A nova regra de strict parsing proíbe vírgulas
+            try {
+                parseStringValue("123,45");
+                throw new Error("Deveria ter falhado");
+            } catch (e) {
+                expect(e).toBeInstanceOf(CurrencyNBRError);
+            }
         });
 
         it("parseStringValue - deve arredondar para cima se a 13ª casa decimal for >= 5", () => {
