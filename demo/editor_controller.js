@@ -5,81 +5,38 @@ import { keymap } from "@codemirror/view";
 import { defaultKeymap } from "@codemirror/commands";
 import { autocompletion, snippet } from "@codemirror/autocomplete";
 
-// Configuração do Editor
-const _readOnlyCompartment = new Compartment();
-
-// Texto inicial fixo
-const _FIXED_START = 'CalcAUD.from("';
-const _FIXED_END = '").commit(2)';
-const _INITIAL_CONTENT = `50000.00")\n// Adicione suas operações abaixo:\n.mult("1.05")\n.add("100.00")`;
-
-// A estrutura visual será:
-// CalcAUD.from(" [CONTEUDO EDITAVEL] ").commit(2)
-// Mas para facilitar a edição e o chaining, vamos permitir que o usuário edite o "meio".
-// Vamos bloquear a primeira linha PARCIALMENTE? O CodeMirror permite bloquear faixas (ranges).
-
-// Vamos simplificar:
-// Linha 1: CalcAUD.from(" (Bloqueado)
-// Usuário digita: 50000.00
-// Linha 1 (fim): ") (Bloqueado? Talvez não, o usuário pode querer fechar de outra forma, mas o prompt diz 'CalcAUD.from(' inalterável)
-// Vamos bloquear APENAS o `CalcAUD.from("` inicial e o `.commit(2)` final.
-
 let editorView;
+const themeCompartment = new Compartment();
 
-export function initEditor(containerId) {
-  const parent = document.getElementById(containerId);
-  if (!parent) { return; }
+// Tema Visual Completo (Restaurado)
+const createEditorTheme = () => EditorView.theme({
+  "&": {
+    height: "100%",
+    fontSize: "16px",
+    border: "none",
+    background: "#fcfcfc",
+  },
+  ".cm-content, .cm-scroller": {
+    fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
+    padding: "12px",
+    color: "#1a1a1a !important",
+  },
+  ".cm-gutters": {
+    backgroundColor: "#f1f5f9",
+    borderRight: "1px solid var(--primary)",
+    color: "#64748b",
+  },
+  ".cm-activeLine": { backgroundColor: "rgba(0, 51, 102, 0.04)" },
+  ".cm-activeLineGutter": {
+    backgroundColor: "rgba(0, 51, 102, 0.08)",
+    color: "var(--primary)",
+  },
+  "&.cm-focused": { outline: "none" },
+});
 
-  // Estado inicial
-  const startDoc = `${_FIXED_START}50000.00")
-  .add("1000.00")
-  .group()
-  .mult("0.10")
-${
-    // Espaço reservado
-    ""}
-// Fim da cadeia
-.commit(2)`;
-
-  const extensions = [
-    basicSetup,
-    javascript(),
-    keymap.of(defaultKeymap),
-    autocompletion({
-      override: [customCompletions],
-    }),
-    EditorView.theme({
-      "&": { height: "300px", fontSize: "14px", border: "1px solid #ddd" },
-      ".cm-scroller": { overflow: "auto" },
-      ".cm-gutters": {
-        backgroundColor: "#f5f5f5",
-        borderRight: "1px solid #ddd",
-      },
-    }),
-    // Extensão para faixas somente leitura
-    readOnlyRangesExtension(startDoc),
-  ];
-
-  editorView = new EditorView({
-    doc: startDoc,
-    extensions: extensions,
-    parent: parent,
-  });
-}
-
-// Definição das faixas somente leitura
-function readOnlyRangesExtension(docText) {
-  return EditorState.readOnly.of((state) => {
-    // Bloqueia o início: CalcAUD.from("
-    // Bloqueia o final: .commit(2)
-    return [];
-  });
-}
-
-// Filtro de alterações para impedir edição das partes fixas
+// Filtro de Edição (Proteção de Prefixo/Sufixo)
 const readOnlyFilter = EditorState.changeFilter.of((tr) => {
-  // Se não há mudanças no documento (ex: apenas seleção), permite
-  if (tr.changes.empty) { return true; }
+  if (tr.changes.empty) return true;
 
   const doc = tr.startState.doc;
   const docString = doc.toString();
@@ -90,21 +47,21 @@ const readOnlyFilter = EditorState.changeFilter.of((tr) => {
   const endFixed = ".commit(";
   const endIdx = docString.lastIndexOf(endFixed);
 
-  if (endIdx === -1) { return false; }
+  if (endIdx === -1) return false;
 
   let allowed = true;
   tr.changes.iterChanges((fromA, toA) => {
     // Se a mudança toca no prefixo [0, startLen]
-    if (fromA < startLen) { allowed = false; }
+    if (fromA < startLen) allowed = false;
 
     // Se a mudança toca no sufixo [endIdx, doc.length]
-    if (toA > endIdx) { allowed = false; }
+    if (toA > endIdx) allowed = false;
   });
 
   return allowed;
 });
 
-// Completions personalizados
+// Autocomplete e Hints (Restaurado)
 function customCompletions(context) {
   // 1. Sugestão para o início (CalcAUD.from)
   const word = context.matchBefore(/\w*/);
@@ -186,15 +143,14 @@ function customCompletions(context) {
   return null;
 }
 
-// Recriar setupEditor com suporte a mudança de tema reativa
-export function setupEditor(containerId) {
+// Funções globais para o iframe
+window.setupEditor = function(containerId) {
   const parent = document.getElementById(containerId);
-  if (!parent) { return; }
+  if (!parent) return;
 
   parent.innerHTML = ""; // Limpa container
 
-  const themeCompartment = new Compartment();
-
+  // Código Inicial Restaurado
   const startCode = `CalcAUD.from("1234567.89")
         .pow("353/1141")
         .add(
@@ -217,61 +173,31 @@ export function setupEditor(containerId) {
             ).group()).pow("49/189")
       .commit(2)`;
 
-  const getTheme = () => {
-    EditorView.theme({
-      "&": {
-        height: "100%",
-        fontSize: "16px",
-        border: "none",
-        background: "#fcfcfc",
-      },
-      ".cm-content, .cm-scroller": {
-        fontFamily: "'JetBrains Mono', 'Fira Code', monospace",
-        padding: "12px",
-        color: "#1a1a1a !important",
-      },
-      ".cm-gutters": {
-        backgroundColor: "#f1f5f9",
-        borderRight: "1px solid var(--primary)",
-        color: "#64748b",
-      },
-      ".cm-activeLine": { backgroundColor: "rgba(0, 51, 102, 0.04)" },
-      ".cm-activeLineGutter": {
-        backgroundColor: "rgba(0, 51, 102, 0.08)",
-        color: "var(--primary)",
-      },
-      "&.cm-focused": { outline: "none" },
-    });
+  editorView = new EditorView({
+    doc: startCode,
+    extensions: [
+      basicSetup,
+      javascript(),
+      keymap.of(defaultKeymap),
+      autocompletion({ override: [customCompletions] }),
+      readOnlyFilter,
+      themeCompartment.of(createEditorTheme())
+    ],
+    parent
+  });
 
-    editorView = new EditorView({
-      doc: startCode,
-      extensions: [
-        basicSetup,
-        javascript(),
-        keymap.of(defaultKeymap),
-        autocompletion({ override: [customCompletions] }),
-        readOnlyFilter,
-        themeCompartment.of(getTheme()),
-      ],
-      parent: parent,
-    });
+  window.addEventListener("message", (event) => {
+    if (event.data.type === "THEME_CHANGE") {
+      editorView.dispatch({ effects: themeCompartment.reconfigure(createEditorTheme()) });
+    }
+  });
+};
 
-    // Listener para mudança de tema via postMessage (Ignora dark mode para manter legibilidade do editor)
-    window.addEventListener("message", (event) => {
-      if (event.data.type === "THEME_CHANGE") {
-        editorView.dispatch({
-          effects: themeCompartment.reconfigure(getTheme()),
-        });
-      }
-    });
-  };
-}
-
-export function getUserCode() {
-  if (!editorView) { return null; }
+window.getUserCode = function() {
+  if (!editorView) return null;
   const code = editorView.state.doc.toString();
 
-  // 1. Validar Estrutura Básica
+  // Validações restauradas
   if (!code.startsWith('CalcAUD.from("')) {
     throw new Error("O código deve começar com 'CalcAUD.from(\"'");
   }
@@ -279,16 +205,13 @@ export function getUserCode() {
     throw new Error("O código deve terminar com '.commit(...)'");
   }
 
-  // 2. Validar Limite de Operações (Max 16 métodos principais)
   const methodRegex = /\.(add|sub|mult|div|pow|mod|divInt|group)\b/g;
   const matches = code.match(methodRegex);
   const count = matches ? matches.length : 0;
 
   if (count > 16) {
-    throw new Error(
-      `Limite de operações excedido. Máximo: 16. Encontrado: ${count}.`,
-    );
+    throw new Error(`Limite de operações excedido. Máximo: 16. Encontrado: ${count}.`);
   }
 
   return code;
-}
+};

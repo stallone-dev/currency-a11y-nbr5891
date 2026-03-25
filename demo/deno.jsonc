@@ -5,7 +5,7 @@
     "license": "Apache-2.0",
     "tasks": {
         "demo": "deno serve --watch --allow-read server.ts",
-        "bundle": "deno run -A npm:esbuild editor_controller.js --bundle --format=esm --outfile=editor_controller.bundle.js"
+        "bundle": "deno run -A npm:esbuild editor_controller.js --bundle --format=iife --outfile=editor_controller.bundle.js"
     },
     "imports": {
         "@calc-aud-nbr-a11y": "../mod.ts",

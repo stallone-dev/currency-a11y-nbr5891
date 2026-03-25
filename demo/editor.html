@@ -1,52 +1,40 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-    <head>
-        <meta charset="UTF-8">
-        <title>CalcAUD Editor Sandbox</title>
-        <style>
-            body,
-            html {
-                margin: 0;
-                padding: 0;
-                height: 100%;
-                overflow: hidden;
-                background: #fcfcfc;
-            }
+<head>
+    <meta charset="UTF-8">
+    <title>CalcAUD Editor Sandbox</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #fcfcfc; }
+        #editor-container { height: 100%; width: 100%; }
+        .cm-editor { height: 100% !important; }
+    </style>
+</head>
+<body>
+    <div id="editor-container"></div>
+    <!-- Carrega o bundle como um script global (IIFE) -->
+    <script src="editor_controller.bundle.js"></script>
+    <script>
+        // Inicializa através das funções globais expostas pelo bundle
+        if (typeof window.setupEditor === "function") {
+            window.setupEditor("editor-container");
+        } else {
+            console.error("Editor Bundle falhou ao carregar as funções globais.");
+        }
 
-            #editor-container {
-                height: 100%;
-                width: 100%;
-            }
-
-            /* Replicar estilos básicos para evitar pulo visual */
-            .cm-editor {
-                height: 100% !important;
-            }
-        </style>
-    </head>
-
-    <body>
-        <div id="editor-container"></div>
-        <script type="module">
-            import { getUserCode, setupEditor } from "./editor_controller.bundle.js";
-
-            // Inicializa o editor
-            setupEditor("editor-container");
-
-            // Escuta comandos da página pai
-            window.addEventListener("message", (event) => {
-                if (event.data.type === "GET_CODE") {
-                    try {
-                        const code = getUserCode();
-                        window.parent.postMessage({ type: "CODE_RESPONSE", code }, "*");
-                    } catch (e) {
-                        window.parent.postMessage({ type: "CODE_ERROR", error: e.message }, "*");
-                    }
+        // Comunicação via PostMessage
+        window.addEventListener("message", (event) => {
+            if (event.data.type === "GET_CODE") {
+                try {
+                    const code = window.getUserCode();
+                    window.parent.postMessage({ type: "CODE_RESPONSE", code }, "*");
+                } catch (e) {
+                    window.parent.postMessage({ type: "CODE_ERROR", error: e.message }, "*");
                 }
-            });
+            }
+        });
 
-            // Notifica que está pronto
-            window.parent.postMessage({ type: "EDITOR_READY" }, "*");
-        </script>
-    </body>
+        // Notifica a página pai que o editor está pronto
+        window.parent.postMessage({ type: "EDITOR_READY" }, "*");
+    </script>
+</body>
 </html>
