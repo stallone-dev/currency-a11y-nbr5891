@@ -66,10 +66,6 @@ export function calculateBigIntPower(base: bigint, exponent: bigint): bigint {
        const isValueNegative = value < 0n;
        const absoluteValue = isValueNegative ? -value : value;
 
-       if (isValueNegative && rootIndex % 2n === 0n) {
-           throw new CurrencyNBRError({ type: "even-root-of-negative", operation: "root" });
-       }
-
        // 2. Estimativa inicial otimizada (Overestimate obrigatório)
        const bitLength = getBitLengthFast(absoluteValue);
        let currentGuess = 1n << (bitLength / rootIndex + 1n);

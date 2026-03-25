@@ -5,6 +5,8 @@ import type { LOCALE_CURRENCY_MAP } from "./locales.ts";
  */
 export const VALID_ROUNDING_METHODS = ["NBR-5891", "HALF-EVEN", "HALF-UP", "TRUNCATE", "CEIL"] as const;
 
+export type ModStrategy = "truncated" | "euclidean";
+
 /**
  * Tipo representando os métodos de arredondamento válidos.
  */
@@ -30,6 +32,12 @@ export interface CurrencyNBROutputOptions {
      * @default "pt-BR"
      */
     locale?: LocaleLang;
+
+    /**
+     * Define a estratégia de cálculo de módulo/divisão inteira.
+     * @default "euclidean"
+     */
+    modStrategy?: ModStrategy;
 }
 
 /**
@@ -38,4 +46,5 @@ export interface CurrencyNBROutputOptions {
 export const DEFAULT_OPTIONS: Required<CurrencyNBROutputOptions> = {
     roundingMethod: "NBR-5891",
     locale: "pt-BR",
+    modStrategy: "euclidean",
 };

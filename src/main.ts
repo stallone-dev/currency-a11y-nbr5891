@@ -59,9 +59,9 @@ export class CurrencyNBR {
                 && value !== undefined
                 && (typeof value === "string" || typeof value === "number" || typeof value === "bigint");
 
-            const isActuallyNaN = typeof value === "number" && isNaN(value);
+            const isInvalidNumber = typeof value === "number" && !Number.isFinite(value);
 
-            if (!isValidType || isActuallyNaN) {
+            if (!isValidType || isInvalidNumber) {
                 throw new CurrencyNBRError({
                     type: "invalid-currency-format",
                     title: "Tipo de Dado Inválido",
@@ -198,7 +198,16 @@ export class CurrencyNBR {
         try {
             const other = CurrencyNBR.from(value);
             const otherValue = other.accumulatedValue + other.activeTermValue;
-            const nextActiveValue = (this.activeTermValue * otherValue) / INTERNAL_SCALE_FACTOR;
+            const product = this.activeTermValue * otherValue;
+
+            // Metade da nossa escala de 10^12 (ou seja, 5 * 10^11)
+            const halfScale = INTERNAL_SCALE_FACTOR / 2n;
+
+            // Ajuste de sinal: se o produto for positivo, somamos. Se for negativo, subtraímos.
+            const adjustment = product >= 0n ? halfScale : -halfScale;
+
+            // A divisão agora arredonda para a 12ª casa mais próxima em vez de simplesmente truncar
+            const nextActiveValue = (product + adjustment) / INTERNAL_SCALE_FACTOR;
 
             const nextActiveExpr = `${wrapLaTeX(this.activeTermExpression)} \\times ${
                 wrapLaTeX(other.getFullLaTeXExpression())
@@ -253,7 +262,17 @@ export class CurrencyNBR {
                     unicode: `${this.activeTermUnicode} ÷ 0`,
                 });
             }
-            const nextActiveValue = (this.activeTermValue * INTERNAL_SCALE_FACTOR) / otherValue;
+            const numerator = this.activeTermValue * INTERNAL_SCALE_FACTOR;
+
+            // Capturamos a metade exata do divisor para fazer o arredondamento na 12ª casa
+            const halfDenominator = otherValue / 2n;
+
+            // O ajuste do sinal garante que o arredondamento funcione para números negativos
+            const adjustment = (this.activeTermValue < 0n) === (otherValue < 0n)
+                ? halfDenominator
+                : -halfDenominator;
+
+            const nextActiveValue = (numerator + adjustment) / otherValue;
 
             const nextActiveExpr = `\\frac{${this.activeTermExpression}}{${other.getFullLaTeXExpression()}}`;
             const nextActiveVerbal = `${this.activeTermVerbal}${VERBAL_TOKENS.DIV}${other.getFullVerbalExpression()}`;
@@ -291,7 +310,8 @@ export class CurrencyNBR {
         }
     }
 
-    public divInt(value: CurrencyNBRAllowedValue): CurrencyNBR {
+    public divInt(value: CurrencyNBRAllowedValue, options: CurrencyNBROutputOptions = {}): CurrencyNBR {
+        const strategy = options.modStrategy ?? "euclidean";
         const start = performance.now();
         try {
             const other = CurrencyNBR.from(value);
@@ -306,14 +326,36 @@ export class CurrencyNBR {
                     unicode: `⌊${this.activeTermUnicode} ÷ 0⌋`,
                 });
             }
-            // Divisão BigInt já é inteira (trunca)
-            const nextActiveValue = (this.activeTermValue / otherValue) * INTERNAL_SCALE_FACTOR;
 
-            const nextActiveExpr =
-                `\\lfloor \\frac{${this.activeTermExpression}}{${other.getFullLaTeXExpression()}} \\rfloor`;
-            const nextActiveVerbal =
-                `${this.activeTermVerbal}${VERBAL_TOKENS.DIV_INT}${other.getFullVerbalExpression()}`;
-            const nextActiveUnicode = `⌊${this.activeTermUnicode} ÷ ${other.getFullUnicodeExpression()}⌋`;
+            let quotient: bigint;
+            let latexWrapper: [string, string];
+            let unicodeWrapper: [string, string];
+            let verbalOp: string;
+
+            if (strategy === "euclidean") {
+                // Euclidean (Floor Division) Logic
+                quotient = this.activeTermValue / otherValue;
+                const remainder = this.activeTermValue % otherValue;
+
+                if (remainder !== 0n && ((this.activeTermValue < 0n) !== (otherValue < 0n))) {
+                    quotient -= 1n;
+                }
+                latexWrapper = ["\\lfloor", "\\rfloor"];
+                unicodeWrapper = ["⌊", "⌋"];
+                verbalOp = VERBAL_TOKENS.DIV_INT;
+            } else {
+                // Truncated (Native) Logic
+                quotient = this.activeTermValue / otherValue;
+                latexWrapper = ["\\text{trunc}\\left(", "\\right)"];
+                unicodeWrapper = ["trunc(", ")"];
+                verbalOp = " trunc "; // Distinct verbal for truncate? Or reuse DIV_INT? Let's use "trunc" for clarity if strategy is explicit.
+            }
+
+            const nextActiveValue = quotient * INTERNAL_SCALE_FACTOR;
+
+            const nextActiveExpr = `${latexWrapper[0]} \\frac{${this.activeTermExpression}}{${other.getFullLaTeXExpression()}} ${latexWrapper[1]}`;
+            const nextActiveVerbal = `${this.activeTermVerbal}${verbalOp}${other.getFullVerbalExpression()}`;
+            const nextActiveUnicode = `${unicodeWrapper[0]}${this.activeTermUnicode} ÷ ${other.getFullUnicodeExpression()}${unicodeWrapper[1]}`;
 
             const result = new CurrencyNBR(
                 this.accumulatedValue,
@@ -328,6 +370,7 @@ export class CurrencyNBR {
             const end = performance.now();
             getLogger(["currency-nbr-a11y", "engine", "divInt"]).debug("Integer division performed {*}", {
                 calcTime: end - start,
+                strategy,
                 mathState: {
                     latex: result.getFullLaTeXExpression(),
                     unicode: result.getFullUnicodeExpression(),
@@ -339,13 +382,14 @@ export class CurrencyNBR {
             return result;
         } catch (e) {
             if (!(e instanceof CurrencyNBRError)) {
-                logFatal(e, { operation: "divInt", value: String(value) });
+                logFatal(e, { operation: "divInt", value: String(value), options });
             }
             throw e;
         }
     }
 
-    public mod(value: CurrencyNBRAllowedValue): CurrencyNBR {
+    public mod(value: CurrencyNBRAllowedValue, options: CurrencyNBROutputOptions = {}): CurrencyNBR {
+        const strategy = options.modStrategy ?? "euclidean";
         const start = performance.now();
         try {
             const other = CurrencyNBR.from(value);
@@ -360,11 +404,28 @@ export class CurrencyNBR {
                     unicode: `${this.activeTermUnicode} mod 0`,
                 });
             }
-            const nextActiveValue = this.activeTermValue % otherValue;
 
-            const nextActiveExpr = `${this.activeTermExpression} \\pmod{${other.getFullLaTeXExpression()}}`;
-            const nextActiveVerbal = `${this.activeTermVerbal}${VERBAL_TOKENS.MOD}${other.getFullVerbalExpression()}`;
-            const nextActiveUnicode = `${this.activeTermUnicode} mod ${other.getFullUnicodeExpression()}`;
+            let nextActiveValue: bigint;
+
+            if (strategy === "euclidean") {
+                // Módulo Euclidiano: garante que o resto seja sempre positivo
+                // Fórmula: ((a % n) + n) % n
+                const rawMod = this.activeTermValue % otherValue;
+                const absDivisor = otherValue < 0n ? -otherValue : otherValue;
+                nextActiveValue = ((rawMod % absDivisor) + absDivisor) % absDivisor;
+            } else {
+                // Resto Truncado (Padrão JS/C#/Java)
+                nextActiveValue = this.activeTermValue % otherValue;
+            }
+
+            const opSymbol = strategy === "euclidean" ? "mod" : "%";
+            const latexOp = strategy === "euclidean" ? "\\bmod" : "\\text{ rem }";
+
+            const nextActiveExpr = `${this.activeTermExpression} ${latexOp} ${other.getFullLaTeXExpression()}`;
+            const nextActiveVerbal = `${this.activeTermVerbal}${
+                strategy === "euclidean" ? VERBAL_TOKENS.MOD : " resto "
+            }${other.getFullVerbalExpression()}`;
+            const nextActiveUnicode = `${this.activeTermUnicode} ${opSymbol} ${other.getFullUnicodeExpression()}`;
 
             const result = new CurrencyNBR(
                 this.accumulatedValue,
@@ -379,6 +440,7 @@ export class CurrencyNBR {
             const end = performance.now();
             getLogger(["currency-nbr-a11y", "engine", "mod"]).debug("Modulo performed {*}", {
                 calcTime: end - start,
+                strategy,
                 mathState: {
                     latex: result.getFullLaTeXExpression(),
                     unicode: result.getFullUnicodeExpression(),
@@ -390,7 +452,7 @@ export class CurrencyNBR {
             return result;
         } catch (e) {
             if (!(e instanceof CurrencyNBRError)) {
-                logFatal(e, { operation: "mod", value: String(value) });
+                logFatal(e, { operation: "mod", value: String(value), options });
             }
             throw e;
         }
