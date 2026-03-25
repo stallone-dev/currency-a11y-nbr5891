@@ -15,6 +15,11 @@ export function mapAllOutputs(
     .join(" ");
   const base64 = btoa(String.fromCharCode(...buffer));
 
+  // Exemplo de processador customizado para o toCustomOutput
+  const customReport = output.toCustomOutput((ctx) => {
+    return `[AUDIT-REPORT] Value: ${ctx.rawData.value} | Formula: ${ctx.rawData.unicodeExpression} | Decimals: ${ctx.rawData.decimalPrecision}`;
+  });
+
   return {
     toString: output.toString(),
     toFloatNumber: output.toFloatNumber(),
@@ -25,6 +30,7 @@ export function mapAllOutputs(
     toVerbalA11y: output.toVerbalA11y(),
     toUnicode: output.toUnicode(),
     toJson: output.toJson(),
+    toCustomOutput: customReport,
     toImageBufferHex: hex,
     toImageDataBase64: `data:image/svg+xml;base64,${base64}`,
   };

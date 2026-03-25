@@ -19,6 +19,19 @@
     <link rel="icon" id="favicon" href="favicon.ico">
     <meta name="session-token" content="{{SESSION_TOKEN}}">
     <link rel="stylesheet" href="style.css">
+    <script>
+        // Bloqueia FOUC aplicando o tema antes do body renderizar
+        (function () {
+            try {
+                const theme = localStorage.getItem("theme") || "light";
+                document.documentElement.setAttribute("data-theme", theme);
+                const contrast = localStorage.getItem("altoContraste");
+                if (contrast === "true") {
+                    document.documentElement.classList.add("alto-contraste-init");
+                }
+            } catch (e) { }
+        })();
+    </script>
 </head>
 
 <body>
@@ -62,7 +75,9 @@
 
                 <li class="nav-group-title">Outputs</li>
                 <li><a href="#sec-verbalMonetary">1. locale</a></li>
+                <li><a href="#sec-currencyOptions">1.1 Currency</a></li>
                 <li><a href="#sec-roundingShowcase">2. Rounding</a></li>
+                <li><a href="#sec-strategyShowcase">2.1 Strategies</a></li>
                 <li><a href="#sec-toString">3. toString</a></li>
                 <li><a href="#sec-toFloatNumber">4. toFloatNumber</a></li>
                 <li><a href="#sec-toRawInternalBigInt">5. toRawInternalBigInt</a></li>
@@ -71,6 +86,7 @@
                 <li><a href="#sec-toHTML">8. toHTML</a></li>
                 <li><a href="#sec-toUnicode">9. toUnicode</a></li>
                 <li><a href="#sec-toVerbalA11y">10. toVerbalA11y</a></li>
+                <li><a href="#sec-toCustomOutput">10.1 toCustomOutput</a></li>
                 <li><a href="#sec-toImageBuffer">11. toImageBuffer</a></li>
                 <li><a href="#sec-toJson">12. toJson</a></li>
             </ul>
@@ -86,7 +102,7 @@
                             <label for="editor-iframe">Expressão de Cálculo (TypeScript):</label>
 
                             <!-- Editor CodeMirror em Sandbox -->
-                            <iframe id="editor-iframe" src="editor.html" sandbox="allow-scripts allow-same-origin"
+                            <iframe id="editor-iframe" src="editor.html" sandbox="allow-scripts"
                                 title="Editor de Código"
                                 style="width: 100%; height: 450px; border: 2px solid var(--primary); border-radius: 12px; background: #fcfcfc;"></iframe>
 
@@ -130,6 +146,10 @@
                                 <strong>toVerbalA11y():</strong>
                                 <span class="val">--</span>
                             </div>
+                            <div class="output-item full-width" data-type="toCustomOutput">
+                                <strong>toCustomOutput():</strong>
+                                <span class="val" style="font-family: monospace; font-size: 0.85em; background: #eee; padding: 5px; display: block; color: #555;">--</span>
+                            </div>
                             <div class="output-item full-width" data-type="toImageBuffer">
                                 <strong>toImageBuffer():</strong>
                                 <div class="img-preview">--</div>
@@ -165,7 +185,7 @@
     </div>
 
     <!-- High Contrast & Common Scripts -->
-    <script src="script.js" type="module" defer></script>
+    <script src="script.js" type="module"></script>
 </body>
 
 </html>

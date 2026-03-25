@@ -11,6 +11,7 @@ function updateInteractiveDisplay(data) {
     toLaTeX: data.toLaTeX,
     toUnicode: data.toUnicode,
     toVerbalA11y: data.toVerbalA11y,
+    toCustomOutput: data.toCustomOutput,
     // toHTML handled separately below
     toJson: `<div class="json-view">${JSON.stringify(JSON.parse(data.toJson), null, 2)}</div>`,
     toImageBuffer: `
@@ -36,6 +37,104 @@ function updateInteractiveDisplay(data) {
   }
 }
 
+const methodTitles = {
+  verbalMonetary: "1. locale",
+  currencyOptions: "1.1 Currency Options",
+  roundingShowcase: "2. Rounding",
+  strategyShowcase: "2.1 Strategies (Div/Mod)",
+  toString: "3. toString",
+  toFloatNumber: "4. toFloatNumber",
+  toRawInternalBigInt: "5. toRawInternalBigInt",
+  toMonetary: "6. toMonetary",
+  toLaTeX: "7. toLaTeX",
+  toHTML: "8. toHTML",
+  toUnicode: "9. toUnicode",
+  toVerbalA11y: "10. toVerbalA11y",
+  toCustomOutput: "10.1 toCustomOutput",
+  toImageBuffer: "11. toImageBuffer",
+  toJson: "12. toJson",
+  add: "Adição",
+  sub: "Subtração",
+  mult: "Multiplicação",
+  div: "Divisão",
+  pow: "Potência",
+  mod: "Módulo",
+  divInt: "Divisão Inteira",
+  group: "Agrupamento",
+};
+
+function renderCategory(method, examples, groupType, container) {
+  const section = document.createElement("section");
+  section.id = `sec-${method}`;
+  section.innerHTML = `<h2>${methodTitles[method] || method}</h2>`;
+
+  const grid = document.createElement("div");
+  grid.className = "grid";
+
+  examples.forEach((ex) => {
+    const article = document.createElement("article");
+    article.className = "card";
+
+    let resultView = "";
+    if (groupType === "operations") {
+      resultView = `
+                        <div class="result-label">toString():</div>
+                        <div class="card-result-text">${ex.outputs.toString}</div>
+                        <div class="result-label" style="margin-top: 10px;">toMonetary():</div>
+                        <div class="card-result-text">${ex.outputs.toMonetary}</div>
+                        <div class="result-label" style="margin-top: 10px;">toHTML():</div>
+                        <div class="card-math-render">${ex.outputs.toHTML}</div>
+                    `;
+    } else if (method === "toCustomOutput") {
+      resultView = `<div class="card-result-text" style="font-family: monospace; font-size: 0.85em; background: #eee; padding: 10px; border-radius: 4px; color: #555;">${ex.outputs.toCustomOutput}</div>`;
+    } else if (method === "toImageBuffer") {
+
+      resultView = `
+                        <div class="image-output-wrapper">
+                          <div class="binary-view-small">${ex.outputs.toImageBufferHex}</div>
+                          <img src="${ex.outputs.toImageDataBase64}" alt="Image Result" class="image-result">
+                        </div>
+                    `;
+    } else if (method === "toHTML") {
+      resultView = `<div class="card-math-render">${ex.outputs.toHTML}</div>
+                                  <div class="result-label">Resultado numérico:</div>
+                                  <div class="card-result-text">${ex.outputs.toString}</div>`;
+    } else if (method === "toJson") {
+      resultView = `<div class="json-view">${JSON.stringify(JSON.parse(ex.outputs.toJson), null, 2)
+        }</div>`;
+    } else if (method === "verbalMonetary" || method === "currencyOptions") {
+      resultView = `
+                        <div class="result-label">Monetary:</div>
+                        <div class="card-result-text">${ex.outputs.toMonetary}</div>
+                        <div class="result-label" style="margin-top: 10px;">Verbal (A11y):</div>
+                        <div class="card-result-text" style="font-size: 0.9em; font-style: italic;">${ex.outputs.toVerbalA11y}</div>
+                    `;
+    } else if (method === "roundingShowcase" || method === "strategyShowcase") {
+      resultView = `
+                        <div class="card-math-render">${ex.outputs.toHTML}</div>
+                        <div class="result-label">LaTeX Source:</div>
+                        <div class="card-code" style="font-size: 0.75em;">${ex.outputs.toLaTeX}</div>
+                        <div class="result-label" style="margin-top: 5px;">Result:</div>
+                        <div class="card-result-text">${ex.outputs.toString}</div>
+                    `;
+    } else {
+      resultView = `<div class="card-result-text">${ex.outputs[method]}</div>`;
+    }
+
+    article.innerHTML = `
+                  <h3>${ex.title}</h3>
+                  <p class="context"><strong>Contexto:</strong> ${ex.context}</p>
+                  <div class="card-code"><code>${ex.code}</code></div>
+                  <div class="result-label">Resultado:</div>
+                  <div class="result-area">${resultView}</div>
+                `;
+    grid.appendChild(article);
+  });
+
+  section.appendChild(grid);
+  container.appendChild(section);
+}
+
 // Carregar e categorizar exemplos
 async function loadExamples() {
   const container = document.getElementById("categories-container");
@@ -46,29 +145,6 @@ async function loadExamples() {
     const categoriesGrouped = await response.json();
     container.innerHTML = "";
 
-    const methodTitles = {
-      verbalMonetary: "1. locale",
-      roundingShowcase: "2. Rounding",
-      toString: "3. toString",
-      toFloatNumber: "4. toFloatNumber",
-      toRawInternalBigInt: "5. toRawInternalBigInt",
-      toMonetary: "6. toMonetary",
-      toLaTeX: "7. toLaTeX",
-      toHTML: "8. toHTML",
-      toUnicode: "9. toUnicode",
-      toVerbalA11y: "10. toVerbalA11y",
-      toImageBuffer: "11. toImageBuffer",
-      toJson: "12. toJson",
-      add: "Adição",
-      sub: "Subtração",
-      mult: "Multiplicação",
-      div: "Divisão",
-      pow: "Potência",
-      mod: "Módulo",
-      divInt: "Divisão Inteira",
-      group: "Agrupamento",
-    };
-
     // 1. Renderiza Grupo OPERAÇÕES
     const operationsHeader = document.createElement("h1");
     operationsHeader.className = "group-main-header";
@@ -76,7 +152,7 @@ async function loadExamples() {
     container.appendChild(operationsHeader);
 
     for (const [method, examples] of Object.entries(categoriesGrouped.operations)) {
-      renderCategory(method, examples, "operations");
+      renderCategory(method, examples, "operations", container);
     }
 
     // 2. Renderiza Grupo OUTPUTS
@@ -86,75 +162,9 @@ async function loadExamples() {
     container.appendChild(outputHeader);
 
     for (const [method, examples] of Object.entries(categoriesGrouped.outputs)) {
-      renderCategory(method, examples, "outputs");
+      renderCategory(method, examples, "outputs", container);
     }
 
-    function renderCategory(method, examples, groupType) {
-      const section = document.createElement("section");
-      section.id = `sec-${method}`;
-      section.innerHTML = `<h2>${methodTitles[method] || method}</h2>`;
-
-      const grid = document.createElement("div");
-      grid.className = "grid";
-
-      examples.forEach((ex) => {
-        const article = document.createElement("article");
-        article.className = "card";
-
-        let resultView = "";
-        if (groupType === "operations") {
-          resultView = `
-                        <div class="result-label">toString():</div>
-                        <div class="card-result-text">${ex.outputs.toString}</div>
-                        <div class="result-label" style="margin-top: 10px;">toMonetary():</div>
-                        <div class="card-result-text">${ex.outputs.toMonetary}</div>
-                        <div class="result-label" style="margin-top: 10px;">toHTML():</div>
-                        <div class="card-math-render">${ex.outputs.toHTML}</div>
-                    `;
-        } else if (method === "toImageBuffer") {
-          resultView = `
-                        <div class="image-output-wrapper">
-                          <div class="binary-view-small">${ex.outputs.toImageBufferHex}</div>
-                          <img src="${ex.outputs.toImageDataBase64}" alt="Image Result" class="image-result">
-                        </div>
-                    `;
-        } else if (method === "toHTML") {
-          resultView = `<div class="card-math-render">${ex.outputs.toHTML}</div>
-                                  <div class="result-label">Resultado numérico:</div>
-                                  <div class="card-result-text">${ex.outputs.toString}</div>`;
-        } else if (method === "toJson") {
-          resultView = `<div class="json-view">${JSON.stringify(JSON.parse(ex.outputs.toJson), null, 2)
-            }</div>`;
-        } else if (method === "verbalMonetary") {
-          resultView = `
-                        <div class="result-label">Monetary:</div>
-                        <div class="card-result-text">${ex.outputs.toMonetary}</div>
-                        <div class="result-label" style="margin-top: 10px;">Verbal (A11y):</div>
-                        <div class="card-result-text" style="font-size: 0.9em; font-style: italic;">${ex.outputs.toVerbalA11y}</div>
-                    `;
-        } else if (method === "roundingShowcase") {
-          resultView = `
-                        <div class="card-math-render">${ex.outputs.toHTML}</div>
-                        <div class="result-label">LaTeX Source:</div>
-                        <div class="card-code" style="font-size: 0.75em;">${ex.outputs.toLaTeX}</div>
-                    `;
-        } else {
-          resultView = `<div class="card-result-text">${ex.outputs[method]}</div>`;
-        }
-
-        article.innerHTML = `
-                  <h3>${ex.title}</h3>
-                  <p class="context"><strong>Contexto:</strong> ${ex.context}</p>
-                  <div class="card-code"><code>${ex.code}</code></div>
-                  <div class="result-label">Resultado:</div>
-                  <div class="result-area">${resultView}</div>
-                `;
-        grid.appendChild(article);
-      });
-
-      section.appendChild(grid);
-      container.appendChild(section);
-    }
   } catch (err) {
     console.error(err);
     container.innerHTML = `<p class="error">Erro ao carregar exemplos: ${err.message}</p>`;
@@ -167,26 +177,34 @@ let codePromiseResolve = null;
 // Inicialização
 function init() {
   const htmlEl = document.documentElement;
-  let savedTheme = "light";
-  try {
-    savedTheme = localStorage.getItem("theme") || "light";
-  } catch (e) {
-    // localStorage pode estar bloqueado em sandbox
-  }
-  htmlEl.setAttribute("data-theme", savedTheme);
+  const currentTheme = htmlEl.getAttribute("data-theme") || "light";
 
   const darkModeBtn = document.getElementById("modo-escuro");
   if (darkModeBtn) {
-    const isDark = savedTheme === "dark";
+    const isDark = currentTheme === "dark";
     darkModeBtn.setAttribute("aria-pressed", isDark);
     darkModeBtn.querySelector("span").textContent = isDark ? "☾" : "☼";
+  }
+
+  // Sincroniza estado de alto contraste se aplicado pelo head
+  const contrastBtn = document.getElementById("alto-contraste");
+  if (contrastBtn) {
+    const isContrast = htmlEl.classList.contains("alto-contraste-init") ||
+      document.body.classList.contains("alto-contraste");
+
+    if (isContrast) {
+      document.body.classList.add("alto-contraste");
+      contrastBtn.setAttribute("aria-pressed", "true");
+    }
+    // Limpa a classe temporária do head
+    htmlEl.classList.remove("alto-contraste-init");
   }
 
   // Carregar Exemplos
   loadExamples();
 
   // Listener para mensagens do Editor Sandbox
-  window.addEventListener("message", (event) => {
+  globalThis.addEventListener("message", (event) => {
     if (event.data.type === "CODE_RESPONSE") {
       if (codePromiseResolve) {
         codePromiseResolve(event.data.code);
@@ -268,13 +286,15 @@ function init() {
   if (darkModeBtn) {
     darkModeBtn.addEventListener("click", (e) => {
       e.preventDefault();
-      const currentTheme = htmlEl.getAttribute("data-theme");
-      const newTheme = currentTheme === "dark" ? "light" : "dark";
+      const theme = htmlEl.getAttribute("data-theme");
+      const newTheme = theme === "dark" ? "light" : "dark";
 
       htmlEl.setAttribute("data-theme", newTheme);
       try {
         localStorage.setItem("theme", newTheme);
-      } catch (e) { }
+      } catch (_e) {
+        // localStorage might be blocked
+      }
 
       const isDark = newTheme === "dark";
       darkModeBtn.setAttribute("aria-pressed", isDark);
@@ -289,7 +309,6 @@ function init() {
   }
 
   // Alto Contraste
-  const contrastBtn = document.getElementById("alto-contraste");
   if (contrastBtn) {
     contrastBtn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -298,24 +317,16 @@ function init() {
       contrastBtn.setAttribute("aria-pressed", !isPressed);
       try {
         localStorage.setItem("altoContraste", !isPressed);
-      } catch (e) { }
+      } catch (_e) {
+        // localStorage might be blocked
+      }
     });
-
-    let savedContrast = "false";
-    try {
-      savedContrast = localStorage.getItem("altoContraste");
-    } catch (e) { }
-
-    if (savedContrast === "true") {
-      document.body.classList.add("alto-contraste");
-      contrastBtn.setAttribute("aria-pressed", "true");
-    }
   }
 }
 
-// Inicialização
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", init);
-} else {
+// Inicialização segura após carregamento completo
+if (document.readyState === "complete") {
   init();
+} else {
+  globalThis.addEventListener("load", init);
 }

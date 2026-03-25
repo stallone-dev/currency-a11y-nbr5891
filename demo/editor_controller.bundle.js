@@ -1,5 +1,5 @@
 (() => {
-  // node_modules/.deno/@marijn+find-cluster-break@1.0.2/node_modules/@marijn/find-cluster-break/src/index.js
+  // ../node_modules/.deno/@marijn+find-cluster-break@1.0.2/node_modules/@marijn/find-cluster-break/src/index.js
   var rangeFrom = [];
   var rangeTo = [];
   (() => {
@@ -73,7 +73,7 @@
     return code < 65536 ? 1 : 2;
   }
 
-  // node_modules/.deno/@codemirror+state@6.6.0/node_modules/@codemirror/state/dist/index.js
+  // ../node_modules/.deno/@codemirror+state@6.6.0/node_modules/@codemirror/state/dist/index.js
   var Text = class _Text {
     /**
     Get the line description around the given position.
@@ -3426,7 +3426,7 @@
     return strict === true ? -1 : string2.length;
   }
 
-  // node_modules/.deno/style-mod@4.1.3/node_modules/style-mod/src/style-mod.js
+  // ../node_modules/.deno/style-mod@4.1.3/node_modules/style-mod/src/style-mod.js
   var C = "\u037C";
   var COUNT = typeof Symbol == "undefined" ? "__" + C : Symbol.for(C);
   var SET = typeof Symbol == "undefined" ? "__styleSet" + Math.floor(Math.random() * 1e8) : /* @__PURE__ */ Symbol("styleSet");
@@ -3557,7 +3557,7 @@
     }
   };
 
-  // node_modules/.deno/w3c-keyname@2.2.8/node_modules/w3c-keyname/index.js
+  // ../node_modules/.deno/w3c-keyname@2.2.8/node_modules/w3c-keyname/index.js
   var base = {
     8: "Backspace",
     9: "Tab",
@@ -3663,7 +3663,7 @@
     return name2;
   }
 
-  // node_modules/.deno/crelt@1.0.6/node_modules/crelt/index.js
+  // ../node_modules/.deno/crelt@1.0.6/node_modules/crelt/index.js
   function crelt() {
     var elt = arguments[0];
     if (typeof elt == "string") elt = document.createElement(elt);
@@ -3692,7 +3692,7 @@
     }
   }
 
-  // node_modules/.deno/@codemirror+view@6.40.0/node_modules/@codemirror/view/dist/index.js
+  // ../node_modules/.deno/@codemirror+view@6.40.0/node_modules/@codemirror/view/dist/index.js
   var nav = typeof navigator != "undefined" ? navigator : { userAgent: "", vendor: "", platform: "" };
   var doc = typeof document != "undefined" ? document : { documentElement: { style: {} } };
   var ie_edge = /* @__PURE__ */ /Edge\/(\d+)/.exec(nav.userAgent);
@@ -14181,7 +14181,7 @@
     return activeLineGutterHighlighter;
   }
 
-  // node_modules/.deno/@lezer+common@1.5.1/node_modules/@lezer/common/dist/index.js
+  // ../node_modules/.deno/@lezer+common@1.5.1/node_modules/@lezer/common/dist/index.js
   var DefaultBufferLength = 1024;
   var nextPropID = 0;
   var Range2 = class {
@@ -15851,7 +15851,7 @@
   };
   var stoppedInner = new NodeProp({ perNode: true });
 
-  // node_modules/.deno/@lezer+highlight@1.2.3/node_modules/@lezer/highlight/dist/index.js
+  // ../node_modules/.deno/@lezer+highlight@1.2.3/node_modules/@lezer/highlight/dist/index.js
   var nextTagID = 0;
   var Tag = class _Tag {
     /**
@@ -16575,7 +16575,7 @@
     { tag: tags.punctuation, class: "tok-punctuation" }
   ]);
 
-  // node_modules/.deno/@codemirror+language@6.12.2/node_modules/@codemirror/language/dist/index.js
+  // ../node_modules/.deno/@codemirror+language@6.12.2/node_modules/@codemirror/language/dist/index.js
   var _a;
   var languageDataProp = /* @__PURE__ */ new NodeProp();
   function defineLanguageFacet(baseData) {
@@ -18136,7 +18136,7 @@
     auto: /* @__PURE__ */ Decoration.mark({ class: "cm-iso", inclusive: true, attributes: { dir: "auto" }, bidiIsolate: null })
   };
 
-  // node_modules/.deno/@codemirror+commands@6.10.3/node_modules/@codemirror/commands/dist/index.js
+  // ../node_modules/.deno/@codemirror+commands@6.10.3/node_modules/@codemirror/commands/dist/index.js
   var toggleComment = (target) => {
     let { state } = target, line = state.doc.lineAt(state.selection.main.from), config2 = getConfig(target.state, line.from);
     return config2.line ? toggleLineComment(target) : config2.block ? toggleBlockCommentByLine(target) : false;
@@ -19216,7 +19216,7 @@
     { key: "Ctrl-m", mac: "Shift-Alt-m", run: toggleTabFocusMode }
   ].concat(standardKeymap);
 
-  // node_modules/.deno/@codemirror+search@6.6.0/node_modules/@codemirror/search/dist/index.js
+  // ../node_modules/.deno/@codemirror+search@6.6.0/node_modules/@codemirror/search/dist/index.js
   var basicNormalize = typeof String.prototype.normalize == "function" ? (x) => x.normalize("NFKD") : (x) => x;
   var SearchCursor = class {
     /**
@@ -20293,7 +20293,7 @@
     baseTheme3
   ];
 
-  // node_modules/.deno/@codemirror+autocomplete@6.20.1/node_modules/@codemirror/autocomplete/dist/index.js
+  // ../node_modules/.deno/@codemirror+autocomplete@6.20.1/node_modules/@codemirror/autocomplete/dist/index.js
   var CompletionContext = class {
     /**
     Create a new completion context. (Mostly useful for testing
@@ -22107,7 +22107,7 @@
   ];
   var completionKeymapExt = /* @__PURE__ */ Prec.highest(/* @__PURE__ */ keymap.computeN([completionConfig], (state) => state.facet(completionConfig).defaultKeymap ? [completionKeymap] : []));
 
-  // node_modules/.deno/@codemirror+lint@6.9.5/node_modules/@codemirror/lint/dist/index.js
+  // ../node_modules/.deno/@codemirror+lint@6.9.5/node_modules/@codemirror/lint/dist/index.js
   var SelectedDiagnostic = class {
     constructor(from, to, diagnostic) {
       this.from = from;
@@ -22711,7 +22711,7 @@
     baseTheme5
   ];
 
-  // node_modules/.deno/codemirror@6.0.2/node_modules/codemirror/dist/index.js
+  // ../node_modules/.deno/codemirror@6.0.2/node_modules/codemirror/dist/index.js
   var basicSetup = /* @__PURE__ */ (() => [
     lineNumbers(),
     highlightActiveLineGutter(),
@@ -22741,7 +22741,7 @@
     ])
   ])();
 
-  // node_modules/.deno/@lezer+lr@1.4.8/node_modules/@lezer/lr/dist/index.js
+  // ../node_modules/.deno/@lezer+lr@1.4.8/node_modules/@lezer/lr/dist/index.js
   var Stack = class _Stack {
     /**
     @internal
@@ -24500,7 +24500,7 @@
     return spec.get;
   }
 
-  // node_modules/.deno/@lezer+javascript@1.5.4/node_modules/@lezer/javascript/dist/index.js
+  // ../node_modules/.deno/@lezer+javascript@1.5.4/node_modules/@lezer/javascript/dist/index.js
   var noSemi = 316;
   var noSemiType = 317;
   var incdec = 1;
@@ -24712,7 +24712,7 @@
     tokenPrec: 15201
   });
 
-  // node_modules/.deno/@codemirror+lang-javascript@6.2.5/node_modules/@codemirror/lang-javascript/dist/index.js
+  // ../node_modules/.deno/@codemirror+lang-javascript@6.2.5/node_modules/@codemirror/lang-javascript/dist/index.js
   var snippets = [
     /* @__PURE__ */ snippetCompletion("function ${name}(${params}) {\n	${}\n}", {
       label: "function",
@@ -25024,7 +25024,7 @@
     return true;
   });
 
-  // demo/editor_controller.js
+  // editor_controller.js
   var editorView;
   var themeCompartment = new Compartment();
   var createEditorTheme = () => EditorView.theme({
