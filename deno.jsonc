@@ -1,6 +1,6 @@
 {
-    "name": "@st-all-one/calcaud-nbr-a11y",
-    "version": "0.3.3",
+    "name": "@st-all-one/calc-auy",
+    "version": "0.2.0",
     "exports": "./mod.ts",
     "license": "MPL-2.0",
     "publish": {
@@ -47,7 +47,6 @@
     },
     "imports": {
         "@logtape": "jsr:@logtape/logtape@^2.0.4",
-        "@katex": "npm:katex@^0.16.40"
     },
     "nodeModulesDir": "auto",
     "vendor": true,
