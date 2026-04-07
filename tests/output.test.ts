@@ -21,8 +21,8 @@ describe("CalcAUYOutput - HTML & Image Generation", () => {
         assertStringIncludes(html, 'aria-label="10 mais 5 é igual a 15 vírgula 00');
         assertStringIncludes(html, "<style>");
         assertStringIncludes(html, ".calc-auy-result { margin: 1em 0; overflow-x: auto; }");
-        // Check audit trail in LaTeX
-        assertStringIncludes(html, "\\text{round}_{\\text{NBR}}(10 + 5, 2) = 15.00");
+        // Check audit trail in LaTeX with full name
+        assertStringIncludes(html, "\\text{round}_{\\text{NBR-5891}}(10 + 5, 2) = 15.00");
     });
 
     it("toImageBuffer deve gerar um buffer contendo SVG com rastro e metadados", () => {
@@ -35,7 +35,8 @@ describe("CalcAUYOutput - HTML & Image Generation", () => {
         assertStringIncludes(svg, 'aria-label="10 mais 5 é igual a 15 vírgula 00');
         assertStringIncludes(svg, "<title>10 mais 5 é igual a 15 vírgula 00");
         assertStringIncludes(svg, "<foreignObject");
-        assertStringIncludes(svg, "\\text{round}_{\\text{NBR}}(10 + 5, 2) = 15.00");
+        // Check audit trail in LaTeX with full name
+        assertStringIncludes(svg, "\\text{round}_{\\text{NBR-5891}}(10 + 5, 2) = 15.00");
     });
 
     it("toImageBuffer deve ajustar altura para frações e raízes", () => {

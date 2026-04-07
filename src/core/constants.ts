@@ -14,11 +14,11 @@ export const DEFAULT_CURRENCY = "BRL";
 export const DEFAULT_DECIMAL_PRECISION = 4;
 
 export const ROUNDING_IDS = {
-    NBR5891: "NBR",
-    HALF_UP: "HU",
-    HALF_EVEN: "HE",
-    TRUNCATE: "TR",
-    CEIL: "CE",
+    NBR5891: "NBR-5891",
+    HALF_UP: "Half-Up",
+    HALF_EVEN: "Half-Even",
+    TRUNCATE: "Truncate",
+    CEIL: "Ceil",
 } as const;
 
 export type RoundingStrategy = keyof typeof ROUNDING_IDS;

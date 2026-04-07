@@ -3,26 +3,22 @@
  */
 export function generateSVG(
     html: string,
-    latex: string,
+    fullLatex: string,
     verbal: string,
-    roundedStr: string,
-    strategyId: string,
-    precision: number,
 ): string {
     const scaleFactor = 1.3;
     const averagePxPerChar = 8;
     const paddingHorizontal = 16;
     const paddingVertical = 16;
 
-    const textToMeasure = `round_{${strategyId}}(${latex}, ${precision}) = ${roundedStr}`;
-    const estimatedWidth: number = (textToMeasure.length * averagePxPerChar * scaleFactor)
+    const estimatedWidth: number = (fullLatex.length * averagePxPerChar * scaleFactor)
         + (paddingHorizontal * 2);
     const finalWidth: number = Math.max(300, Math.min(2000, Math.ceil(estimatedWidth)));
 
     let verticalExpansion = 0;
-    const fracMatches: RegExpMatchArray | null = latex.match(/\\frac/g);
+    const fracMatches: RegExpMatchArray | null = fullLatex.match(/\\frac/g);
     if (fracMatches) { verticalExpansion += fracMatches.length * 15; }
-    const sqrtMatches: RegExpMatchArray | null = latex.match(/\\sqrt/g);
+    const sqrtMatches: RegExpMatchArray | null = fullLatex.match(/\\sqrt/g);
     if (sqrtMatches) { verticalExpansion += sqrtMatches.length * 25; }
 
     const baseHeight: number = (24 * scaleFactor) + (paddingVertical * 2) + verticalExpansion;
