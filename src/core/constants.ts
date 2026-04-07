@@ -15,10 +15,10 @@ export const DEFAULT_DECIMAL_PRECISION = 4;
 
 export const ROUNDING_IDS = {
     NBR5891: "NBR-5891",
-    HALF_UP: "Half-Up",
-    HALF_EVEN: "Half-Even",
-    TRUNCATE: "Truncate",
-    CEIL: "Ceil",
+    HALF_UP: "HALF-UP",
+    HALF_EVEN: "HALF-EVEN",
+    TRUNCATE: "TRUNCATE",
+    CEIL: "CEIL",
 } as const;
 
 export type RoundingStrategy = keyof typeof ROUNDING_IDS;

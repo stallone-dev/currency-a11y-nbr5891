@@ -17,7 +17,7 @@ describe("CalcAUY - Integração e Auditoria", () => {
             assertEquals(res.toStringNumber({ decimalPrecision: 0 }), "512");
             // Multi-digit exponent should have braces in LaTeX
             const res12 = CalcAUY.from(1).pow(12).commit({ roundStrategy: "TRUNCATE" });
-            assertEquals(res12.toLaTeX({ decimalPrecision: 0 }), "\\text{round}_{\\text{Truncate}}(1^{12}, 0) = 1");
+            assertEquals(res12.toLaTeX({ decimalPrecision: 0 }), "\\text{round}_{\\text{TRUNCATE}}(1^{12}, 0) = 1");
         });
 
         it("deve aplicar o auto-agrupamento ao injetar instâncias", () => {
@@ -78,16 +78,23 @@ describe("CalcAUY - Integração e Auditoria", () => {
 
         it("deve gerar rastro Unicode enriquecido para potências e raízes", () => {
             const res = CalcAUY.from(2).pow(3).commit({ roundStrategy: "HALF_UP" });
-            // roundHalf-Up(2³, 4) = 8.0000 -> ₕₐₗf₋ᵤₚ
+            // roundHALF-UP(2³, 4) = 8.0000 -> ₕₐₗf₋ᵤₚ
             assertEquals(res.toUnicode(), "roundₕₐₗf₋ᵤₚ(2³, 4) = 8.0000");
 
             const raiz = CalcAUY.from(16).pow("1/2").commit({ roundStrategy: "TRUNCATE" });
-            // roundTruncate(√16, 2) = 4.00 -> ₜᵣᵤₙcₐₜₑ
+            // roundTRUNCATE(√16, 2) = 4.00 -> ₜᵣᵤₙcₐₜₑ
             assertEquals(raiz.toUnicode({ decimalPrecision: 2 }), "roundₜᵣᵤₙcₐₜₑ(√16, 2) = 4.00");
         });
     });
 
     describe("Exportação JSON", () => {
+        it("deve gerar rastro Unicode para NBR-5891 usando o homóglifo Beta", () => {
+            const res = CalcAUY.from(10).add(5).commit({ roundStrategy: "NBR5891" });
+            // roundNBR-5891(10 + 5, 4) = 15.0000 -> ₙᵦᵣ₋₅₈₉₁
+            assertEquals(res.toUnicode(), "roundₙᵦᵣ₋₅₈₉₁(10 + 5, 4) = 15.0000");
+        });
+
+
         it("deve exportar múltiplos formatos via toJSON", () => {
             const res = CalcAUY.from(10).add(5).commit({ roundStrategy: "NBR5891" });
             const json: any = res.toJSON(["toStringNumber", "toLaTeX"]);
@@ -101,7 +108,7 @@ describe("CalcAUY - Integração e Auditoria", () => {
         it("deve renderizar raiz quadrada corretamente (1/2)", () => {
             const res = CalcAUY.from(16).pow("1/2").commit();
             assertEquals(res.toLaTeX(), "\\text{round}_{\\text{NBR-5891}}(\\sqrt{16}, 4) = 4.0000");
-            assertEquals(res.toUnicode(), "roundₙBᵣ₋₅₈₉₁(√16, 4) = 4.0000");
+            assertEquals(res.toUnicode(), "roundₙᵦᵣ₋₅₈₉₁(√16, 4) = 4.0000");
             assertEquals(res.toVerbalA11y({ locale: "pt-BR" }), "raiz quadrada de 16 é igual a 4 vírgula 0000 (Arredondamento: NBR-5891 para 4 casas decimais).");
         });
 
@@ -109,14 +116,14 @@ describe("CalcAUY - Integração e Auditoria", () => {
             const res = CalcAUY.from(8).pow("2/3").commit();
             // 8^(2/3) = (root3(8))^2 = 2^2 = 4
             assertEquals(res.toLaTeX(), "\\text{round}_{\\text{NBR-5891}}(\\sqrt[3]{{8}^{2}}, 4) = 4.0000");
-            assertEquals(res.toUnicode(), "roundₙBᵣ₋₅₈₉₁(∛(8²), 4) = 4.0000");
+            assertEquals(res.toUnicode(), "roundₙᵦᵣ₋₅₈₉₁(∛(8²), 4) = 4.0000");
             assertEquals(res.toVerbalA11y({ locale: "pt-BR" }), "raiz cúbica de 8 elevado a 2 é igual a 4 vírgula 0000 (Arredondamento: NBR-5891 para 4 casas decimais).");
         });
 
         it("deve renderizar raiz enésima complexa (3/6)", () => {
             const res = CalcAUY.from(12).pow("3/6").commit();
             assertEquals(res.toLaTeX(), "\\text{round}_{\\text{NBR-5891}}(\\sqrt[6]{{12}^{3}}, 4) = 3.4641");
-            assertEquals(res.toUnicode(), "roundₙBᵣ₋₅₈₉₁(⁶√(12³), 4) = 3.4641");
+            assertEquals(res.toUnicode(), "roundₙᵦᵣ₋₅₈₉₁(⁶√(12³), 4) = 3.4641");
             const verbal = res.toVerbalA11y({ locale: "pt-BR" });
             assertStringIncludes(verbal, "raiz 6-ésima de 12 elevado a 3");
         });
@@ -125,7 +132,7 @@ describe("CalcAUY - Integração e Auditoria", () => {
             const res = CalcAUY.from(12).pow(2).group().pow("3/6").commit();
             // (12^2)^(3/6) = (144)^(1/2) = 12
             assertEquals(res.toLaTeX(), "\\text{round}_{\\text{NBR-5891}}(\\sqrt[6]{{\\left( 12^{2} \\right)}^{3}}, 4) = 12.0000");
-            assertEquals(res.toUnicode(), "roundₙBᵣ₋₅₈₉₁(⁶√((12²)³), 4) = 12.0000");
+            assertEquals(res.toUnicode(), "roundₙᵦᵣ₋₅₈₉₁(⁶√((12²)³), 4) = 12.0000");
         });
     });
 

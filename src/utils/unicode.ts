@@ -42,6 +42,7 @@ const SUBSCRIPTS: Record<string, string> = {
     "(": "₍",
     ")": "₎",
     "a": "ₐ",
+    "b": "ᵦ", // Greek beta as homoglyph
     "e": "ₑ",
     "h": "ₕ",
     "i": "ᵢ",
@@ -57,20 +58,23 @@ const SUBSCRIPTS: Record<string, string> = {
     "t": "ₜ",
     "u": "ᵤ",
     "v": "ᵥ",
+    "w": "₝", // Unicode 17.0
     "x": "ₓ",
-    // Standard Latin subscripts are limited.
+    "y": "₞", // Unicode 17.0 (fallback to gamma ᵧ if needed)
+    "z": "₟", // Unicode 17.0
+    // Standard Latin subscripts for c, d, f, g, q are still missing in Unicode.
 };
 
 /**
  * Converts a string to its Unicode superscript equivalent.
  */
 export function toSuperscript(text: string): string {
-    return text.split("").map((char: string) => SUPERSCRIPTS[char.toLowerCase()] || char).join("");
+    return text.split("").map((char: string) => SUPERSCRIPTS[char.toLowerCase()] || char.toLowerCase()).join("");
 }
 
 /**
  * Converts a string to its Unicode subscript equivalent.
  */
 export function toSubscript(text: string): string {
-    return text.split("").map((char: string) => SUBSCRIPTS[char.toLowerCase()] || char).join("");
+    return text.split("").map((char: string) => SUBSCRIPTS[char.toLowerCase()] || char.toLowerCase()).join("");
 }

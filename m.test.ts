@@ -22,7 +22,7 @@ const calc = CalcAUY.from(2).add(5).mult(3).pow(CalcAUY.from(2).pow(2).pow("3/7"
 
 const tree = calc.hibernate();
 
-const reanimate = CalcAUY.hydrate(tree).commit({ roundStrategy: "HALF_UP" });
+const reanimate = CalcAUY.hydrate(tree).commit({ roundStrategy: "NBR5891" });
 
 console.log("String => ", reanimate.toStringNumber());
 console.log("Verbal => ", reanimate.toVerbalA11y());
