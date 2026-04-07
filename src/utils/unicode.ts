@@ -22,6 +22,7 @@ const SUPERSCRIPTS: Record<string, string> = {
     "/": "ᐟ",
     "n": "ⁿ",
     "i": "ⁱ",
+    "^": "^",
 };
 
 const SUBSCRIPTS: Record<string, string> = {
@@ -57,6 +58,7 @@ const SUBSCRIPTS: Record<string, string> = {
     "u": "ᵤ",
     "v": "ᵥ",
     "x": "ₓ",
+    // Standard Latin subscripts are limited.
 };
 
 /**

@@ -1,5 +1,5 @@
 import { describe, it } from "@std/testing/bdd";
-import { assertEquals } from "@std/assert";
+import { assertEquals, assertStringIncludes } from "@std/assert";
 import { CalcAUY } from "../mod.ts";
 
 describe("CalcAUY - Integração e Auditoria", () => {
@@ -8,13 +8,16 @@ describe("CalcAUY - Integração e Auditoria", () => {
             // 10 + 5 * 2 = 20
             const res = CalcAUY.from(10).add(5).mult(2).commit({ roundStrategy: "NBR5891" });
             assertEquals(res.toStringNumber(), "20.0000");
-            assertEquals(res.toLaTeX(), "10 + 5 \\times 2");
+            assertEquals(res.toLaTeX(), "\\text{round}_{\\text{NBR-5891}}(10 + 5 \\times 2, 4) = 20.0000");
         });
 
-        it("deve respeitar a associatividade à direita na potência", () => {
+        it("deve respeitar a associatividade à direita na potência e formatar expoentes com múltiplos dígitos", () => {
             // 2 ^ 3 ^ 2 = 2 ^ (3 ^ 2) = 2 ^ 9 = 512
             const res = CalcAUY.from(2).pow(3).pow(2).commit({ roundStrategy: "NBR5891" });
             assertEquals(res.toStringNumber({ decimalPrecision: 0 }), "512");
+            // Multi-digit exponent should have braces in LaTeX
+            const res12 = CalcAUY.from(1).pow(12).commit({ roundStrategy: "TRUNCATE" });
+            assertEquals(res12.toLaTeX({ decimalPrecision: 0 }), "\\text{round}_{\\text{Truncate}}(1^{12}, 0) = 1");
         });
 
         it("deve aplicar o auto-agrupamento ao injetar instâncias", () => {
@@ -22,7 +25,7 @@ describe("CalcAUY - Integração e Auditoria", () => {
             const sub = CalcAUY.from(2).add(3);
             const res = CalcAUY.from(10).mult(sub).commit({ roundStrategy: "NBR5891" });
             assertEquals(res.toStringNumber(), "50.0000");
-            assertEquals(res.toLaTeX(), "10 \\times \\left( 2 + 3 \\right)");
+            assertEquals(res.toLaTeX(), "\\text{round}_{\\text{NBR-5891}}(10 \\times \\left( 2 + 3 \\right), 4) = 50.0000");
         });
     });
 
@@ -64,22 +67,23 @@ describe("CalcAUY - Integração e Auditoria", () => {
         it("deve gerar rastro verbal em pt-BR", () => {
             const res = CalcAUY.from(10).add(5).commit({ roundStrategy: "NBR5891" });
             const verbal = res.toVerbalA11y({ locale: "pt-BR", decimalPrecision: 2 });
-            assertEquals(verbal, "10 mais 5 é igual a 15 vírgula 00 (Arredondamento: NBR para 2 casas decimais).");
+            assertEquals(verbal, "10 mais 5 é igual a 15 vírgula 00 (Arredondamento: NBR-5891 para 2 casas decimais).");
         });
 
         it("deve gerar rastro verbal em en-US", () => {
             const res = CalcAUY.from(10).add(5).commit({ roundStrategy: "NBR5891" });
             const verbal = res.toVerbalA11y({ locale: "en-US", decimalPrecision: 2 });
-            assertEquals(verbal, "10 plus 5 is equal to 15 point 00 (Rounding: NBR for 2 decimal places).");
+            assertEquals(verbal, "10 plus 5 is equal to 15 point 00 (Rounding: NBR-5891 for 2 decimal places).");
         });
 
         it("deve gerar rastro Unicode enriquecido para potências e raízes", () => {
             const res = CalcAUY.from(2).pow(3).commit({ roundStrategy: "HALF_UP" });
-            // roundₕᵤ(2³, 4) = 8.0000
-            assertEquals(res.toUnicode(), "roundₕᵤ(2³, 4) = 8.0000");
+            // roundHalf-Up(2³, 4) = 8.0000 -> ₕₐₗf₋ᵤₚ
+            assertEquals(res.toUnicode(), "roundₕₐₗf₋ᵤₚ(2³, 4) = 8.0000");
 
             const raiz = CalcAUY.from(16).pow("1/2").commit({ roundStrategy: "TRUNCATE" });
-            assertEquals(raiz.toUnicode({ decimalPrecision: 2 }), "roundₜᵣ(√(16), 2) = 4.00");
+            // roundTruncate(√16, 2) = 4.00 -> ₜᵣᵤₙcₐₜₑ
+            assertEquals(raiz.toUnicode({ decimalPrecision: 2 }), "roundₜᵣᵤₙcₐₜₑ(√16, 2) = 4.00");
         });
     });
 
@@ -89,14 +93,39 @@ describe("CalcAUY - Integração e Auditoria", () => {
             const json: any = res.toJSON(["toStringNumber", "toLaTeX"]);
 
             assertEquals(json["toStringNumber"], "15.0000");
-            assertEquals(json["toLaTeX"], "10 + 5");
+            assertEquals(json["toLaTeX"], "\\text{round}_{\\text{NBR-5891}}(10 + 5, 4) = 15.0000");
         });
     });
 
-    describe("Parsing de Expressões", () => {
-        it("deve processar uma string complexa e manter a AST funcional", () => {
-            const res = CalcAUY.parseExpression("(10 + 5) * 2 ^ 3").commit({ roundStrategy: "NBR5891" });
-            assertEquals(res.toStringNumber({ decimalPrecision: 0 }), "120");
+    describe("Raízes e Potências Fracionárias", () => {
+        it("deve renderizar raiz quadrada corretamente (1/2)", () => {
+            const res = CalcAUY.from(16).pow("1/2").commit();
+            assertEquals(res.toLaTeX(), "\\text{round}_{\\text{NBR-5891}}(\\sqrt{16}, 4) = 4.0000");
+            assertEquals(res.toUnicode(), "roundₙBᵣ₋₅₈₉₁(√16, 4) = 4.0000");
+            assertEquals(res.toVerbalA11y({ locale: "pt-BR" }), "raiz quadrada de 16 é igual a 4 vírgula 0000 (Arredondamento: NBR-5891 para 4 casas decimais).");
+        });
+
+        it("deve renderizar raiz cúbica com numerador diferente de 1 (2/3)", () => {
+            const res = CalcAUY.from(8).pow("2/3").commit();
+            // 8^(2/3) = (root3(8))^2 = 2^2 = 4
+            assertEquals(res.toLaTeX(), "\\text{round}_{\\text{NBR-5891}}(\\sqrt[3]{{8}^{2}}, 4) = 4.0000");
+            assertEquals(res.toUnicode(), "roundₙBᵣ₋₅₈₉₁(∛(8²), 4) = 4.0000");
+            assertEquals(res.toVerbalA11y({ locale: "pt-BR" }), "raiz cúbica de 8 elevado a 2 é igual a 4 vírgula 0000 (Arredondamento: NBR-5891 para 4 casas decimais).");
+        });
+
+        it("deve renderizar raiz enésima complexa (3/6)", () => {
+            const res = CalcAUY.from(12).pow("3/6").commit();
+            assertEquals(res.toLaTeX(), "\\text{round}_{\\text{NBR-5891}}(\\sqrt[6]{{12}^{3}}, 4) = 3.4641");
+            assertEquals(res.toUnicode(), "roundₙBᵣ₋₅₈₉₁(⁶√(12³), 4) = 3.4641");
+            const verbal = res.toVerbalA11y({ locale: "pt-BR" });
+            assertStringIncludes(verbal, "raiz 6-ésima de 12 elevado a 3");
+        });
+
+        it("deve lidar com o caso complexo do usuário (12^2^3/6) com agrupamento", () => {
+            const res = CalcAUY.from(12).pow(2).group().pow("3/6").commit();
+            // (12^2)^(3/6) = (144)^(1/2) = 12
+            assertEquals(res.toLaTeX(), "\\text{round}_{\\text{NBR-5891}}(\\sqrt[6]{{\\left( 12^{2} \\right)}^{3}}, 4) = 12.0000");
+            assertEquals(res.toUnicode(), "roundₙBᵣ₋₅₈₉₁(⁶√((12²)³), 4) = 12.0000");
         });
     });
 
@@ -114,9 +143,10 @@ describe("CalcAUY - Integração e Auditoria", () => {
             assertEquals(resFluent.toStringNumber(), expectedValue);
             assertEquals(resParser.toStringNumber(), expectedValue);
 
-            // O Fluent API terá parênteses extras apenas na raiz da instância injetada
-            assertEquals(resFluent.toLaTeX(), "2 + 5 \\times 3 ^ \\left( 2 ^ 2 ^ 2 \\right)");
-            assertEquals(resParser.toLaTeX(), "2 + 5 \\times 3 ^ 2 ^ 2 ^ 2");
+            // O Fluent API terá parênteses extras apenas na raiz da instância injetada. 
+            // Note: Power now uses braces ^{...}
+            assertEquals(resFluent.toLaTeX(), "\\text{round}_{\\text{NBR-5891}}(2 + 5 \\times 3^{\\left( 2^{2^{2}} \\right)}, 4) = 215233607.0000");
+            assertEquals(resParser.toLaTeX(), "\\text{round}_{\\text{NBR-5891}}(2 + 5 \\times 3^{2^{2^{2}}}, 4) = 215233607.0000");
         });
     });
 });

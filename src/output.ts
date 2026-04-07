@@ -103,17 +103,21 @@ export class CalcAUYOutput {
         });
     }
 
-    public toLaTeX(): string {
-        return this.instrument("toLaTeX", {}, () => {
-            return renderAST(this.#ast, "latex");
+    public toLaTeX(options?: OutputOptions): string {
+        return this.instrument("toLaTeX", options, () => {
+            const base: string = renderAST(this.#ast, "latex");
+            const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
+            const roundedStr: string = this.toStringNumber(options);
+            const strategyName: string = ROUNDING_IDS[this.#strategy];
+            return `\\text{round}_{\\text{${strategyName}}}(${base}, ${p}) = ${roundedStr}`;
         });
     }
 
     public toUnicode(options?: OutputOptions): string {
         return this.instrument("toUnicode", options, () => {
             const base: string = renderAST(this.#ast, "unicode");
-            const strategyId: string = ROUNDING_IDS[this.#strategy];
-            const subStrategy: string = toSubscript(strategyId);
+            const strategyName: string = ROUNDING_IDS[this.#strategy];
+            const subStrategy: string = toSubscript(strategyName);
             const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
             return `round${subStrategy}(${base}, ${p}) = ${this.toStringNumber(options)}`;
         });
@@ -125,13 +129,9 @@ export class CalcAUYOutput {
                 throw new CalcAUYError("invalid-syntax", "O módulo 'katex' é obrigatório para toHTML.");
             }
 
-            const baseLatex: string = this.toLaTeX();
-            const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
-            const roundedStr: string = this.toStringNumber(options);
-            const strategyId: string = ROUNDING_IDS[this.#strategy];
+            const fullLatex: string = this.toLaTeX(options);
             const verbal: string = this.toVerbalA11y(options);
 
-            const fullLatex = `\\text{round}_{\\text{${strategyId}}}(${baseLatex}, ${p}) = ${roundedStr}`;
             const rendered: string = katex.renderToString(fullLatex, { displayMode: true, throwOnError: false });
 
             if (!CalcAUYOutput.cachedKaTeXCSS) { CalcAUYOutput.cachedKaTeXCSS = KATEX_CSS_MINIFIED; }
@@ -143,13 +143,10 @@ export class CalcAUYOutput {
     public toImageBuffer(katex: IKatex, options?: OutputOptions): Uint8Array {
         return this.instrument("toImageBuffer", options, () => {
             const html: string = this.toHTML(katex, options);
-            const latex: string = this.toLaTeX();
+            const latex: string = this.toLaTeX(options);
             const verbal: string = this.toVerbalA11y(options);
-            const roundedStr: string = this.toStringNumber(options);
-            const strategyId: string = ROUNDING_IDS[this.#strategy];
-            const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
 
-            const svg: string = generateSVG(html, latex, verbal, roundedStr, strategyId, p);
+            const svg: string = generateSVG(html, latex, verbal);
             return new TextEncoder().encode(svg);
         });
     }
