@@ -4,9 +4,9 @@
 
 **Engine de Cálculo Baseada em AST para Engenharia Financeira e Acessibilidade**
 
-[![JSR](https://jsr.io/badges/@st-all-one/calc-auy?logoColor=f7df1e&color=f7df1e&labelColor=083344)](https://jsr.io/@st-all-one/calc-auy)
-[![Deno](https://img.shields.io/badge/runtime-deno-black?logo=deno)](https://deno.land/)
-[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+[![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-2b3a42?style=for-the-badge)](https://opensource.org/licenses/MPL-2.0)
+[![JSR](https://img.shields.io/badge/JSR-F7DF1E?style=for-the-badge&logo=jsr&logoColor=000)](https://jsr.io/@seu-escopo/seu-pacote)
+[![Made in Brazil](https://img.shields.io/badge/Made_in-Brazil-009739?style=for-the-badge)](https://github.com/topics/brazil)
 
 </div>
 
@@ -16,17 +16,13 @@ A **CalcAUY** é uma infraestrutura de cálculo de alta precisão, feita em type
 
 ### Documentação
 
-Veja a documentação completa no [Guia de Bolso.](./docs/_docs.md)
-
----
+Veja a documentação completa no [Guia de Bolso](./docs/_docs.md)
 
 ### Showcase
 
-Veja em execução no [Showcase Interativo](https://google.com)s
+Veja em execução no [Showcase Interativo](https://google.com)
 
----
-
-### 🚀 Quick-start
+### Quick-start
 
 #### Instalação:
 ```bash
@@ -81,8 +77,6 @@ console.log(auditTrace);
 */
 
 ```
-
----
 
 <div align="center">
 
