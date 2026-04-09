@@ -86,29 +86,33 @@ No desenvolvimento de software financeiro moderno, o uso de `number` (float) é 
 
 ### Para Desenvolvedores
 
-- **Precisão de Escala**: Processamento em escala interna de **10⁵⁰** utilizando `BigInt`, eliminando as limitações de precisão do tipo `number`.
-
 - **Arquitetura AST**: As operações não são apenas executadas; elas são estruturadas em uma árvore lógica que separa a **intenção do cálculo** de sua **realização**.
 
 - **Imutável por padrão**: Cada operação gera um novo `estado`, garantindo que o fluxo de dados seja livre de efeitos colaterais.
 
 - **Multi-Runtime**: Distribuída via `JSR`, garantindo suporte nativo e otimizado para Deno, Node.js, Cloudflare Workers e Bun.
 
+- **PII Policy Frist**: A lib implementa logs internos através do `LogTape 2.0`, com política PII controlável e ativada por padrão, garantindo segurança de dados e conformidade legal com a LGPD.
+
+- **Server Friendly**: A estrutura interna da `CalcAUY` opera diversas taticas de otimização e controle de memória para mitigar casos de DOS e overflow, possuindo também o método especial `CalcAUY.processBatch`, para executar operações em lotes (Yielding), desafogando o processador sob demanda.
+
 ### Para Negócios, Compliance e Auditoria
 
 - **Rastreabilidade Forense**: Cada resultado mantém sua "memória de cálculo" original, permitindo **reconstruir o histórico** de qualquer transação.
 
-- **Padrão NBR 5891**: Implemento por padrão o arredondamento estatístico (**Banker's Rounding**), neutralizando vieses financeiros em processamentos de massa.
+- **Metadados Granulares**: É possível anexar metadados em qualquer trecho do cálculo através do `.setMetadata(key, value)`, enriquecendo a intenção do cálculo com precisão e flexibilidade.
 
-- **Evidências Matemáticas**: Exportação instantânea para `LaTeX` e `Unicode`, permitindo que a fórmula exata utilizada no código seja espelhada em relatórios oficiais e contratos jurídicos.
+- **Padrão NBR 5891**: Implementado por padrão o arredondamento estatístico (**Banker's Rounding**), neutralizando vieses financeiros em processamentos de massa.
+
+- **Evidências Matemáticas**: Exportação instantânea para `LaTeX`, `Unicode` e `AuditTrace`, permitindo que a fórmula exata e cada passo e metadado anexado seja espelhado em relatórios oficiais e contratos jurídicos.
 
 ### Para Acessibilidade e Universalidade (A11y)
 
 - **Matemática Semântica**: Diferente de strings estáticas, a `CalcAUY` compreende a hierarquia das operações, gerando descrições narrativas inteligentes para leitores de tela.
 
-- **Suporte Multilíngue (i18n)**: Tradução automática da lógica de cálculo para 8 idiomas, garantindo que usuários globais compreendam a composição de seus custos.
+- **Suporte Multilíngue (i18n)**: Tradução automática da lógica de cálculo para `8 idiomas`, garantindo que usuários globais compreendam a composição de seus custos.
 
-- **Inclusão Cognitiva**: Representações visuais e auditivas que diferenciam claremente a precedência de operações, tornando o complexo compreensível para todos.
+- **Inclusão Cognitiva**: Representações visuais e auditivas que diferenciam claremente a precedência de operações, tornando o cálculo complexo algo compreensível para todos.
 
 ---
 
