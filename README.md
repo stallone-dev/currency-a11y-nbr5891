@@ -124,9 +124,36 @@ A `CalcAUY` busca neutralizar essa imprecisão ao tratar o cálculo como um **ar
 <div align="left">
     
 **📊 Code Coverage**
-> IMG
+> ```bash
+> // 2026-04-09
+> deno task coverage:report
+>
+> ok | 17 passed (228 steps) | 0 failed (40s)
 > 
-> Link, 2026-04-xx
+> | File                               | Branch % | Function % | Line % |
+> | ---------------------------------- | -------- | ---------- | ------ |
+> | mod.ts                             |    100.0 |      100.0 |  100.0 |
+> | src/ast/builder_utils.ts           |    100.0 |      100.0 |  100.0 |
+> | src/ast/engine.ts                  |     97.6 |      100.0 |   97.5 |
+> | src/builder.ts                     |     95.8 |      100.0 |   96.6 |
+> | src/core/constants.ts              |    100.0 |      100.0 |  100.0 |
+> | src/core/errors.ts                 |    100.0 |      100.0 |  100.0 |
+> | src/core/metadata.ts               |    100.0 |      100.0 |  100.0 |
+> | src/core/rational.ts               |     92.0 |      100.0 |   94.6 |
+> | src/i18n/i18n.ts                   |     50.0 |      100.0 |  100.0 |
+> | src/output.ts                      |     93.0 |      100.0 |   98.2 |
+> | src/output_internal/image_utils.ts |     75.0 |      100.0 |   96.6 |
+> | src/output_internal/renderer.ts    |     93.1 |      100.0 |   82.5 |
+> | src/output_internal/slicer.ts      |     69.2 |      100.0 |   87.8 |
+> | src/parser/lexer.ts                |     83.7 |      100.0 |   81.8 |
+> | src/parser/parser.ts               |     90.2 |      100.0 |   93.6 |
+> | src/rounding/rounding.ts           |     88.9 |      100.0 |   90.5 |
+> | src/utils/batch.ts                 |     77.8 |      100.0 |   88.5 |
+> | src/utils/logger.ts                |    100.0 |      100.0 |  100.0 |
+> | src/utils/sanitizer.ts             |    100.0 |      100.0 |  100.0 |
+> | src/utils/unicode.ts               |     75.0 |      100.0 |  100.0 |
+> | All files                          |     92.7 |      100.0 |   95.4 |
+> ```
 
 **🛡️ Code Quality (SonarQube)**
 > IMG
@@ -134,9 +161,27 @@ A `CalcAUY` busca neutralizar essa imprecisão ao tratar o cálculo como um **ar
 > Link, 2026-04-xx
 
 **📛 Stress Test**
-> IMG
+> ```bash
+> // 2026-04-09
+> deno test tests/stress.test.ts
 > 
-> Link, 2026-04-xx
+> ┌───────────────────────────────┬──────────────────────────────────────────┐
+> │ (idx)                         │ Values                                   │
+> ├───────────────────────────────┼──────────────────────────────────────────┤
+> │ 1_cpu_limit_complex_root      │ "4.5216ms"                               │
+> │ 2_extensive_ast_depth         │ "9.6443ms"                               │
+> │ 3_costly_repeated_pow         │ "6515.6680ms (iterations: 100000)"       │
+> │ 4_simple_real_repeated        │ "3560.0605ms (iterations: 100000)"       │
+> │ 5_metadata_cloning_stress     │ "76.7173ms (metadata_keys: 1000)"        │
+> │ 6_rational_explosion_gcd      │ "0.7545ms"                               │
+> │ 7_slicing_massacre            │ "66.1110ms (slices: 100000)"             │
+> │ 8_burst_concurrency_ddos      │ "4139.5395ms (concurrent_tasks: 100000)" │
+> │ 9_batch_processing_controlled │ "4058.4680ms (total_tasks: 100000)"      │
+> │ 10_logging_policy_race_stress │ "1166.6012ms (errors: 0)"                │
+> │ 11_bigint_limit_torture       │ "0.7607ms (caught_overflow: true)"       │
+> │ 12_malicious_json_hydration   │ "1.2498ms (deflected: true)"             │
+> └───────────────────────────────┴──────────────────────────────────────────┘
+> ```
 
 </div>
 
