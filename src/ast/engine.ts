@@ -53,12 +53,14 @@ export function evaluate(node: CalculationNode, depth = 0): RationalNumber {
         }
     });
 
-    logger.debug("Node evaluated", {
-        operation_kind: node.kind,
-        depth,
-        duration,
-        structure: sanitizeAST(node),
-    });
+    if (logger.isEnabledFor("debug")) {
+        logger.debug("Node evaluated", {
+            operation_kind: node.kind,
+            depth,
+            duration,
+            structure: sanitizeAST(node),
+        });
+    }
 
     return result;
 }

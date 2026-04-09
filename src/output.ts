@@ -737,11 +737,13 @@ export class CalcAUYOutput {
 
     private instrument<T>(method: string, options: unknown, fn: () => T): T {
         const [result, duration] = measureTime(fn);
-        logger.info("Output generated", {
-            output_method: method,
-            duration,
-            options,
-        });
+        if (logger.isEnabledFor("info")) {
+            logger.info("Output generated", {
+                output_method: method,
+                duration,
+                options,
+            });
+        }
         return result;
     }
 }
