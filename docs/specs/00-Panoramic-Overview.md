@@ -18,6 +18,7 @@ A **CalcAUY** trata o cálculo não como um resultado volátil, mas como um **do
 6.  **Proteção de Dados e Telemetria (`specs/11`, `specs/17`):** Sistema de proteção de PII (*Security by Default*) com controle global e granular de logs.
 7.  **Qualidade e Rigor (`specs/15`):** Padrões de tipagem estrita e performance.
 8.  **Extensibilidade (`specs/16`):** Processadores de saída customizados e injeção de lógica.
+9.  **Processamento em Massa (`specs/18`):** Utilitários de *Batch Processing* para evitar o bloqueio do Event Loop.
 
 ## Resumo de Métodos Principais
 
@@ -25,6 +26,7 @@ A **CalcAUY** trata o cálculo não como um resultado volátil, mas como um **do
 - `add()`, `sub()`, `mult()`, `div()`, `pow()`, `mod()`, `divInt()`
 - `group()`: Agrupamento manual.
 - **`setLoggingPolicy({sensitive})`**: Controle global de PII nos logs (1ª camada).
+- **`processBatch(items, task)`**: Processamento assíncrono em lotes (anti-bloqueio).
 - **`parseExpression(str)`**: Parser de strings matemáticas complexas (com auto-agrupamento).
 - **`setMetadata(key, val)`**: O pilar da auditoria. Use `pii: true|false` para controle granular (2ª camada).
 - **`hibernate()`**: Serializa a árvore atual (**string JSON**).
@@ -39,4 +41,4 @@ A **CalcAUY** trata o cálculo não como um resultado volátil, mas como um **do
 - `toAuditTrace()`: Snapshot JSON completo com metadados e valores intermediários.
 
 ---
-*Para detalhes de implementação, consulte os arquivos numerados de 01 a 17 neste diretório.*
+*Para detalhes de implementação, consulte os arquivos numerados de 01 a 18 neste diretório.*

@@ -86,13 +86,15 @@ export class CalcAUYError extends Error {
         this.name = "CalcAUYError";
 
         // Telemetria Automática Sanitizada (Rigor specs/11 e specs/12)
-        logger.error("CalcAUY Exception Triggered", {
-            error_type: this.type,
-            instance: this.instance,
-            status: this.status,
-            detail: this.detail,
-            context: sanitizeObject(this.context),
-        });
+        if (logger.isEnabledFor("error")) {
+            logger.error("CalcAUY Exception Triggered", {
+                error_type: this.type,
+                instance: this.instance,
+                status: this.status,
+                detail: this.detail,
+                context: sanitizeObject(this.context),
+            });
+        }
     }
 
     /**

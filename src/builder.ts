@@ -13,9 +13,10 @@ import { evaluate } from "./ast/engine.ts";
 import { CalcAUYOutput } from "./output.ts";
 import { Lexer } from "./parser/lexer.ts";
 import { Parser } from "./parser/parser.ts";
-import { attachOp } from "./ast/builder_utils.ts";
+import { attachOp, validateASTNode } from "./ast/builder_utils.ts";
 import { getSubLogger } from "./utils/logger.ts";
 import { sanitizeAST, setGlobalLoggingPolicy } from "./utils/sanitizer.ts";
+import { type BatchOptions, processBatch } from "./utils/batch.ts";
 
 const logger = getSubLogger("engine");
 
@@ -105,10 +106,12 @@ export class CalcAUY {
             originalInput: value.toString(),
         };
 
-        logger.debug("CalcAUY Instance Created", {
-            input_type: typeof value,
-            structure: sanitizeAST(node),
-        });
+        if (logger.isEnabledFor("debug")) {
+            logger.debug("CalcAUY Instance Created", {
+                input_type: typeof value,
+                structure: sanitizeAST(node),
+            });
+        }
 
         return new CalcAUY(node);
     }
@@ -182,7 +185,27 @@ export class CalcAUY {
             ? data.ast
             : data;
 
+        validateASTNode(node);
+
         return new CalcAUY(node);
+    }
+
+    /**
+     * Processa um array de itens de forma assíncrona e em lotes (Yielding).
+     * 
+     * **Engenharia:** Evita o bloqueio do Event Loop em cálculos massivos, cedendo a CPU 
+     * periodicamente para que o servidor possa atender outras requisições ou I/O.
+     * 
+     * @param items Array de dados.
+     * @param task Função de transformação/cálculo.
+     * @param options Configuração do lote (batchSize e onProgress).
+     */
+    public static async processBatch<T, R>(
+        items: T[],
+        task: (item: T, index: number) => R,
+        options?: BatchOptions,
+    ): Promise<R[]> {
+        return await processBatch(items, task, options);
     }
 
     /**
@@ -241,10 +264,12 @@ export class CalcAUY {
             metadata: { ...(this.#ast.metadata || {}), [key]: value },
         } as CalculationNode;
 
-        logger.debug("Metadata Attached", {
-            key,
-            structure: sanitizeAST(newAST),
-        });
+        if (logger.isEnabledFor("debug")) {
+            logger.debug("Metadata Attached", {
+                key,
+                structure: sanitizeAST(newAST),
+            });
+        }
 
         return new CalcAUY(newAST);
     }
@@ -288,9 +313,11 @@ export class CalcAUY {
             child: this.#ast,
         };
 
-        logger.debug("Grouping Applied", {
-            structure: sanitizeAST(node),
-        });
+        if (logger.isEnabledFor("debug")) {
+            logger.debug("Grouping Applied", {
+                structure: sanitizeAST(node),
+            });
+        }
 
         return new CalcAUY(node);
     }
@@ -346,11 +373,13 @@ export class CalcAUY {
 
         const newAST: CalculationNode = attachOp(this.#ast, type, rightNode);
 
-        logger.debug("Node appended to AST", {
-            operation: type,
-            input_type: inputType,
-            structure: sanitizeAST(newAST),
-        });
+        if (logger.isEnabledFor("debug")) {
+            logger.debug("Node appended to AST", {
+                operation: type,
+                input_type: inputType,
+                structure: sanitizeAST(newAST),
+            });
+        }
 
         return new CalcAUY(newAST);
     }

@@ -1,4 +1,5 @@
 import type { CalculationNode, OperationType } from "./types.ts";
+import { CalcAUYError } from "../core/errors.ts";
 
 /**
  * Tabela de precedência para operações matemáticas. 
@@ -13,6 +14,70 @@ export const PRECEDENCE: Record<OperationType, number> = {
     add: 4,
     sub: 4,
 };
+
+/**
+ * Limites de segurança para a estrutura da AST durante a hidratação.
+ */
+const MAX_HYDRATE_DEPTH = 500;
+const MAX_HYDRATE_NODES = 1000;
+
+/**
+ * Valida recursivamente a estrutura de um nó da AST.
+ * Lança um erro se encontrar inconsistências ou propriedades faltando.
+ * 
+ * @param node O objeto a ser validado.
+ * @param depth Nível atual de recursão (interno).
+ * @param state Estado compartilhado para contagem de nós (interno).
+ */
+export function validateASTNode(
+    node: unknown,
+    depth = 0,
+    state = { nodeCount: 0 },
+): asserts node is CalculationNode {
+    if (!node || typeof node !== "object") {
+        throw new CalcAUYError("corrupted-node", "O nó da AST deve ser um objeto válido.");
+    }
+
+    if (depth > MAX_HYDRATE_DEPTH) {
+        throw new CalcAUYError("corrupted-node", "Profundidade máxima da AST excedida na hidratação.");
+    }
+
+    state.nodeCount++;
+    if (state.nodeCount > MAX_HYDRATE_NODES) {
+        throw new CalcAUYError("corrupted-node", "Número máximo de nós excedido na hidratação.");
+    }
+
+    const n = node as Record<string, unknown>;
+
+    if (!["literal", "group", "operation"].includes(n.kind as string)) {
+        throw new CalcAUYError("corrupted-node", `Tipo de nó desconhecido: ${n.kind}`);
+    }
+
+    if (n.kind === "literal") {
+        if (!n.value || typeof n.value !== "object") {
+            throw new CalcAUYError("corrupted-node", "Nó literal sem valor racional.");
+        }
+        const v = n.value as Record<string, unknown>;
+        if (typeof v.n !== "string" || typeof v.d !== "string") {
+            throw new CalcAUYError("corrupted-node", "Valor racional malformado (numerador/denominador devem ser strings).");
+        }
+    } else if (n.kind === "group") {
+        if (!n.child) {
+            throw new CalcAUYError("corrupted-node", "Nó de grupo sem nó filho.");
+        }
+        validateASTNode(n.child, depth + 1, state);
+    } else if (n.kind === "operation") {
+        if (!n.type || !PRECEDENCE[n.type as OperationType]) {
+            throw new CalcAUYError("corrupted-node", `Tipo de operação inválido: ${n.type}`);
+        }
+        if (!Array.isArray(n.operands) || n.operands.length === 0) {
+            throw new CalcAUYError("corrupted-node", `Operação '${n.type}' deve ter ao menos um operando.`);
+        }
+        for (const op of n.operands) {
+            validateASTNode(op, depth + 1, state);
+        }
+    }
+}
 
 /**
  * Anexa recursivamente uma nova operação à árvore, respeitando as regras de 
