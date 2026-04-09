@@ -80,44 +80,44 @@ console.log(auditTrace);
 
 Veja em execução no [Showcase Interativo](https://google.com)
 
-## 🎯 Por que essa lib existe?
+## 🎯 Por que a CalcAUY existe?
 
-No desenvolvimento de software financeiro moderno, o uso de `number` (float) é um risco. Erros de arredondamento inerentes ao padrão IEEE 754 (ex: `0.1 + 0.2 !== 0.3`) podem causar prejuízos acumulados e falhas em auditorias fiscais.
+No desenvolvimento de softwares modernos, o uso do padrão **IEEE 754** (number/float) introduz um risco sistêmico. Erros de arredondamento binário, como o clássico `0.1 + 0.2 !== 0.3`, não são meras curiosidades matemáticas; em escala, transformam-se em rombos financeiros, falhas de compliance e passivos jurídicos.
 
-### Para Desenvolvedores
+A `CalcAUY` busca neutralizar essa imprecisão ao tratar o cálculo como um **artefato de engenharia persistente e auditável**.
 
-- **Arquitetura AST**: As operações não são apenas executadas; elas são estruturadas em uma árvore lógica que separa a **intenção do cálculo** de sua **realização**.
+### Engenharia Matemática
 
-- **Imutável por padrão**: Cada operação gera um novo `estado`, garantindo que o fluxo de dados seja livre de efeitos colaterais.
+- **Precisão Racional**: Baseada em `BigInts`, a lib opera puramente com frações exatas `(n/d)`. Executando simplificação via **Algoritmo de Stein** (Binary GCD) em cada etapa, garantindo que a memória seja otimizada sem sacrificar o rigor matemático.
 
-- **Multi-Runtime**: Distribuída via `JSR`, garantindo suporte nativo e otimizado para Deno, Node.js, Cloudflare Workers e Bun.
+- **Auditabilidade Forense via AST**: Toda operação constrói uma `Árvore de Sintaxe Abstrata (AST) imutável`. Isso permite "hibernar" cálculos complexos em JSON e reidratá-los sem perda de contexto, preservando a intenção original do cálculo.
 
-- **PII Policy Frist**: A lib implementa logs internos através do `LogTape 2.0`, com política PII controlável e ativada por padrão, garantindo segurança de dados e conformidade legal com a LGPD.
+- **Segurança por Design**: Opera sob o dogma de `Security by Default`, com redação automática de dados sensíveis (`PII`) em logs estruturados. A engine é protegida por gatekeepers estruturais que validam a profundidade cada input, neutralizando vetores de ataque como `JSON Bombs` e `Stack Overflow`.
 
-- **Server Friendly**: A estrutura interna da `CalcAUY` opera diversas taticas de otimização e controle de memória para mitigar casos de DOS e overflow, possuindo também o método especial `CalcAUY.processBatch`, para executar operações em lotes (Yielding), desafogando o processador sob demanda.
+- **Integridade Atuária**: Implementação estrita de `NBR 5891` e algoritmos de `Resto de divisão Euclidiana` e `Maior Resto` para rateios monetários exatos, garantindo que nenhum centavo seja perdido ou tendenciado.
 
-### Para Negócios, Compliance e Auditoria
+### Developer Experience (DX), Portabilidade e Escalabilidade
 
-- **Rastreabilidade Forense**: Cada resultado mantém sua "memória de cálculo" original, permitindo **reconstruir o histórico** de qualquer transação.
+- **Tipagem Estrita**: Desenvolvida sob o `Strict Mode máximo` do TypeScript, a lib utiliza `Type Guards` e campos privados para garantir que a integridade dos dados seja mantida do código à transpilação.
 
-- **Metadados Granulares**: É possível anexar metadados em qualquer trecho do cálculo através do `.setMetadata(key, value)`, enriquecendo a intenção do cálculo com precisão e flexibilidade.
+- **Agnosticismo de Runtime**: Distribuída via `JSR`, a biblioteca é nativamente compatível com `Deno`, `Node.js`, `Bun` e `Cloudflare Workers`. Sem dependências pesadas, ela mantém um rastro zero de IO, operando puramente em memória.
 
-- **Padrão NBR 5891**: Implementado por padrão o arredondamento estatístico (**Banker's Rounding**), neutralizando vieses financeiros em processamentos de massa.
+- **Interoperabilidade Total**: Através do sistema de `Custom Output Processors`, a lib é extensível para suportar qualquer formato de saída (Protobuf, XML, Excel) sem inflar o núcleo do projeto.
 
-- **Evidências Matemáticas**: Exportação instantânea para `LaTeX`, `Unicode` e `AuditTrace`, permitindo que a fórmula exata e cada passo e metadado anexado seja espelhado em relatórios oficiais e contratos jurídicos.
+- **Processamento em Lotes**: O utilitário `processBatch` permite processar volumes massivos de transações (ex: 100.000 cálculos) sem congelar o servidor, utilizando a API `scheduler.yield()` para equilibrar o Throughput e a Responsividade.
 
-### Para Acessibilidade e Universalidade (A11y)
+### Acessibilidade (A11y) e Universalidade
 
-- **Matemática Semântica**: Diferente de strings estáticas, a `CalcAUY` compreende a hierarquia das operações, gerando descrições narrativas inteligentes para leitores de tela.
-
-- **Suporte Multilíngue (i18n)**: Tradução automática da lógica de cálculo para `8 idiomas`, garantindo que usuários globais compreendam a composição de seus custos.
-
-- **Inclusão Cognitiva**: Representações visuais e auditivas que diferenciam claremente a precedência de operações, tornando o cálculo complexo algo compreensível para todos.
+- **Matemática Acessível**: A `CalcAUY` transforma a AST em diferentes representações visuais e integrativas, como narrações verbais em 8 idiomas (`toVerbalA11y`), unicode para CLIs (`toUnicode`), LaTeX para relatórios (`toLaTeX`), HTML via KaTeX (`toHTML`), AST serializada para auditoria profunda (`toAuditTrace`) e diversos outros outputs, garantindo que cada cálculo possa ser lido por pessoas, máquinas e leitores de tela.
 
 ---
 
 <div align="center">
 
-**CalcAUY** é um projeto de código aberto sob a licença **MPL-2.0**
+**A CalcAUY é a ferramenta para o engenheiro que não aceita resultados sem provas auditáveis.**
+
+---
+
+Este é um projeto de código aberto sob a licença **MPL-2.0**
 
 </div>
