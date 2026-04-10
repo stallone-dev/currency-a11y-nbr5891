@@ -39,8 +39,11 @@ export async function processBatch<T, R>(
     for (let i = 0; i < total; i++) {
         results[i] = task(items[i], i);
 
+        // Garantia que o batchSize seja pelo menos 1
+        const safeBatchSize = Math.max(1, Math.floor(batchSize));
+
         // A cada fim de lote, cedemos a CPU
-        if ((i + 1) % batchSize === 0 && i < total - 1) {
+        if ((i + 1) % safeBatchSize === 0 && i < total - 1) {
             if (onProgress) {
                 onProgress(Math.round(((i + 1) / total) * 100));
             }

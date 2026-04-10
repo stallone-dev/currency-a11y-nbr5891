@@ -4,17 +4,11 @@
     "exports": "./mod.ts",
     "license": "MPL-2.0",
     "publish": {
-        "exclude": [
-            "./tests",
-            "./demo",
-            "node_modules",
-            "vendor",
-            "GEMINI.md"
-        ],
         "include": [
             "mod.ts",
             "src",
             "docs",
+            "deno.jsonc",
             "README.md",
             "LICENSE"
         ]
@@ -51,7 +45,7 @@
     "nodeModulesDir": "auto",
     "vendor": true,
     "lock": {
-        "frozen": false
+        "frozen": true
     },
     "fmt": {
         "bracePosition": "sameLine",
