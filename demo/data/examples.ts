@@ -1,67 +1,211 @@
-/**
- * CalcAUY Demo - Biblioteca de Engenharia (Exemplos Reais)
- * @module
+// Create by Stallone L. S. (@st-all-one) - 2026 - License: MPL-2.0
+/*
+ * Copyright (c) 2026, Stallone L. S. (@st-all-one)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { CalcAUY } from "@calc-auy";
 import { mapAllOutputs } from "../logic/mapper.ts";
+import { CalcAUY } from "@calc-auy";
 
-export const getCategorizedExamples = async (): Promise<Record<string, Record<string, any>>> => {
-    const examples: Record<string, Record<string, any>> = {
-        "Finanças e Amortização": {
-            juros_compostos: [
+type ExampleOutput = Record<string, string | number | null>;
+
+export const getCategorizedExamples = () => {
+    const globalRegistry: Record<string, Record<string, ExampleOutput>> = {};
+
+    const register = (category: string, key: string, data: ExampleOutput) => {
+        if (!globalRegistry[category]) { globalRegistry[category] = {}; }
+        globalRegistry[category][key] = data;
+        return data;
+    };
+
+    const examples = {
+        outputs: {
+            verbalMonetary: [
                 {
-                    title: "Juros Compostos (Auditoria Completa)",
-                    context: "Cálculo de montante com taxa de 2% a.m. sobre capital de R$ 5.000,00.",
-                    code:
-                        'CalcAUY.from(5000).mult(CalcAUY.from(1).add("0.02").group().pow(12)).setMetadata("formula", "M = P(1+i)^n").commit({ roundStrategy: "HALF_EVEN" })',
-                    outputs: await mapAllOutputs(
-                        CalcAUY.from(5000).mult(CalcAUY.from(1).add("0.02").group().pow(12)).setMetadata(
-                            "formula",
-                            "M = P(1+i)^n",
-                        ).commit({ roundStrategy: "HALF_EVEN" }),
+                    title: "Locale PT-BR (Padrão)",
+                    context: "Formatação padrão brasileira para valores monetários.",
+                    code: "CalcAUY.from('1500.50').add(0.75).commit().toMonetary({ locale: 'pt-BR' })",
+                    outputs: register(
+                        "outputs",
+                        "verbalMonetary_ptBR",
+                        mapAllOutputs(
+                            CalcAUY.from("1500.50").add(0.75).commit(),
+                        ),
+                    ),
+                },
+                {
+                    title: "Locale EN-US (Internacional)",
+                    context: "Formatação americana com ponto decimal e separador de milhares.",
+                    code: "CalcAUY.from('1500.50').add(0.75).commit().toMonetary({ locale: 'en-US' })",
+                    outputs: register(
+                        "outputs",
+                        "verbalMonetary_enUS",
+                        mapAllOutputs(
+                            CalcAUY.from("1500.50").add(0.75).commit(),
+                        ),
+                    ),
+                },
+                {
+                    title: "Locale fr-FR (Europeu)",
+                    context: "Formatação francesa (vírgula decimal, ponto milhar).",
+                    code: "CalcAUY.from('1234567.89').commit().toMonetary({ locale: 'fr-FR' })",
+                    outputs: register(
+                        "outputs",
+                        "verbalMonetary_deDE",
+                        mapAllOutputs(
+                            CalcAUY.from("1234567.89").commit(),
+                        ),
+                    ),
+                },
+                {
+                    title: "Locale JA-JP (Iene)",
+                    context: "Formatação japonesa.",
+                    code: "CalcAUY.from('5000').mult(1.10).commit().toMonetary({ locale: 'ja-JP' })",
+                    outputs: register(
+                        "outputs",
+                        "verbalMonetary_jaJP",
+                        mapAllOutputs(
+                            CalcAUY.from("5000").mult(1.10).commit(),
+                        ),
                     ),
                 },
             ],
-            slicing: [
+            currencyOptions: [
                 {
-                    title: "Rateio de Centavos (Maior Resto)",
-                    context: "Divisão de R$ 10,00 entre 3 parceiros sem perda de precisão.",
-                    code: "CalcAUY.from(10).commit().toSlice(3, { decimalPrecision: 2 })",
-                    outputs: { toStringNumber: '["3.34", "3.33", "3.33"] (Soma exata: 10.00)' },
+                    title: "BRL em Locale US",
+                    context: "Exibindo Reais com formatação numérica americana.",
+                    code: "CalcAUY.from(1000).commit().toMonetary({ locale: 'en-US', currency: 'BRL' })",
+                    outputs: register(
+                        "outputs",
+                        "currency_brl_in_us",
+                        mapAllOutputs(
+                            CalcAUY.from(1000).commit(),
+                        ),
+                    ),
+                },
+                {
+                    title: "EUR em Locale BR",
+                    context: "Exibindo Euros com formatação numérica brasileira.",
+                    code: "CalcAUY.from(50.55).commit().toMonetary({ locale: 'pt-BR', currency: 'EUR' })",
+                    outputs: register(
+                        "outputs",
+                        "currency_eur_in_br",
+                        mapAllOutputs(
+                            CalcAUY.from(50.55).commit(),
+                        ),
+                    ),
                 },
             ],
-        },
-        "Engenharia e Ciência": {
-            torre_potencia: [
+            roundingShowcase: [
                 {
-                    title: "Torre de Potência (Caso Extremo)",
-                    context: "Demonstração de associatividade à direita e precisão interna de 50 casas.",
-                    code: "CalcAUY.from(2).pow(3).pow(2).commit()",
-                    outputs: await mapAllOutputs(CalcAUY.from(2).pow(3).pow(2).commit()),
+                    title: "NBR5891 (Bancário/Par)",
+                    context: "2.5 -> 2 (Par mais próximo)",
+                    code: "CalcAUY.from(2.5).commit({ roundStrategy: 'NBR5891' })",
+                    outputs: register(
+                        "outputs",
+                        "rounding_nbr_even",
+                        mapAllOutputs(
+                            CalcAUY.from(2.5).commit({ roundStrategy: "NBR5891" }),
+                        ),
+                    ),
+                },
+                {
+                    title: "HALF_UP (Comercial)",
+                    context: "2.5 -> 3 (Sempre para cima no meio)",
+                    code: "CalcAUY.from(2.5).commit({ roundStrategy: 'HALF_UP' })",
+                    outputs: register(
+                        "outputs",
+                        "rounding_half_up",
+                        mapAllOutputs(
+                            CalcAUY.from(2.5).commit({ roundStrategy: "HALF_UP" }),
+                        ),
+                    ),
+                },
+                {
+                    title: "TRUNCATE (Corte)",
+                    context: "2.99 -> 2 (Descarta decimais)",
+                    code: "CalcAUY.from(2.99).commit({ roundStrategy: 'TRUNCATE' })",
+                    outputs: register(
+                        "outputs",
+                        "rounding_truncate",
+                        mapAllOutputs(
+                            CalcAUY.from(2.99).commit({ roundStrategy: "TRUNCATE" }),
+                        ),
+                    ),
+                },
+                {
+                    title: "CEIL (Teto)",
+                    context: "2.01 -> 3 (Próximo inteiro)",
+                    code: "CalcAUY.from(2.01).commit({ roundStrategy: 'CEIL' })",
+                    outputs: register(
+                        "outputs",
+                        "rounding_ceil",
+                        mapAllOutputs(
+                            CalcAUY.from(2.01).commit({ roundStrategy: "CEIL" }),
+                        ),
+                    ),
                 },
             ],
-            raizes: [
+            toString: [
                 {
-                    title: "Raiz Enésima Complexa",
-                    context: "Cálculo de raiz 6-ésima de 12 elevado ao cubo.",
-                    code: 'CalcAUY.from(12).pow("3/6").commit()',
-                    outputs: await mapAllOutputs(CalcAUY.from(12).pow("3/6").commit()),
+                    title: "Cadeia de Soma Complexa",
+                    context: "Soma de múltiplos valores decimais flutuantes.",
+                    code: "CalcAUY.from('0.1').add('0.2').add('0.3').sub('0.4').commit().toStringNumber()",
+                    outputs: register(
+                        "outputs",
+                        "toString_chain",
+                        mapAllOutputs(
+                            CalcAUY.from("0.1").add("0.2").add("0.3").sub("0.4").commit(),
+                        ),
+                    ),
                 },
             ],
-        },
-        "Compliance e Metadados": {
-            impostos: [
+            toMonetary: [
                 {
-                    title: "ICMS com Rastro de Lei",
-                    context: "Aplicação de alíquota com metadados vinculados a artigos jurídicos.",
+                    title: "IOF Cascata (Juros sobre Juros)",
+                    context: "Principal + Taxa fixa + (Taxa diária * Dias).",
                     code:
-                        'CalcAUY.from(1250.45).mult("0.18").setMetadata("lei", "Art. 155 CF/88").setMetadata("aliq_tipo", "interestadual").commit()',
-                    outputs: await mapAllOutputs(
-                        CalcAUY.from(1250.45).mult("0.18").setMetadata("lei", "Art. 155 CF/88").setMetadata(
-                            "aliq_tipo",
-                            "interestadual",
-                        ).commit(),
+                        "CalcAUY.from(1000).mult(1.0038).add(CalcAUY.from(1000).mult(0.000082).mult(30)).commit().toMonetary()",
+                    outputs: register(
+                        "outputs",
+                        "toMonetary_iof",
+                        mapAllOutputs(
+                            CalcAUY.from(1000).mult(1.0038).add(
+                                CalcAUY.from(1000).mult(0.000082).mult(30),
+                            ).commit(),
+                        ),
+                    ),
+                },
+            ],
+        },
+        operations: {
+            add: [
+                {
+                    title: "Composição de Preço de Venda",
+                    context: "Custo + Frete + Embalagem + Margem Fixa.",
+                    code: "CalcAUY.from(50.00).add(12.50).add(2.30).add(20.00).commit()",
+                    outputs: register(
+                        "operations",
+                        "add_price_composition",
+                        mapAllOutputs(
+                            CalcAUY.from(50.00).add(12.50).add(2.30).add(20.00).commit(),
+                        ),
+                    ),
+                },
+            ],
+            mult: [
+                {
+                    title: "Juros Simples",
+                    context: "Capital * Taxa * Tempo.",
+                    code: "CalcAUY.from(1000).mult(0.05).mult(12).commit()",
+                    outputs: register(
+                        "operations",
+                        "mult_simple_interest",
+                        mapAllOutputs(
+                            CalcAUY.from(1000).mult(0.05).mult(12).commit(),
+                        ),
                     ),
                 },
             ],

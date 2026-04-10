@@ -1,6 +1,9 @@
-/**
- * CalcAUY Demo - Server
- * @module
+// Create by Stallone L. S. (@st-all-one) - 2026 - License: MPL-2.0
+/*
+ * Copyright (c) 2026, Stallone L. S. (@st-all-one)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
 import { dirname, fromFileUrl, join } from "@std/path";
@@ -14,57 +17,66 @@ import { serveFile } from "./handlers/static.ts";
 const __dirname = dirname(fromFileUrl(import.meta.url));
 const ROOT = __dirname;
 
-// Global BigInt serialization for JSON
-(BigInt.prototype as any).toJSON = function () {
-    return this.toString();
-};
-
-Deno.serve({ port: 8000 }, async (req) => {
+export default Deno.serve({ port: 8087 }, async (req) => {
     const url = new URL(req.url);
 
-    // Static Files
-    if (url.pathname === "/") { return serveFile(join(ROOT, "index.html")); }
-    if (url.pathname === "/style.css") { return serveFile(join(ROOT, "style.css")); }
-    if (url.pathname === "/script.js") { return serveFile(join(ROOT, "script.js")); }
-    if (url.pathname === "/editor.html") { return serveFile(join(ROOT, "editor.html")); }
-    if (url.pathname === "/editor_controller.js") { return serveFile(join(ROOT, "editor_controller.js")); }
+    if (url.pathname === "/") { return serveFile(join(__dirname, "index.html")); }
+    if (url.pathname === "/editor.html") {
+        return serveFile(join(__dirname, "editor.html"));
+    }
+    if (url.pathname === "/style.css") {
+        return serveFile(join(__dirname, "style.css"));
+    }
+    if (url.pathname === "/script.js") {
+        return serveFile(join(__dirname, "script.js"));
+    }
     if (url.pathname === "/editor_controller.bundle.js") {
-        return serveFile(join(ROOT, "editor_controller.bundle.js"));
+        return serveFile(join(__dirname, "editor_controller.bundle.js"));
+    }
+    if (url.pathname === "/editor_controller.js") {
+        return serveFile(join(__dirname, "editor_controller.js"));
     }
 
-    // Assets
-    if (url.pathname.startsWith("/assets/")) { return serveFile(join(ROOT, url.pathname)); }
-    if (url.pathname.startsWith("/fonts/")) { return serveFile(join(ROOT, "assets", url.pathname)); }
-    if (url.pathname === "/favicon.ico") { return serveFile(join(ROOT, "assets", "favicon.ico")); }
-
-    // API: Examples
     if (url.pathname === "/api/examples") {
-        try {
-            return new Response(JSON.stringify(await getCategorizedExamples()), {
-                headers: { "content-type": "application/json" },
-            });
-        } catch (err) {
-            return new Response(JSON.stringify({ error: (err as Error).message }), { status: 500 });
-        }
+        return new Response(JSON.stringify(getCategorizedExamples()), {
+            headers: {
+                "content-type": "application/json",
+                "cache-control": "no-store",
+            },
+        });
     }
 
-    // API: Calculate
     if (url.pathname === "/api/calculate") {
         try {
+            // Rate Limit por "IP" (ou identificador de conexão)
             const clientIp = req.headers.get("x-forwarded-for") || "local";
             if (isRateLimited(clientIp)) {
-                return new Response(JSON.stringify({ error: "Too many requests. Try again in 30s." }), { status: 429 });
+                return new Response(
+                    JSON.stringify({
+                        error: "Muitas requisições. Tente novamente em 30 segundos.",
+                    }),
+                    {
+                        status: 429,
+                        headers: { "content-type": "application/json" },
+                    },
+                );
             }
 
             const { expression } = await req.json();
             const output = executeExpression(expression, req);
-            return new Response(JSON.stringify(await mapAllOutputs(output)), {
-                headers: { "content-type": "application/json" },
-            });
+            return new Response(
+                JSON.stringify(mapAllOutputs(output)),
+                {
+                    headers: {
+                        "content-type": "application/json",
+                        "cache-control": "no-store",
+                    },
+                },
+            );
         } catch (err) {
             if (err instanceof CalcAUYError) {
                 return new Response(JSON.stringify(err.toJSON()), {
-                    status: err.status || 400,
+                    status: err.status,
                     headers: { "content-type": "application/problem+json" },
                 });
             }
@@ -75,5 +87,25 @@ Deno.serve({ port: 8000 }, async (req) => {
         }
     }
 
-    return new Response("Not Found", { status: 404 });
+    if (url.pathname.startsWith("/fonts/")) {
+        const fontPath = join(ROOT, "assets", url.pathname);
+        return serveFile(fontPath);
+    }
+
+    if (url.pathname.startsWith("/styles/")) {
+        const fontPath = join(ROOT, url.pathname);
+        return serveFile(fontPath);
+    }
+
+    if (url.pathname.includes("favicon")) {
+        const fontPath = join(ROOT, "assets", url.pathname);
+        return serveFile(fontPath);
+    }
+
+    if (url.pathname.startsWith("/assets/")) {
+        return serveFile(join(ROOT, url.pathname));
+    }
+
+    // Redirecionamento redundante: Qualquer rota não mapeada volta para a Home
+    return Response.redirect(url.origin + "/", 302);
 });

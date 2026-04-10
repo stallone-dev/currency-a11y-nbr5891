@@ -1,6 +1,9 @@
-/**
- * CalcAUY Demo - Static File Handler
- * @module
+// Create by Stallone L. S. (@st-all-one) - 2026 - License: MPL-2.0
+/*
+ * Copyright (c) 2026, Stallone L. S. (@st-all-one)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
 export async function serveFile(path: string): Promise<Response> {
@@ -12,7 +15,6 @@ export async function serveFile(path: string): Promise<Response> {
         woff: "font/woff",
         woff2: "font/woff2",
         ttf: "font/ttf",
-        ico: "image/x-icon",
     };
     try {
         const data = await Deno.readFile(path);
@@ -20,7 +22,7 @@ export async function serveFile(path: string): Promise<Response> {
             headers: {
                 "content-type": mimes[ext ?? ""] || "application/octet-stream",
                 "cache-control": "no-store, must-revalidate",
-                "access-control-allow-origin": "*",
+                "access-control-allow-origin": "*", // Permite carregamento de fontes no sandbox
             },
         });
     } catch {

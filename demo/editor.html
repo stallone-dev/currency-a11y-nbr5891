@@ -1,36 +1,62 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <style>
-        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #fff; }
-        #editor-container { height: 100%; width: 100%; font-family: monospace; padding: 10px; box-sizing: border-box; }
-        textarea { width: 100%; height: 100%; border: none; outline: none; font-size: 16px; }
-    </style>
-</head>
-<body>
-    <div id="editor-container">
-        <textarea id="code-editor">CalcAUY.from("1000")
-  .mult(
-    CalcAUY.from(1).add("0.10").pow(12)
-  )
-  .setMetadata("op_type", "compound_interest")
-  .commit({ roundStrategy: "NBR5891" })</textarea>
-    </div>
-    <script>
-        // Simple editor for demo (could be upgraded to CodeMirror later if bundle is provided)
-        const textarea = document.getElementById("code-editor");
-        
-        window.setupEditor = () => {}; // Mock for compatibility with plan
-        window.getUserCode = () => textarea.value;
-
-        window.addEventListener("message", (event) => {
-            if (event.data.type === "GET_CODE") {
-                window.parent.postMessage({ type: "CODE_RESPONSE", code: textarea.value }, "*");
+    <head>
+        <!--
+    Create by Stallone L. S. (@st-all-one) - 2026 - License: MPL-2.0
+        * Copyright (c) 2026, Stallone L. S. (@st-all-one)
+        * This Source Code Form is subject to the terms of the Mozilla Public
+        * License, v. 2.0. If a copy of the MPL was not distributed with this
+        * file, You can obtain one at https://mozilla.org/MPL/2.0/.
+    -->
+        <meta charset="UTF-8">
+        <title>CalcAUY Editor Sandbox</title>
+        <style>
+            body,
+            html {
+                margin: 0;
+                padding: 0;
+                height: 100%;
+                overflow: hidden;
+                background: #fcfcfc;
             }
-        });
 
-        window.parent.postMessage({ type: "EDITOR_READY" }, "*");
-    </script>
-</body>
+            #editor-container {
+                height: 100%;
+                width: 100%;
+            }
+
+            .cm-editor {
+                height: 100% !important;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="editor-container"></div>
+        <!-- Carrega o bundle como um script global (IIFE) -->
+        <script src="editor_controller.bundle.js"></script>
+        <script>
+            // Inicializa através das funções globais expostas pelo bundle
+            if (typeof window.setupEditor === "function") {
+                window.setupEditor("editor-container");
+            } else {
+                console.error("Editor Bundle falhou ao carregar as funções globais.");
+            }
+
+            // Comunicação via PostMessage
+            window.addEventListener("message", (event) => {
+                if (event.data.type === "GET_CODE") {
+                    try {
+                        const code = window.getUserCode();
+                        window.parent.postMessage({ type: "CODE_RESPONSE", code }, "*");
+                    } catch (e) {
+                        window.parent.postMessage({ type: "CODE_ERROR", error: e.message }, "*");
+                    }
+                }
+            });
+
+            // Notifica a página pai que o editor está pronto
+            window.parent.postMessage({ type: "EDITOR_READY" }, "*");
+        </script>
+    </body>
 </html>

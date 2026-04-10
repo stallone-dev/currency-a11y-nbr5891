@@ -1,42 +1,48 @@
-/**
- * CalcAUY Demo - Secure Expression Execution
- * @module
+// Create by Stallone L. S. (@st-all-one) - 2026 - License: MPL-2.0
+/*
+ * Copyright (c) 2026, Stallone L. S. (@st-all-one)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
 import { CalcAUY, CalcAUYOutput } from "@calc-auy";
 
 /**
- * Executes a calculation expression received as a string, ensuring auditability
- * and applying strict security locks for the demonstration environment.
+ * Executa uma expressão de cálculo recebida via string, garantindo a auditoria
+ * e aplicando travas de segurança rigorosas para o ambiente de demonstração.
  *
- * @param expression The string containing the TypeScript code to be executed.
- * @param req The original request object for header validation.
- * @returns Instance of CalcAUYOutput with the calculation result.
+ * @param expression A string contendo o código TypeScript a ser executado.
+ * @param req O objeto de requisição original para validação de headers.
+ * @returns Instância de CalcAUYOutput com o resultado do cálculo.
  */
 export function executeExpression(
     expression: string,
     req: Request,
 ): CalcAUYOutput {
-    // 1. Origin and Header Validation
+    // 1. Validação de Origem e Headers
+    // Bloqueia chamadas diretas via ferramentas como Postman/Curl para evitar abuso da API.
     const requestedWith = req.headers.get("x-requested-with");
-    if (requestedWith !== "CalcAUY-Demo") {
-        throw new Error("Access denied: Direct calls not allowed.");
+
+    if (requestedWith !== "CalcAUD-Demo") {
+        throw new Error("Acesso negado: Chamada direta não permitida.");
     }
 
-    // 2. Security: Payload Size Limit
+    // 2. Segurança: Limite de Tamanho do Payload
     if (expression.length > 2000) {
-        throw new Error("Expression too long (Max 2000 characters).");
+        throw new Error("Expressão muito longa (Máximo 2000 caracteres).");
     }
 
-    // 3. Core Syntax Security Validation
-    if (!expression.trim().startsWith('CalcAUY.')) {
-        throw new Error("Expression must start with 'CalcAUY.'");
+    // 3. Validação de Segurança da Sintaxe Core
+    if (!expression.startsWith('CalcAUY.from("')) {
+        throw new Error("A expressão deve iniciar com 'CalcAUY.from(\"'");
     }
     if (!expression.includes(".commit(")) {
-        throw new Error("Expression must contain '.commit(...)'");
+        throw new Error("A expressão deve conter '.commit(...)'");
     }
 
-    // 4. Security Sandbox: Malicious Code Detection
+    // 4. Sandbox de Segurança: Detecção de Código Malicioso
+    // Impedimos o acesso a primitivas do Deno, rede, IO e loops infinitos.
     const forbidden = [
         "while",
         "for",
@@ -50,33 +56,30 @@ export function executeExpression(
         "import",
     ];
     if (forbidden.some((word) => expression.includes(word))) {
-        throw new Error("Unauthorized syntax detected.");
+        throw new Error("Sintaxe não permitida detectada.");
     }
 
-    // 5. Resource Governance: Operations Limit
+    // 5. Governança de Recursos: Limite de Operações
     const methodRegex = /\.(add|sub|mult|div|pow|mod|divInt|group)\b/g;
     const matches = expression.match(methodRegex);
     const count = matches ? matches.length : 0;
 
     if (count > 16) {
         throw new Error(
-            `Operations limit exceeded. Max: 16. Found: ${count}.`,
+            `Limite de operações excedido. Máximo: 16. Encontrado: ${count}.`,
         );
     }
 
-    // 6. Controlled Execution
-    try {
-        const fn = new Function("CalcAUY", `return ${expression};`);
-        const result = fn(CalcAUY);
+    // 6. Execução Controlada
+    // Injetamos a classe CalcAUY no escopo da função para permitir o encadeamento dinâmico.
+    const fn = new Function("CalcAUY", `return ${expression};`);
+    const result = fn(CalcAUY);
 
-        if (!(result instanceof CalcAUYOutput) && !(result instanceof CalcAUY)) {
-            throw new Error(
-                "Expression must return a CalcAUY or CalcAUYOutput instance",
-            );
-        }
-
-        return result instanceof CalcAUY ? result.commit() : result;
-    } catch (err) {
-        throw new Error(`Execution error: ${(err as Error).message}`);
+    if (!(result instanceof CalcAUYOutput) && !(result instanceof CalcAUY)) {
+        throw new Error(
+            "A expressão deve retornar um CalcAUY ou CalcAUYOutput",
+        );
     }
+
+    return result instanceof CalcAUY ? result.commit() : result;
 }

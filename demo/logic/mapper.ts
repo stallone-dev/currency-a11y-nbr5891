@@ -1,48 +1,45 @@
-/**
- * CalcAUY Demo - Output Mapper
- * @module
+// Create by Stallone L. S. (@st-all-one) - 2026 - License: MPL-2.0
+/*
+ * Copyright (c) 2026, Stallone L. S. (@st-all-one)
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import katex from "@katex";
 import type { CalcAUYOutput } from "@calc-auy";
+import katex from "@katex";
 
 /**
- * Maps all output formats of a CalcAUYOutput instance to a serializable
- * object, including binary conversions for web visualization.
+ * Mapeia todos os formatos de saída de uma instância CalcAUYOutput para um
+ * objeto serializável, incluindo conversões binárias para visualização na web.
  *
- * @param output The output instance to be mapped.
- * @returns Object containing all representations of the calculation.
+ * @param output A instância de saída a ser mapeada.
+ * @returns Objeto contendo todas as representações do cálculo.
  */
-export async function mapAllOutputs(
+export function mapAllOutputs(
     output: CalcAUYOutput,
-): Promise<Record<string, unknown>> {
-    // KaTeX renderer mockup for server-side demo (since we don't have real KaTeX on server yet)
-    // In a real scenario, we might use a JSR/NPM package for KaTeX
-
+): Record<string, string | number | null> {
+    // Passa a instância do KaTeX para métodos que exigem renderização visual
     const buffer = output.toImageBuffer(katex);
     const hex = Array.from(buffer).map((b) => b.toString(16).padStart(2, "0"))
         .join(" ");
     const base64 = btoa(String.fromCharCode(...buffer));
 
-    // Custom processor example
+    // Exemplo de processador customizado para o toCustomOutput (Contexto atualizado)
     const customReport = output.toCustomOutput((ctx) => {
-        return `[AUDIT-REPORT] Result: ${ctx.result.n}/${ctx.result.d} | Strategy: ${ctx.strategy} | Precision: ${
-            ctx.options.decimalPrecision ?? "default"
-        }`;
+        return `[AUDIT-REPORT] Value: ${ctx.result.n}/${ctx.result.d} | LaTeX: ${ctx.audit.latex} | Strategy: ${ctx.strategy}`;
     });
 
     return {
-        toStringNumber: output.toStringNumber(),
+        toString: output.toStringNumber(),
         toFloatNumber: output.toFloatNumber(),
         toRawInternalBigInt: output.toRawInternalBigInt().toString(),
-        toScaledBigInt: output.toScaledBigInt().toString(),
         toMonetary: output.toMonetary(),
         toLaTeX: output.toLaTeX(),
         toHTML: output.toHTML(katex),
         toVerbalA11y: output.toVerbalA11y(),
         toUnicode: output.toUnicode(),
-        toAuditTrace: JSON.parse(output.toAuditTrace()),
-        toJSON: output.toJSON(),
+        toJson: output.toJSON(),
         toCustomOutput: customReport,
         toImageBufferHex: hex,
         toImageDataBase64: `data:image/svg+xml;base64,${base64}`,
