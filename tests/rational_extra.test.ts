@@ -51,13 +51,6 @@ describe("RationalNumber - Casos de Borda e Snippets Específicos", () => {
             // @ts-ignore: Testing invalid input
             assertThrows(() => RationalNumber.from({}), CalcAUYError, "Tipo de entrada não suportado: object");
         });
-
-        it("deve utilizar o cache para BigInts repetidos", () => {
-            const val = 12345n;
-            const r1 = RationalNumber.from(val);
-            const r2 = RationalNumber.from(val);
-            assert(r1 === r2, "Deve retornar a mesma instância do cache para BigInt");
-        });
     });
 
     describe("String Parsing (fromString)", () => {

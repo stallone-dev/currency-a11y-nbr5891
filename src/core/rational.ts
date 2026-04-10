@@ -12,7 +12,7 @@ const MAX_BI_LIMIT = 1n << MAX_BI_BITS;
  * Útil para reaproveitar instâncias de RationalNumber para valores comuns (ex: 1.18, 0.05).
  */
 const MAX_CACHE_SIZE = 2048;
-const literalCache = new Map<string, RationalNumber>();
+const literalCache = new Map<string | bigint, RationalNumber>();
 
 /** Regex para validar formatos numéricos permitidos (Rigor specs/08). */
 const BIGINT_RE = /^[+-]?\d+(?:_\d+)*n?$/;
@@ -26,37 +26,17 @@ const DECIMAL_RE = /^[+-]?(?:\d+(?:_\d+)*(?:\.\d+(?:_\d+)*)?|\.\d+(?:_\d+)*)(?:[
  * tradicional para BigInts grandes, pois evita operações de divisão/módulo
  * dispendiosas em favor de bit-shifts e subtrações.
  */
-function gcd(a: bigint, b: bigint): bigint {
+ function gcd(a: bigint, b: bigint): bigint {
     let u = a < 0n ? -a : a;
     let v = b < 0n ? -b : b;
-
-    if (u === 0n) { return v; }
-    if (v === 0n) { return u; }
-
-    let shift = 0n;
-
-    // Enquanto u e v forem pares, divide por 2
-    while (((u | v) & 1n) === 0n) {
-        u >>= 1n;
-        v >>= 1n;
-        shift++;
+    
+    while (v !== 0n) {
+        const temp = v;
+        v = u % v;
+        u = temp;
     }
-
-    while ((u & 1n) === 0n) { u >>= 1n; }
-
-    do {
-        while ((v & 1n) === 0n) { v >>= 1n; }
-
-        if (u > v) {
-            const t = v;
-            v = u;
-            u = t;
-        }
-
-        v = v - u;
-    } while (v !== 0n);
-
-    return u << shift;
+    
+    return u;
 }
 
 /**
@@ -137,12 +117,19 @@ export class RationalNumber {
         if (value instanceof RationalNumber) { return value; }
 
         if (typeof value === "bigint") {
-            const cached = literalCache.get(value.toString());
+            // Fast-path de bypass: se o número for minimamente grande, pule o cache.
+            // Stringificar e fazer hash de BigInts maiores custa mais do que instanciar o objeto.
+            if (value > 9999n || value < -9999n) {
+                return new RationalNumber(value, 1n);
+            }
+
+            const strVal = value.toString();
+            const cached = literalCache.get(strVal);
             if (cached) { return cached; }
 
             const res = new RationalNumber(value, 1n);
             if (literalCache.size < MAX_CACHE_SIZE) {
-                literalCache.set(value.toString(), res);
+                literalCache.set(strVal, res);
             }
             return res;
         }
