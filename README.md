@@ -122,14 +122,14 @@ A `CalcAUY` busca neutralizar essa imprecisão ao tratar o cálculo como um **ar
 <summary><b>🔍 Testes </b></summary>
 
 <div align="left">
-    
+
 **📊 Code Coverage**
 > ```bash
 > // 2026-04-10
 > ❯ deno task coverage:dev
-> 
+>
 > ok | 16 passed (215 steps) | 0 failed (12s)
-> 
+>
 > | File                               | Branch % | Function % | Line % |
 > | ---------------------------------- | -------- | ---------- | ------ |
 > | mod.ts                             |    100.0 |      100.0 |  100.0 |
@@ -157,14 +157,13 @@ A `CalcAUY` busca neutralizar essa imprecisão ao tratar o cálculo como um **ar
 
 **🛡️ Code Quality (SonarQube)**
 > IMG
-> 
+>
 > Link, 2026-04-xx
 
 **📛 Stress Test**
 > ```bash
 > // 2026-04-10
 > ❯ deno test tests/stress.test.ts
-> 
 > ┌───────────────────────────────┬─────────────────────────────────────────┐
 > │ (idx)                         │ Values                                  │
 > ├───────────────────────────────┼─────────────────────────────────────────┤
@@ -181,7 +180,21 @@ A `CalcAUY` busca neutralizar essa imprecisão ao tratar o cálculo como um **ar
 > │ 11_bigint_limit_torture       │ "0.7201ms (caught_overflow: true)"      │
 > │ 12_malicious_json_hydration   │ "1.2668ms (deflected: true)"            │
 > └───────────────────────────────┴─────────────────────────────────────────┘
-> 
+>
+> ❯ deno test tests/output_stress.test.ts
+> ┌────────────────────────────┬──────────────────────────────┐
+> │ (idx)                      │ Values                       │
+> ├────────────────────────────┼──────────────────────────────┤
+> │ 1_monetary_cache_hit_rate  │ "149.2624ms (iters: 100000)" │
+> │ 2_verbal_a11y_deep_ast     │ "0.3610ms (chars: 4578)"     │
+> │ 3_render_complexity_nested │ "0.3189ms (latex_len: 1495)" │
+> │ 4_html_generation_burst    │ "3.6706ms (iters: 1000)"     │
+> │ 5_high_precision_slicing   │ "28.3279ms (slices: 50000)"  │
+> │ 6_to_json_consolidation    │ "13.0110ms (iters: 1000)"    │
+> │ 7_locale_switching_burst   │ "3.1189ms (switches: 900)"   │
+> │ 8_custom_processor_stress  │ "35.1137ms (iters: 10000)"   │
+> │ 9_image_buffer_svg_stress  │ "3.7314ms (iters: 100)"      │
+> └────────────────────────────┴──────────────────────────────┘
 > ```
 <details>
 <summary><b>🔍 Detalhes do Hardware </b></summary>
@@ -230,7 +243,7 @@ Info:
     inxi: 3.3.40
 ```
 </details>
-    
+
 </div>
 
 </details>

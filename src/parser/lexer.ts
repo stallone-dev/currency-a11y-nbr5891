@@ -35,12 +35,16 @@ export class Lexer {
         while (this.pos < this.input.length) {
             const char: string = this.input[this.pos];
 
-            if (/\s/.test(char)) {
+            // Whitespace optimization
+            if (char === " " || char === "\n" || char === "\r" || char === "\t") {
                 this.pos++;
                 continue;
             }
 
-            if (/[0-9]/.test(char) || (char === "." && /[0-9]/.test(this.input[this.pos + 1]))) {
+            const code = char.charCodeAt(0);
+            const isDigit = code >= 48 && code <= 57;
+
+            if (isDigit || (char === "." && this.isNextDigit())) {
                 tokens.push(this.readNumber());
                 continue;
             }
@@ -97,26 +101,40 @@ export class Lexer {
         return tokens;
     }
 
+    private isNextDigit(): boolean {
+        const next = this.input[this.pos + 1];
+        if (!next) { return false; }
+        const code = next.charCodeAt(0);
+        return code >= 48 && code <= 57;
+    }
+
     private readNumber(): Token {
         const start: number = this.pos;
         let hasDot = false;
         let hasE = false;
 
         while (this.pos < this.input.length) {
-            const char: string = this.input[this.pos].toLowerCase();
-            if (/[0-9]/.test(char) || char === "_") {
+            const char: string = this.input[this.pos];
+            const code = char.charCodeAt(0);
+            const isDigit = code >= 48 && code <= 57;
+
+            if (isDigit || char === "_") {
                 this.pos++;
             } else if (char === "." && !hasDot && !hasE) {
                 hasDot = true;
                 this.pos++;
-            } else if (char === "e" && !hasE) {
-                hasE = true;
-                this.pos++;
-                if (this.input[this.pos] === "+" || this.input[this.pos] === "-") {
-                    this.pos++;
-                }
             } else {
-                break;
+                const lowerChar = char.toLowerCase();
+                if (lowerChar === "e" && !hasE) {
+                    hasE = true;
+                    this.pos++;
+                    const next = this.input[this.pos];
+                    if (next === "+" || next === "-") {
+                        this.pos++;
+                    }
+                } else {
+                    break;
+                }
             }
         }
 

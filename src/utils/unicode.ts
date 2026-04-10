@@ -66,12 +66,22 @@ const SUBSCRIPTS: Record<string, string> = {
  * Converts a string to its Unicode superscript equivalent.
  */
 export function toSuperscript(text: string): string {
-    return text.split("").map((char: string) => SUPERSCRIPTS[char.toLowerCase()] || char.toLowerCase()).join("");
+    let result = "";
+    for (const char of text) {
+        const lowerChar = char.toLowerCase();
+        result += SUPERSCRIPTS[lowerChar] || lowerChar;
+    }
+    return result;
 }
 
 /**
  * Converts a string to its Unicode subscript equivalent.
  */
 export function toSubscript(text: string): string {
-    return text.split("").map((char: string) => SUBSCRIPTS[char.toLowerCase()] || char.toLowerCase()).join("");
+    let result = "";
+    for (const char of text) {
+        const lowerChar = char.toLowerCase();
+        result += SUBSCRIPTS[lowerChar] || lowerChar;
+    }
+    return result;
 }

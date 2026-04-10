@@ -88,6 +88,7 @@ export class CalcAUYOutput {
     readonly #strategy: RoundingStrategy;
     readonly #cache: Map<number, RationalNumber> = new Map<number, RationalNumber>();
     private static cachedKaTeXCSS: string | null = null;
+    private static readonly formatterCache = new Map<string, Intl.NumberFormat>();
 
     public constructor(result: RationalNumber, ast: CalculationNode, strategy: RoundingStrategy) {
         this.#result = result;
@@ -279,12 +280,19 @@ export class CalcAUYOutput {
             const numberValue = parseFloat(val);
             if (Number.isNaN(numberValue)) { return val; }
 
-            return new Intl.NumberFormat(loc.locale, {
-                style: "currency",
-                currency,
-                minimumFractionDigits: p,
-                maximumFractionDigits: p,
-            }).format(numberValue);
+            const cacheKey = `${loc.locale}:${currency}:${p}`;
+            let formatter = CalcAUYOutput.formatterCache.get(cacheKey);
+            if (!formatter) {
+                formatter = new Intl.NumberFormat(loc.locale, {
+                    style: "currency",
+                    currency,
+                    minimumFractionDigits: p,
+                    maximumFractionDigits: p,
+                });
+                CalcAUYOutput.formatterCache.set(cacheKey, formatter);
+            }
+
+            return formatter.format(numberValue);
         });
     }
 
@@ -738,14 +746,15 @@ export class CalcAUYOutput {
     }
 
     private instrument<T>(method: string, options: unknown, fn: () => T): T {
-        const [result, duration] = measureTime(fn);
-        if (logger.isEnabledFor("info")) {
-            logger.info("Output generated", {
-                output_method: method,
-                duration,
-                options,
-            });
+        if (!logger.isEnabledFor("info")) {
+            return fn();
         }
+        const [result, duration] = measureTime(fn);
+        logger.info("Output generated", {
+            output_method: method,
+            duration,
+            options,
+        });
         return result;
     }
 }
