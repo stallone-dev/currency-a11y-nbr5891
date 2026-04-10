@@ -28,9 +28,9 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         expect(output.toMonetary()).toContain("1.234,56");
     });
 
-    it("Cenário 2: Verbalização A11y com AST Profunda (500 níveis)", () => {
+    it("Cenário 2: Verbalização A11y com AST Profunda (1_000 níveis)", () => {
         let calc = CalcAUY.from("1");
-        for (let i = 0; i < 500; i++) {
+        for (let i = 0; i < 1_000; i++) {
             calc = calc.add("1.1");
         }
         const output = calc.commit();
@@ -46,7 +46,7 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
     it("Cenário 3: Unicode & LaTeX Complexity (Aninhamento Massivo)", () => {
         // (1 + (1 / (1 + (1 / ...))))
         let calc = CalcAUY.from("1");
-        for (let i = 0; i < 50; i++) {
+        for (let i = 0; i < 150; i++) {
             calc = CalcAUY.from("1").div(calc.add("1"));
         }
         const output = calc.commit();
@@ -62,7 +62,7 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
     });
 
     it("Cenário 4: Geração de HTML Burst (1.000 fragmentos)", () => {
-        const ITERATIONS = 1_000;
+        const ITERATIONS = 100_000;
         const output = CalcAUY.from("100.00").pow(2).div(3).commit();
         const start = performance.now();
 
@@ -74,8 +74,8 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         results["4_html_generation_burst"] = `${(end - start).toFixed(4)}ms (iters: ${ITERATIONS})`;
     });
 
-    it("Cenário 5: Slicing de Alta Precisão (50.000 fatias)", () => {
-        const SLICES = 50_000;
+    it("Cenário 5: Slicing de Alta Precisão (100_000 fatias)", () => {
+        const SLICES = 100_000;
         const output = CalcAUY.from("1000000.00").commit();
         const start = performance.now();
 
@@ -87,8 +87,8 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         expect(slices.length).toBe(SLICES);
     });
 
-    it("Cenário 6: Consolidação toJSON Completa (1.000 objetos)", () => {
-        const ITERATIONS = 1_000;
+    it("Cenário 6: Consolidação toJSON Completa (100_000 objetos)", () => {
+        const ITERATIONS = 100_000;
         const output = CalcAUY.from("99.99").mult("1.15").commit();
         const start = performance.now();
 
@@ -105,8 +105,8 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         const output = CalcAUY.from("1234567.89").commit();
         const start = performance.now();
 
-        // Cicla 100 vezes por todos os idiomas da engine
-        for (let i = 0; i < 100; i++) {
+        // Itera 100_000 vezes por todos os idiomas da engine
+        for (let i = 0; i < 100_000; i++) {
             for (const loc of locales) {
                 output.toVerbalA11y({ locale: loc as any });
                 output.toMonetary({ locale: loc as any });
@@ -114,11 +114,11 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         }
 
         const end = performance.now();
-        results["7_locale_switching_burst"] = `${(end - start).toFixed(4)}ms (switches: ${locales.length * 100})`;
+        results["7_locale_switching_burst"] = `${(end - start).toFixed(4)}ms (switches: ${locales.length * 100_000})`;
     });
 
     it("Cenário 8: Custom Output Processor Pressure", () => {
-        const ITERATIONS = 10_000;
+        const ITERATIONS = 100_000;
         const output = CalcAUY.from("10").add("20").commit();
         const start = performance.now();
 
@@ -132,8 +132,8 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         results["8_custom_processor_stress"] = `${(end - start).toFixed(4)}ms (iters: ${ITERATIONS})`;
     });
 
-    it("Cenário 9: Image Buffer SVG Generation (100 buffers)", () => {
-        const ITERATIONS = 100;
+    it("Cenário 9: Image Buffer SVG Generation (100_000 buffers)", () => {
+        const ITERATIONS = 100_000;
         const output = CalcAUY.from("10").div("3").commit();
         const start = performance.now();
 
