@@ -1,5 +1,5 @@
-import { describe, it, beforeEach } from "@std/testing/bdd";
-import { assertEquals, assertThrows, assert } from "@std/assert";
+import { beforeEach, describe, it } from "@std/testing/bdd";
+import { assert, assertEquals, assertThrows } from "@std/assert";
 import { evaluate } from "../src/ast/engine.ts";
 import { CalcAUYError } from "../src/core/errors.ts";
 import { getSubLogger } from "../src/utils/logger.ts";
@@ -60,7 +60,7 @@ describe("AST Engine - Mecanismo de Avaliação", () => {
                 CalcAUYError,
                 "Operação 'add' sem operandos.",
             );
-            
+
             // Verificando se a AST parcial foi anexada
             assertEquals((err as CalcAUYError).context.partialAST, emptyOpNode);
         });
@@ -70,7 +70,7 @@ describe("AST Engine - Mecanismo de Avaliação", () => {
                 kind: "operation",
                 type: "unsupported_func",
                 operands: [
-                    { kind: "literal", value: { n: "1", d: "1" }, originalInput: "1" }
+                    { kind: "literal", value: { n: "1", d: "1" }, originalInput: "1" },
                 ],
             } as unknown as CalculationNode;
 
@@ -79,7 +79,7 @@ describe("AST Engine - Mecanismo de Avaliação", () => {
                 CalcAUYError,
                 "Operação não suportada: unsupported_func",
             );
-            
+
             assertEquals((err as CalcAUYError).context.partialAST, unsupportedNode);
         });
 
@@ -101,7 +101,7 @@ describe("AST Engine - Mecanismo de Avaliação", () => {
                 "O denominador não pode ser zero.",
             );
 
-            // O erro original da RationalNumber não tem partialAST. 
+            // O erro original da RationalNumber não tem partialAST.
             // O engine.ts deve ter capturado e anexado.
             assertEquals((err as CalcAUYError).context.partialAST, divByZeroNode);
         });

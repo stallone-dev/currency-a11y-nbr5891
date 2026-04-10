@@ -30,7 +30,6 @@ describe("Telemetria e Proteção de PII (Security by Default)", () => {
         CalcAUY.setLoggingPolicy({ sensitive: true });
     });
 
-
     it("deve mostrar um nó específico com pii: false mesmo com política sensitive: true", () => {
         CalcAUY.setLoggingPolicy({ sensitive: true });
         const calc = CalcAUY.from(100).setMetadata("pii", false);

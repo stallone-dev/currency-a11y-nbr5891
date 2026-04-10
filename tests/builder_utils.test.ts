@@ -1,6 +1,6 @@
 import { describe, it } from "@std/testing/bdd";
-import { assertThrows, assertEquals } from "@std/assert";
-import { validateASTNode, attachOp } from "../src/ast/builder_utils.ts";
+import { assertEquals, assertThrows } from "@std/assert";
+import { attachOp, validateASTNode } from "../src/ast/builder_utils.ts";
 import { CalcAUYError } from "../src/core/errors.ts";
 import type { LiteralNode, OperationNode } from "../src/ast/types.ts";
 
@@ -9,7 +9,11 @@ describe("AST Builder Utils - Validação e Anexação", () => {
         it("deve lançar erro se o nó for nulo ou não for um objeto", () => {
             assertThrows(() => validateASTNode(null), CalcAUYError, "O nó da AST deve ser um objeto válido.");
             assertThrows(() => validateASTNode(undefined), CalcAUYError, "O nó da AST deve ser um objeto válido.");
-            assertThrows(() => validateASTNode("not-an-object"), CalcAUYError, "O nó da AST deve ser um objeto válido.");
+            assertThrows(
+                () => validateASTNode("not-an-object"),
+                CalcAUYError,
+                "O nó da AST deve ser um objeto válido.",
+            );
         });
 
         it("deve lançar erro se a profundidade máxima for excedida", () => {

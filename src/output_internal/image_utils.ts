@@ -4,7 +4,6 @@
 export function generateSVG(
     html: string,
     fullLatex: string,
-    verbal: string,
 ): string {
     const scaleFactor = 1.3;
     const averagePxPerChar = 8;
@@ -31,11 +30,9 @@ export function generateSVG(
   width="${finalWidth}"
   height="${finalHeight}"
   preserveAspectRatio="xMidYMid meet"
-  aria-label="${verbal}"
   role="img"
   style="background: white; border-radius: 8px; border: 1px solid #eee;"
 >
-  <title>${verbal}</title>
   <foreignObject width="100%" height="100%">
     <div
       xmlns="http://www.w3.org/1999/xhtml"

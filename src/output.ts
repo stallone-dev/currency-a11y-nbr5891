@@ -7,7 +7,7 @@ import {
     type RoundingStrategy,
 } from "./core/constants.ts";
 import { applyRounding } from "./rounding/rounding.ts";
-import { getLocale } from "./i18n/i18n.ts";
+import { type CalcAUYLocaleA11y, getLocale } from "./i18n/i18n.ts";
 import { CalcAUYError } from "./core/errors.ts";
 import { toSubscript } from "./utils/unicode.ts";
 import { renderAST } from "./output_internal/renderer.ts";
@@ -390,6 +390,7 @@ export class CalcAUYOutput {
      *
      * @param katex - Instância da biblioteca KaTeX (inversão de dependência).
      * @param options - Opções de saída.
+     * @param customLocale - Tradução customizada completa (opcional).
      * @returns Fragmento HTML (div + style + content).
      *
      * @example Exemplo Simples
@@ -415,30 +416,39 @@ export class CalcAUYOutput {
      * const html = `<td>${res.toHTML(katex, { decimalPrecision: 2 })}</td>`;
      * ```
      */
-    public toHTML(katex: IKatex, options?: OutputOptions): string {
+    public toHTML(katex: IKatex, options?: OutputOptions, customLocale?: CalcAUYLocaleA11y, skipA11y = false): string {
         return this.instrument("toHTML", options, () => {
             if (!katex || typeof katex.renderToString !== "function") {
                 throw new CalcAUYError("invalid-syntax", "O módulo 'katex' é obrigatório para toHTML.");
             }
 
             const fullLatex: string = this.toLaTeX(options);
-            const verbal: string = this.toVerbalA11y(options);
+            const verbal: string = skipA11y ? "" : this.toVerbalA11y(options, customLocale);
 
             const rendered: string = katex.renderToString(fullLatex, { displayMode: true, throwOnError: false });
 
             if (!CalcAUYOutput.cachedKaTeXCSS) { CalcAUYOutput.cachedKaTeXCSS = KATEX_CSS_MINIFIED; }
 
-            return `<div class="calc-auy-result" aria-label="${verbal}"><style>${CalcAUYOutput.cachedKaTeXCSS}.calc-auy-result { margin: 1em 0; overflow-x: auto; }</style>${rendered}</div>`;
+            const ariaAttr = skipA11y ? "" : ` aria-label="${verbal}"`;
+            return `<div class="calc-auy-result"${ariaAttr}><style>${CalcAUYOutput.cachedKaTeXCSS}.calc-auy-result { margin: 1em 0; overflow-x: auto; }</style>${rendered}</div>`;
         });
     }
 
-    public toImageBuffer(katex: IKatex, options?: OutputOptions): Uint8Array {
+    /**
+     * Gera um buffer de imagem (SVG) contendo o rastro visual do cálculo.
+     *
+     * @param katex - Instância da biblioteca KaTeX.
+     * @param options - Opções de saída.
+     * @param customLocale - Tradução customizada completa (opcional).
+     * @returns Buffer (Uint8Array) contendo o código SVG.
+     */
+    public toImageBuffer(katex: IKatex, options?: OutputOptions, customLocale?: CalcAUYLocaleA11y): Uint8Array {
         return this.instrument("toImageBuffer", options, () => {
-            const html: string = this.toHTML(katex, options);
+            const IGNORE_ARAI_LABEL = true;
+            const html: string = this.toHTML(katex, options, customLocale, IGNORE_ARAI_LABEL);
             const latex: string = this.toLaTeX(options);
-            const verbal: string = this.toVerbalA11y(options);
 
-            const svg: string = generateSVG(html, latex, verbal);
+            const svg: string = generateSVG(html, latex);
             return new TextEncoder().encode(svg);
         });
     }
@@ -452,6 +462,7 @@ export class CalcAUYOutput {
      * que a leitura respeite a hierarquia das operações.
      *
      * @param options - Permite definir o `locale` (idioma) e a `decimalPrecision`.
+     * @param customLocale - Tradução customizada completa (opcional). Se fornecida, deve conter todos os tokens.
      * @returns Tradução verbal completa (ex: "dez mais cinco, dividido por dois...").
      *
      * @example Exemplo Simples (pt-BR)
@@ -478,10 +489,10 @@ export class CalcAUYOutput {
      * const a11yDescription = res.toVerbalA11y({ locale: "pt-BR" });
      * ```
      */
-    public toVerbalA11y(options?: OutputOptions): string {
+    public toVerbalA11y(options?: OutputOptions, customLocale?: CalcAUYLocaleA11y): string {
         return this.instrument("toVerbalA11y", options, () => {
             const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
-            const loc = getLocale(options?.locale);
+            const loc = customLocale || getLocale(options?.locale);
             const base: string = renderAST(this.#ast, "verbal", loc);
             const strategyName: string = ROUNDING_IDS[this.#strategy];
             const finalValueStr: string = this.toStringNumber(options).replace(".", loc.voicedSeparator);

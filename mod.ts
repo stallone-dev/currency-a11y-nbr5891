@@ -36,3 +36,4 @@ export { CalcAUYOutput } from "./src/output.ts";
 export { CalcAUYError } from "./src/core/errors.ts";
 export type { ICalcAUYCustomOutput } from "./src/output.ts";
 export type { OutputOptions } from "./src/core/types.ts";
+export type { CalcAUYLocaleA11y } from "./src/i18n/i18n.ts";

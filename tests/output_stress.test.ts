@@ -16,13 +16,13 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         const ITERATIONS = 100_000;
         const output = CalcAUY.from("1234.56").commit();
         const start = performance.now();
-        
+
         for (let i = 0; i < ITERATIONS; i++) {
             // Alterna entre 3 combinações para testar hits e misses do cache
             const locale = i % 3 === 0 ? "pt-BR" : (i % 3 === 1 ? "en-US" : "de-DE");
             output.toMonetary({ locale: locale as any });
         }
-        
+
         const end = performance.now();
         results["1_monetary_cache_hit_rate"] = `${(end - start).toFixed(4)}ms (iters: ${ITERATIONS})`;
         expect(output.toMonetary()).toContain("1.234,56");
@@ -35,9 +35,9 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         }
         const output = calc.commit();
         const start = performance.now();
-        
+
         const verbal = output.toVerbalA11y({ locale: "pt-BR" });
-        
+
         const end = performance.now();
         results["2_verbal_a11y_deep_ast"] = `${(end - start).toFixed(4)}ms (chars: ${verbal.length})`;
         expect(verbal).toContain("mais");
@@ -51,10 +51,10 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         }
         const output = calc.commit();
         const start = performance.now();
-        
+
         const unicode = output.toUnicode();
         const latex = output.toLaTeX();
-        
+
         const end = performance.now();
         results["3_render_complexity_nested"] = `${(end - start).toFixed(4)}ms (latex_len: ${latex.length})`;
         expect(unicode).toContain("÷");
@@ -65,11 +65,11 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         const ITERATIONS = 1_000;
         const output = CalcAUY.from("100.00").pow(2).div(3).commit();
         const start = performance.now();
-        
+
         for (let i = 0; i < ITERATIONS; i++) {
             output.toHTML(mockKatex);
         }
-        
+
         const end = performance.now();
         results["4_html_generation_burst"] = `${(end - start).toFixed(4)}ms (iters: ${ITERATIONS})`;
     });
@@ -78,10 +78,10 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         const SLICES = 50_000;
         const output = CalcAUY.from("1000000.00").commit();
         const start = performance.now();
-        
+
         // Testa o algoritmo de maior resto com um volume grande
         const slices = output.toSlice(SLICES, { decimalPrecision: 10 });
-        
+
         const end = performance.now();
         results["5_high_precision_slicing"] = `${(end - start).toFixed(4)}ms (slices: ${SLICES})`;
         expect(slices.length).toBe(SLICES);
@@ -91,11 +91,11 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         const ITERATIONS = 1_000;
         const output = CalcAUY.from("99.99").mult("1.15").commit();
         const start = performance.now();
-        
+
         for (let i = 0; i < ITERATIONS; i++) {
             output.toJSON();
         }
-        
+
         const end = performance.now();
         results["6_to_json_consolidation"] = `${(end - start).toFixed(4)}ms (iters: ${ITERATIONS})`;
     });
@@ -104,7 +104,7 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         const locales = Object.keys(LOCALES);
         const output = CalcAUY.from("1234567.89").commit();
         const start = performance.now();
-        
+
         // Cicla 100 vezes por todos os idiomas da engine
         for (let i = 0; i < 100; i++) {
             for (const loc of locales) {
@@ -112,7 +112,7 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
                 output.toMonetary({ locale: loc as any });
             }
         }
-        
+
         const end = performance.now();
         results["7_locale_switching_burst"] = `${(end - start).toFixed(4)}ms (switches: ${locales.length * 100})`;
     });
@@ -121,13 +121,13 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         const ITERATIONS = 10_000;
         const output = CalcAUY.from("10").add("20").commit();
         const start = performance.now();
-        
+
         for (let i = 0; i < ITERATIONS; i++) {
             output.toCustomOutput((ctx) => {
                 return `Audit: ${ctx.audit.unicode} | Result: ${ctx.result.n}`;
             });
         }
-        
+
         const end = performance.now();
         results["8_custom_processor_stress"] = `${(end - start).toFixed(4)}ms (iters: ${ITERATIONS})`;
     });
@@ -136,11 +136,11 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         const ITERATIONS = 100;
         const output = CalcAUY.from("10").div("3").commit();
         const start = performance.now();
-        
+
         for (let i = 0; i < ITERATIONS; i++) {
             output.toImageBuffer(mockKatex);
         }
-        
+
         const end = performance.now();
         results["9_image_buffer_svg_stress"] = `${(end - start).toFixed(4)}ms (iters: ${ITERATIONS})`;
     });

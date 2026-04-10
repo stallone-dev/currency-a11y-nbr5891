@@ -102,11 +102,11 @@ export function attachOp(target: CalculationNode, type: OperationType, right: Ca
     // Isso reduz a profundidade da AST de O(N) para O(1) em sequências lineares.
     // Pulamos 'pow' pois sua associatividade é à direita.
     if (
-        target.kind === "operation" &&
-        target.type === type &&
-        type !== "pow" &&
-        !target.metadata &&
-        !target.label
+        target.kind === "operation"
+        && target.type === type
+        && type !== "pow"
+        && !target.metadata
+        && !target.label
     ) {
         return {
             ...target,

@@ -1,4 +1,3 @@
-
 import { describe, it } from "@std/testing/bdd";
 import { assertEquals } from "@std/assert";
 import { sanitizeAST, setGlobalLoggingPolicy } from "../src/utils/sanitizer.ts";
@@ -17,7 +16,7 @@ describe("Reproduction of PII Sanitization Issue", () => {
             operands: [
                 { kind: "literal", value: { n: "100", d: "1" }, originalInput: "100" },
                 { kind: "literal", value: { n: "3", d: "7" }, originalInput: "3/7" },
-            ]
+            ],
         };
 
         // add(powNode, 3)
@@ -28,7 +27,7 @@ describe("Reproduction of PII Sanitization Issue", () => {
                 powNode,
                 { kind: "literal", value: { n: "3", d: "1" }, originalInput: "3" },
             ],
-            metadata: { pii: false } // User explicitly marked this operation as safe
+            metadata: { pii: false }, // User explicitly marked this operation as safe
         };
 
         const sanitized = sanitizeAST(addNode) as any;
@@ -43,7 +42,7 @@ describe("Reproduction of PII Sanitization Issue", () => {
         // 5. powNode literals are REDACTED (CORRECT)
 
         assertEquals(sanitized.metadata.pii, false, "Metadata pii: false should be visible");
-        
+
         // Literal "3" check
         assertEquals(sanitized.operands[1].value.n, "3", "Literal '3' should be visible because parent is pii: false");
 

@@ -26,16 +26,16 @@ const DECIMAL_RE = /^[+-]?(?:\d+(?:_\d+)*(?:\.\d+(?:_\d+)*)?|\.\d+(?:_\d+)*)(?:[
  * tradicional para BigInts grandes, pois evita operações de divisão/módulo
  * dispendiosas em favor de bit-shifts e subtrações.
  */
- function gcd(a: bigint, b: bigint): bigint {
+function gcd(a: bigint, b: bigint): bigint {
     let u = a < 0n ? -a : a;
     let v = b < 0n ? -b : b;
-    
+
     while (v !== 0n) {
         const temp = v;
         v = u % v;
         u = temp;
     }
-    
+
     return u;
 }
 

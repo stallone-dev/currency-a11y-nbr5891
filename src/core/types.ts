@@ -43,7 +43,7 @@ export type CalcAUYCurrency =
     | "RUB"
     | "CNY"
     | "JPY"
-    | (string & {});
+    | (string & Record<string, null>);
 
 /**
  * Global configuration options for outputs.

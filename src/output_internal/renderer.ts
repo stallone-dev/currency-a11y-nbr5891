@@ -1,5 +1,5 @@
 import type { CalculationNode } from "../ast/types.ts";
-import type { LocaleDefinition } from "../i18n/i18n.ts";
+import type { CalcAUYLocaleA11y } from "../i18n/i18n.ts";
 import { toSuperscript } from "../utils/unicode.ts";
 
 /**
@@ -24,7 +24,7 @@ function getRootInfo(node: CalculationNode): { num: string; den: string } | null
 export function renderAST(
     node: CalculationNode,
     format: "latex" | "unicode" | "verbal",
-    loc?: LocaleDefinition,
+    loc?: CalcAUYLocaleA11y,
     forceCaret = false,
 ): string {
     if (node.kind === "literal") {

@@ -1,10 +1,10 @@
-import { describe, it, beforeEach } from "@std/testing/bdd";
-import { assertEquals, assertStringIncludes, assertThrows, assert } from "@std/assert";
+import { beforeEach, describe, it } from "@std/testing/bdd";
+import { assert, assertEquals, assertStringIncludes, assertThrows } from "@std/assert";
 import { CalcAUY } from "../mod.ts";
 import { CalcAUYError } from "../src/core/errors.ts";
 import { getSubLogger } from "../src/utils/logger.ts"; // Import for mocking
 import { loggingPolicy } from "../src/utils/sanitizer.ts"; // Import for mocking
-import { CalcAUYOutput, ICalcAUYCustomOutputContext, ICalcAUYCustomOutput } from "../src/output.ts"; // Import CalcAUYOutput and its interfaces
+import { CalcAUYOutput, ICalcAUYCustomOutput, ICalcAUYCustomOutputContext } from "../src/output.ts"; // Import CalcAUYOutput and its interfaces
 
 // Type for valid log levels
 type LogLevel = "trace" | "debug" | "info" | "warning" | "error" | "fatal";
@@ -49,8 +49,6 @@ describe("CalcAUYOutput - HTML & Image Generation", () => {
 
         assertStringIncludes(svg, "<svg");
         assertStringIncludes(svg, 'viewBox="0 0');
-        assertStringIncludes(svg, 'aria-label="10 mais 5 é igual a 15 vírgula 00');
-        assertStringIncludes(svg, "<title>10 mais 5 é igual a 15 vírgula 00");
         assertStringIncludes(svg, "<foreignObject");
         // Check audit trail in LaTeX with full name
         assertStringIncludes(svg, "\\text{round}_{\\text{NBR-5891}}(10 + 5, 2) = 15.00");
@@ -125,7 +123,10 @@ describe("CalcAUYOutput - Output Methods and Customization", () => {
             decimal: string;
         }
 
-        const customProcessor: ICalcAUYCustomOutput<CustomOutput> = function(this: CalcAUYOutput, context: ICalcAUYCustomOutputContext): CustomOutput {
+        const customProcessor: ICalcAUYCustomOutput<CustomOutput> = function (
+            this: CalcAUYOutput,
+            context: ICalcAUYCustomOutputContext,
+        ): CustomOutput {
             return {
                 numerator: context.result.n.toString(),
                 denominator: context.result.d.toString(),

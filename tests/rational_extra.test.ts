@@ -1,5 +1,5 @@
 import { describe, it } from "@std/testing/bdd";
-import { assertEquals, assertThrows, assert } from "@std/assert";
+import { assert, assertEquals, assertThrows } from "@std/assert";
 import { RationalNumber } from "../src/core/rational.ts";
 import { CalcAUYError } from "../src/core/errors.ts";
 
@@ -47,7 +47,11 @@ describe("RationalNumber - Casos de Borda e Snippets Específicos", () => {
 
         it("deve lançar unsupported-type para tipos de entrada inválidos", () => {
             // @ts-ignore: Testing invalid input
-            assertThrows(() => RationalNumber.from(Symbol("test")), CalcAUYError, "Tipo de entrada não suportado: symbol");
+            assertThrows(
+                () => RationalNumber.from(Symbol("test") as any),
+                CalcAUYError,
+                "Tipo de entrada não suportado: symbol",
+            );
             // @ts-ignore: Testing invalid input
             assertThrows(() => RationalNumber.from({}), CalcAUYError, "Tipo de entrada não suportado: object");
         });

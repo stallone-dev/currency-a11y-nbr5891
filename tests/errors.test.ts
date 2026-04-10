@@ -1,6 +1,6 @@
-import { describe, it, beforeEach } from "@std/testing/bdd";
-import { assertEquals, assert, assertStringIncludes } from "@std/assert";
-import { CalcAUYError, ErrorContext, ErrorCategory } from "../src/core/errors.ts";
+import { beforeEach, describe, it } from "@std/testing/bdd";
+import { assert, assertEquals, assertStringIncludes } from "@std/assert";
+import { CalcAUYError, ErrorCategory, ErrorContext } from "../src/core/errors.ts";
 import { getSubLogger } from "../src/utils/logger.ts";
 import { loggingPolicy } from "../src/utils/sanitizer.ts"; // Import loggingPolicy
 
@@ -30,7 +30,10 @@ describe("CalcAUYError - Gerenciamento de Erros e Telemetria", () => {
         assertStringIncludes(err.type, `calc-auy/${category}`);
         assertEquals(err.detail, detail);
         assertEquals(err.context, context); // Context should be raw in the error object itself
-        assert(typeof err.instance === "string" && err.instance.startsWith("urn:uuid:"), "Instance should be a UUID URN");
+        assert(
+            typeof err.instance === "string" && err.instance.startsWith("urn:uuid:"),
+            "Instance should be a UUID URN",
+        );
 
         // Check title and status mapping
         assertEquals(err.title, "Divisão por Zero Detectada");

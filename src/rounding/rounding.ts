@@ -10,9 +10,10 @@ import type { RoundingStrategy } from "../core/constants.ts";
 const POW10_CACHE: bigint[] = [1n, 10n, 100n, 1000n, 10000n, 100000n];
 
 function getPowerOf10(p: number): bigint {
-    if (p < POW10_CACHE.length) return POW10_CACHE[p];
+    if (p < POW10_CACHE.length) { return POW10_CACHE[p]; }
     const res = 10n ** BigInt(p);
-    if (p < 100) POW10_CACHE[p] = res; // Cache apenas escalas comuns
+    if (p < 100) { POW10_CACHE[p] = res; // Cache apenas escalas comuns
+     }
     return res;
 }
 

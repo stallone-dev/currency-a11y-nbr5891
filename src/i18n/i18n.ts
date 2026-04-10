@@ -2,22 +2,61 @@ import { DEFAULT_LOCALE } from "../core/constants.ts";
 import type { CalcAUYLocale } from "../core/types.ts";
 
 /**
- * Definition of a localized strings and rules for calculation verbalization.
+ * Define a estrutura de tradução e regras de verbalização (A11y) para a CalcAUY.
+ *
+ * **Engenharia:** Esta interface permite a internacionalização completa do rastro de auditoria
+ * falado. Ao fornecer uma implementação customizada, é obrigatório preencher todos os tokens
+ * para garantir que a reconstrução da frase seja fluida e sem termos indefinidos.
+ *
+ * @interface
  */
-export interface LocaleDefinition {
+export interface CalcAUYLocaleA11y {
+    /** Código do locale (ex: "pt-BR", "en-US"). */
     locale: string;
+    /** Símbolo da moeda padrão para este locale (ISO 4217). */
     currency: string;
+    /** Caractere separador de decimais (ex: "," ou "."). */
     decimalSeparator: string;
+    /** Termo falado para o separador decimal (ex: " vírgula " ou " point "). */
     voicedSeparator: string;
+    /** Caractere separador de milhar (ex: "." ou ","). */
     thousandSeparator: string;
-    operators: Record<string, string>;
+    /** Dicionário de tradução para operadores matemáticos. */
+    operators: {
+        /** Termo para adição (+). */
+        add: string;
+        /** Termo para subtração (-). */
+        sub: string;
+        /** Termo para multiplicação (*). */
+        mul: string;
+        /** Termo para divisão (/). */
+        div: string;
+        /** Termo para exponenciação (^). */
+        pow: string;
+        /** Termo para módulo (%). */
+        mod: string;
+        /** Termo para divisão inteira (//). */
+        divInt: string;
+        /** Termo para abertura de agrupamento. */
+        group_start: string;
+        /** Termo para fechamento de agrupamento. */
+        group_end: string;
+    };
+    /** Frases e conectivos utilizados na construção da narração. */
     phrases: {
+        /** Conectivo de igualdade (ex: " é igual a "). */
         isEqual: string;
+        /** Termo para indicar a estratégia de arredondamento. */
         rounding: string;
+        /** Preposição de alvo (ex: "para"). */
         for: string;
+        /** Termo para casas decimais. */
         decimalPlaces: string;
+        /** Prefixo para raiz quadrada. */
         root_square: string;
+        /** Prefixo para raiz cúbica. */
         root_cubic: string;
+        /** Template para raiz enésima (deve conter o placeholder {den}). */
         root_n: string;
     };
 }
@@ -25,7 +64,7 @@ export interface LocaleDefinition {
 /**
  * Map of supported locales.
  */
-export const LOCALES: Record<CalcAUYLocale, LocaleDefinition> = {
+export const LOCALES: Record<CalcAUYLocale, CalcAUYLocaleA11y> = {
     "pt-BR": {
         locale: "pt-BR",
         currency: "BRL",
@@ -274,6 +313,6 @@ export const LOCALES: Record<CalcAUYLocale, LocaleDefinition> = {
 /**
  * Retrieves the locale definition for a given code.
  */
-export function getLocale(code: CalcAUYLocale = DEFAULT_LOCALE as CalcAUYLocale): LocaleDefinition {
+export function getLocale(code: CalcAUYLocale = DEFAULT_LOCALE as CalcAUYLocale): CalcAUYLocaleA11y {
     return LOCALES[code] || LOCALES[DEFAULT_LOCALE as CalcAUYLocale];
 }

@@ -1,5 +1,5 @@
-import { describe, it, beforeEach } from "@std/testing/bdd";
-import { assertEquals, assert } from "@std/assert";
+import { beforeEach, describe, it } from "@std/testing/bdd";
+import { assert, assertEquals } from "@std/assert";
 import { CalcAUY } from "../src/builder.ts";
 import { getSubLogger } from "../src/utils/logger.ts";
 import { loggingPolicy } from "../src/utils/sanitizer.ts"; // Import loggingPolicy
