@@ -43,7 +43,7 @@ export type CalcAUYCurrency =
     | "RUB"
     | "CNY"
     | "JPY"
-    | (string & undefined);
+    | (string & {});
 
 /**
  * Global configuration options for outputs.

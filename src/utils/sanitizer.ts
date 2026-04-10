@@ -7,6 +7,12 @@ import type { CalculationNode } from "../ast/types.ts";
 
 const REDACTED = "[PII]";
 
+/** Chaves de objetos que são conhecidas por conter dados sensíveis (PII). */
+const SENSITIVE_KEYS = new Set(["n", "d", "rawInput", "metadata", "label", "value", "originalInput"]);
+
+/** Regex otimizado para identificar strings que representam números. */
+const NUMERIC_RE = /^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/;
+
 /** Política global de logging. */
 export const loggingPolicy = {
     /**
@@ -63,7 +69,7 @@ export function sanitizeAST(node: CalculationNode): object {
     };
 
     if (node.kind === "literal") {
-        sanitized.value = hide ? REDACTED : node.value;
+        sanitized.value = hide ? { n: REDACTED, d: REDACTED } : node.value;
         sanitized.originalInput = hide ? REDACTED : node.originalInput;
     } else if (node.kind === "group") {
         sanitized.child = sanitizeAST(node.child);
@@ -92,19 +98,24 @@ export function sanitizeAST(node: CalculationNode): object {
  * possam conter PII se a política global estiver restritiva.
  *
  * @param obj Objeto ou valor a ser sanitizado.
+ * @param seen Set para rastrear referências circulares (interno).
  * @returns Valor sanitizado.
  */
-export function sanitizeObject(obj: unknown): unknown {
+export function sanitizeObject(obj: unknown, seen = new WeakSet<object>()): unknown {
     if (obj === null || obj === undefined) { return obj; }
 
     // Se a política global NÃO for sensível (false), libera tudo
     if (!loggingPolicy.sensitive) { return obj; }
 
-    if (Array.isArray(obj)) {
-        return obj.map(sanitizeObject);
-    }
-
     if (typeof obj === "object") {
+        // Proteção contra referências circulares (evita trava de CPU)
+        if (seen.has(obj as object)) { return "[CIRCULAR]"; }
+        seen.add(obj as object);
+
+        if (Array.isArray(obj)) {
+            return obj.map((item) => sanitizeObject(item, seen));
+        }
+
         const result: Record<string, unknown> = {};
         for (const [key, value] of Object.entries(obj)) {
             // Se for um nó da AST (identificado pelo campo 'kind')
@@ -113,11 +124,11 @@ export function sanitizeObject(obj: unknown): unknown {
                 continue;
             }
 
-            // Campos conhecidos por conter dados sensíveis
-            if (["n", "d", "rawInput", "metadata", "label", "value", "originalInput"].includes(key)) {
+            // Campos conhecidos por conter dados sensíveis (O(1) via Set)
+            if (SENSITIVE_KEYS.has(key)) {
                 result[key] = REDACTED;
             } else {
-                result[key] = sanitizeObject(value);
+                result[key] = sanitizeObject(value, seen);
             }
         }
         return result;
@@ -125,9 +136,14 @@ export function sanitizeObject(obj: unknown): unknown {
 
     // Se for um valor primitivo que parece ser numérico ou sensível
     if (typeof obj === "number" || typeof obj === "bigint" || typeof obj === "string") {
-        // Se for string, verifica se parece ser um número ou se é muito longa
-        if (typeof obj === "string" && obj.length > 50) { return REDACTED; }
-        if (!isNaN(Number(obj))) { return REDACTED; }
+        if (typeof obj === "string") {
+            if (obj.length > 50) { return REDACTED; }
+            // Otimização: Regex é mais rápido que Number() para triagem rápida
+            if (obj.length > 0 && NUMERIC_RE.test(obj)) { return REDACTED; }
+        } else {
+            // Numbers e BigInts sempre são redigidos em modo sensível
+            return REDACTED;
+        }
     }
 
     return obj;

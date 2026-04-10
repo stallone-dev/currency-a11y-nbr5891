@@ -33,36 +33,46 @@ export function evaluate(node: CalculationNode, depth = 0): RationalNumber {
         );
     }
 
-    const [result, duration] = measureTime(() => {
-        switch (node.kind) {
-            case "literal":
-                return RationalNumber.from(`${node.value.n}/${node.value.d}`);
-
-            case "group":
-                return evaluate(node.child, depth + 1);
-
-            case "operation":
-                return evaluateOperation(node.type, node.operands, depth + 1, node);
-
-            default:
-                throw new CalcAUYError(
-                    "corrupted-node",
-                    "Tipo de nó desconhecido na AST.",
-                    { partialAST: node },
-                );
-        }
-    });
-
-    if (logger.isEnabledFor("debug")) {
-        logger.debug("Node evaluated", {
-            operation_kind: node.kind,
-            depth,
-            duration,
-            structure: sanitizeAST(node),
-        });
+    // Modo Produção: Execução direta e rápida sem overhead de telemetria.
+    if (!logger.isEnabledFor("debug")) {
+        return evaluateNode(node, depth);
     }
 
+    // Modo Debug: Mede performance e loga estrutura sanitizada para auditoria técnica.
+    const [result, duration] = measureTime(() => evaluateNode(node, depth));
+
+    logger.debug("Node evaluated", {
+        operation_kind: node.kind,
+        depth,
+        duration,
+        structure: sanitizeAST(node),
+    });
+
     return result;
+}
+
+/**
+ * Lógica interna de avaliação sem telemetria para permitir reuso e performance.
+ */
+function evaluateNode(node: CalculationNode, depth: number): RationalNumber {
+    switch (node.kind) {
+        case "literal":
+            return RationalNumber.from(BigInt(node.value.n), BigInt(node.value.d));
+
+        case "group":
+            return evaluate(node.child, depth + 1);
+
+        case "operation":
+            return evaluateOperation(node.type, node.operands, depth + 1, node);
+
+        default: {
+            throw new CalcAUYError(
+                "corrupted-node",
+                "Tipo de nó desconhecido na AST.",
+                { partialAST: node },
+            );
+        }
+    }
 }
 
 /**

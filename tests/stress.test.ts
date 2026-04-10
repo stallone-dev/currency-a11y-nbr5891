@@ -30,7 +30,7 @@ describe("CalcAUY - Testes de Estresse e Performance Extrema", () => {
     });
 
     it("Cenário 3: Operação Muito Custosa (Milhares de vezes)", () => {
-        const ITERATIONS = 10000;
+        const ITERATIONS = 100_000;
         const start = performance.now();
         for (let i = 0; i < ITERATIONS; i++) {
             CalcAUY.from("1000.50").mult("1.05").pow(12).div("3.14159265").commit();
@@ -40,7 +40,7 @@ describe("CalcAUY - Testes de Estresse e Performance Extrema", () => {
     });
 
     it("Cenário 4: Operação Simples Real (Milhares de vezes)", () => {
-        const ITERATIONS = 50000;
+        const ITERATIONS = 100_000;
         const start = performance.now();
         for (let i = 0; i < ITERATIONS; i++) {
             CalcAUY.from("150.00").add("25.50").mult("1.18").commit();
@@ -75,7 +75,7 @@ describe("CalcAUY - Testes de Estresse e Performance Extrema", () => {
     });
 
     it("Cenário 7: Massacre de Rateio (Slicing Massivo)", () => {
-        const SLICES = 100000;
+        const SLICES = 100_000;
         const start = performance.now();
         const output = CalcAUY.from("1000000.00").commit();
         const slices = output.toSlice(SLICES, { decimalPrecision: 2 });
@@ -87,7 +87,7 @@ describe("CalcAUY - Testes de Estresse e Performance Extrema", () => {
     // --- CENÁRIOS DE GUERRA (DoS, CONCURRENCY, ATTACK VECTORS) ---
 
     it("Cenário 8: Burst Concurrency (DDoS Simulation)", async () => {
-        const CONCURRENT_REQUESTS = 10_000;
+        const CONCURRENT_REQUESTS = 100_000;
         const start = performance.now();
 
         // Simula 100.000 requisições disparadas simultaneamente
@@ -104,7 +104,7 @@ describe("CalcAUY - Testes de Estresse e Performance Extrema", () => {
     });
 
     it("Cenário 9: Batch Processing (Controlled Throughput)", async () => {
-        const TOTAL_TASKS = 1_000_000;
+        const TOTAL_TASKS = 100_000;
         const start = performance.now();
 
         const items = Array.from({ length: TOTAL_TASKS }).map((_, i) => i);
@@ -112,7 +112,7 @@ describe("CalcAUY - Testes de Estresse e Performance Extrema", () => {
         // Processa as mesmas 100.000 tarefas, mas em lotes de 5.000 com yielding
         await CalcAUY.processBatch(items, (i) => {
             return CalcAUY.from(i).add(10).mult("1.15").commit();
-        }, { batchSize: 5000 });
+        }, { batchSize: 1000 });
 
         const end = performance.now();
         results["9_batch_processing_controlled"] = `${(end - start).toFixed(4)}ms (total_tasks: ${TOTAL_TASKS})`;

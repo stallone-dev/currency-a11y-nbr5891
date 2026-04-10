@@ -97,6 +97,23 @@ export function validateASTNode(
  * @returns {CalculationNode} Nova raiz da árvore reorganizada.
  */
 export function attachOp(target: CalculationNode, type: OperationType, right: CalculationNode): CalculationNode {
+    // Otimização: Aplanamento Associativo (Smart Flattening)
+    // Se o nó atual já for do mesmo tipo e estiver "limpo", apenas anexamos o operando.
+    // Isso reduz a profundidade da AST de O(N) para O(1) em sequências lineares.
+    // Pulamos 'pow' pois sua associatividade é à direita.
+    if (
+        target.kind === "operation" &&
+        target.type === type &&
+        type !== "pow" &&
+        !target.metadata &&
+        !target.label
+    ) {
+        return {
+            ...target,
+            operands: [...target.operands, right],
+        };
+    }
+
     if (target.kind !== "operation") {
         return { kind: "operation", type, operands: [target, right] };
     }

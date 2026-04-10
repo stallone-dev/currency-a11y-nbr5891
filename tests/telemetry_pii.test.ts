@@ -4,11 +4,11 @@ import { CalcAUY } from "../src/builder.ts";
 import { sanitizeAST, sanitizeObject } from "../src/utils/sanitizer.ts";
 
 describe("Telemetria e Proteção de PII (Security by Default)", () => {
-    it("deve ocultar dados por padrão (sensitive: true)", () => {
+    it("deve usar o marcador [PII] por padrão", () => {
         CalcAUY.setLoggingPolicy({ sensitive: true });
         const calc = CalcAUY.from(100);
         const sanitized = sanitizeAST(calc.getAST()) as any;
-        expect(sanitized.value).toBe("[PII]");
+        expect(sanitized.value).toEqual({ n: "[PII]", d: "[PII]" });
     });
 
     it("deve mostrar PII quando a política global sensitive for false", () => {
@@ -25,10 +25,11 @@ describe("Telemetria e Proteção de PII (Security by Default)", () => {
         CalcAUY.setLoggingPolicy({ sensitive: false });
         const calc = CalcAUY.from(100).setMetadata("pii", true);
         const sanitized = sanitizeAST(calc.getAST()) as any;
-        expect(sanitized.value).toBe("[PII]");
+        expect(sanitized.value).toEqual({ n: "[PII]", d: "[PII]" });
 
         CalcAUY.setLoggingPolicy({ sensitive: true });
     });
+
 
     it("deve mostrar um nó específico com pii: false mesmo com política sensitive: true", () => {
         CalcAUY.setLoggingPolicy({ sensitive: true });

@@ -14,6 +14,11 @@ const MAX_BI_LIMIT = 1n << MAX_BI_BITS;
 const MAX_CACHE_SIZE = 2048;
 const literalCache = new Map<string, RationalNumber>();
 
+/** Regex para validar formatos numéricos permitidos (Rigor specs/08). */
+const BIGINT_RE = /^[+-]?\d+(?:_\d+)*n?$/;
+const FRACTION_RE = /^[+-]?\d+(?:_\d+)*\/[+-]?\d+(?:_\d+)*$/;
+const DECIMAL_RE = /^[+-]?(?:\d+(?:_\d+)*(?:\.\d+(?:_\d+)*)?|\.\d+(?:_\d+)*)(?:[eE][+-]?\d+(?:_\d+)*)?$/;
+
 /**
  * Binary GCD (Stein's Algorithm) otimizado para BigInt.
  *
@@ -160,16 +165,10 @@ export class RationalNumber {
         const trimmed = input.trim();
 
         // Camada de Otimização: Cache de Literais Estáticos (Memoization)
-        // Reduz drasticamente o overhead de parsing para valores financeiros recorrentes.
         const cached = literalCache.get(trimmed);
         if (cached) { return cached; }
 
-        // 1. Definição de Formatos Estritos (Rigor specs/08)
-        const BIGINT_RE = /^[+-]?\d+(?:_\d+)*n?$/;
-        const FRACTION_RE = /^[+-]?\d+(?:_\d+)*\/[+-]?\d+(?:_\d+)*$/;
-        const DECIMAL_RE = /^[+-]?(?:\d+(?:_\d+)*(?:\.\d+(?:_\d+)*)?|\.\d+(?:_\d+)*)(?:[eE][+-]?\d+(?:_\d+)*)?$/;
-
-        // 2. Validação contra os formatos permitidos
+        // 1. Validação contra os formatos permitidos (Rigor specs/08)
         const isBigInt = BIGINT_RE.test(trimmed);
         const isFraction = FRACTION_RE.test(trimmed);
         const isDecimal = DECIMAL_RE.test(trimmed);
@@ -180,21 +179,18 @@ export class RationalNumber {
 
         // 3. Normalização (Remover underscores para BigInt/parseFloat)
         const clean = trimmed.replace(/_/g, "");
+        let result: RationalNumber;
 
         // 4. Ingestão por Tipo
         if (isFraction) {
             const [nStr, dStr] = clean.split("/");
-            return new RationalNumber(BigInt(nStr), BigInt(dStr));
-        }
-
-        if (isBigInt) {
+            result = new RationalNumber(BigInt(nStr), BigInt(dStr));
+        } else if (isBigInt) {
             const val = clean.endsWith("n") ? clean.slice(0, -1) : clean;
-            return new RationalNumber(BigInt(val), 1n);
-        }
-
-        // Caso Decimal/Scientific
-        const lower = clean.toLowerCase();
-        if (lower.includes(".") || lower.includes("e")) {
+            result = new RationalNumber(BigInt(val), 1n);
+        } else {
+            // Caso Decimal/Scientific
+            const lower = clean.toLowerCase();
             const parts: string[] = lower.split("e");
             const baseStr: string = parts[0];
             const scientificExp: number = parts.length > 1 ? parseInt(parts[1]) : 0;
@@ -219,10 +215,8 @@ export class RationalNumber {
                 d *= 10n ** BigInt(-scientificExp);
             }
 
-            return new RationalNumber(n, d);
+            result = new RationalNumber(n, d);
         }
-
-        const result = new RationalNumber(BigInt(clean), 1n);
 
         // Armazenamento no cache com limite de segurança para evitar vazamento de memória.
         if (literalCache.size < MAX_CACHE_SIZE) {

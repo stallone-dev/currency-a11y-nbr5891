@@ -20,6 +20,10 @@ import { type BatchOptions, processBatch } from "./utils/batch.ts";
 
 const logger = getSubLogger("engine");
 
+/** Cache para reuso de nós literais "limpos" (sem metadados). */
+const literalNodeCache = new Map<string, LiteralNode>();
+const MAX_NODE_CACHE_SIZE = 1024;
+
 export type InputValue = string | number | bigint | CalcAUY;
 
 /**
@@ -99,12 +103,28 @@ export class CalcAUY {
     public static from(value: InputValue): CalcAUY {
         if (value instanceof CalcAUY) { return value; }
 
+        const inputStr = value.toString();
+        const cached = literalNodeCache.get(inputStr);
+        if (cached) {
+            if (logger.isEnabledFor("debug")) {
+                logger.debug("CalcAUY Instance Created (Cached)", {
+                    input_type: typeof value,
+                    structure: sanitizeAST(cached),
+                });
+            }
+            return new CalcAUY(cached);
+        }
+
         const r: RationalNumber = RationalNumber.from(value as string | number | bigint);
         const node: LiteralNode = {
             kind: "literal",
             value: r.toJSON() as RationalValue,
-            originalInput: value.toString(),
+            originalInput: inputStr,
         };
+
+        if (literalNodeCache.size < MAX_NODE_CACHE_SIZE) {
+            literalNodeCache.set(inputStr, node);
+        }
 
         if (logger.isEnabledFor("debug")) {
             logger.debug("CalcAUY Instance Created", {
@@ -306,6 +326,11 @@ export class CalcAUY {
      * ```
      */
     public group(): CalcAUY {
+        // Otimização: Evita parênteses redundantes em literais ou grupos já existentes.
+        if (this.#ast.kind === "group" || this.#ast.kind === "literal") {
+            return this;
+        }
+
         const node: GroupNode = {
             kind: "group",
             child: this.#ast,
@@ -359,9 +384,14 @@ export class CalcAUY {
         let rightNode: CalculationNode;
         let inputType: string;
 
-        // Auto-Agrupamento: Se injetar um CalcAUY, ele é tratado como um bloco lógico isolado.
+        // Auto-Agrupamento Inteligente: Só envolve em grupo se não for um literal ou outro grupo.
         if (value instanceof CalcAUY) {
-            rightNode = { kind: "group", child: value.#ast };
+            const innerAST = value.#ast;
+            if (innerAST.kind === "group" || innerAST.kind === "literal") {
+                rightNode = innerAST;
+            } else {
+                rightNode = { kind: "group", child: innerAST };
+            }
             inputType = "CalcAUY";
         } else {
             const r: RationalNumber = RationalNumber.from(value as string | number | bigint);

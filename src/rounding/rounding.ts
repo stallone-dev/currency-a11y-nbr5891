@@ -6,6 +6,16 @@
 import { RationalNumber } from "../core/rational.ts";
 import type { RoundingStrategy } from "../core/constants.ts";
 
+/** Cache de potências de 10 para evitar recalcular 10n ** BigInt(p). */
+const POW10_CACHE: bigint[] = [1n, 10n, 100n, 1000n, 10000n, 100000n];
+
+function getPowerOf10(p: number): bigint {
+    if (p < POW10_CACHE.length) return POW10_CACHE[p];
+    const res = 10n ** BigInt(p);
+    if (p < 100) POW10_CACHE[p] = res; // Cache apenas escalas comuns
+    return res;
+}
+
 /**
  * Handlers para diferentes estratégias de arredondamento.
  *
@@ -21,7 +31,7 @@ export const RoundingHandlers: Record<
      * Útil em cenários onde não se pode "ganhar" centavos por arredondamento.
      */
     TRUNCATE: (val: RationalNumber, p: number): RationalNumber => {
-        const pScale: bigint = 10n ** BigInt(p);
+        const pScale = getPowerOf10(p);
         const scaledNumerator: bigint = (val.n * pScale) / val.d;
         return RationalNumber.from(scaledNumerator, pScale);
     },
@@ -31,7 +41,7 @@ export const RoundingHandlers: Record<
      * Comum em cálculos de frete ou cobranças mínimas.
      */
     CEIL: (val: RationalNumber, p: number): RationalNumber => {
-        const pScale: bigint = 10n ** BigInt(p);
+        const pScale = getPowerOf10(p);
         const scaledN: bigint = val.n * pScale;
         const integralPart: bigint = scaledN / val.d;
         const remainder: bigint = scaledN % val.d;
@@ -47,7 +57,7 @@ export const RoundingHandlers: Record<
      * É o padrão mais comum em transações de consumo no varejo.
      */
     HALF_UP: (val: RationalNumber, p: number): RationalNumber => {
-        const pScale: bigint = 10n ** BigInt(p);
+        const pScale = getPowerOf10(p);
         const scaledN: bigint = val.n * pScale;
         const integralPart: bigint = scaledN / val.d;
         const remainder: bigint = scaledN % val.d;
@@ -66,7 +76,7 @@ export const RoundingHandlers: Record<
      * exigido em diversos sistemas financeiros internacionais.
      */
     HALF_EVEN: (val: RationalNumber, p: number): RationalNumber => {
-        const pScale: bigint = 10n ** BigInt(p);
+        const pScale = getPowerOf10(p);
         const scaledN: bigint = val.n * pScale;
         const integralPart: bigint = scaledN / val.d;
         const remainder: bigint = scaledN % val.d;

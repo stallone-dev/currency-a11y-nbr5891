@@ -9,6 +9,7 @@ import {
 import type { LiteralNode, GroupNode, OperationNode } from "../src/ast/types.ts";
 
 const REDACTED = "[PII]";
+const REDACTED_VALUE = { n: REDACTED, d: REDACTED };
 
 describe("Sanitizer Utilities", () => {
     beforeEach(() => {
@@ -43,9 +44,9 @@ describe("Sanitizer Utilities", () => {
             const sanitized = sanitizeAST(node) as any; // Cast to any
 
             assertEquals(sanitized.kind, "literal");
-            assertEquals(sanitized.value, REDACTED); // Expect REDACTED string
+            assertEquals(sanitized.value, REDACTED_VALUE);
             assertEquals(sanitized.originalInput, REDACTED);
-            assertEquals(sanitized.metadata, REDACTED); // metadata is also redacted to string
+            assertEquals(sanitized.metadata, REDACTED);
             assertEquals(sanitized.label, REDACTED);
         });
 
@@ -80,7 +81,7 @@ describe("Sanitizer Utilities", () => {
 
             assertEquals(sanitized.kind, "group");
             assertEquals(sanitized.child.kind, "literal");
-            assertEquals(sanitized.child.value, REDACTED); // Expect REDACTED string
+            assertEquals(sanitized.child.value, REDACTED_VALUE);
         });
 
         it("deve recursivamente sanitizar nós de operação", () => {
@@ -97,8 +98,8 @@ describe("Sanitizer Utilities", () => {
             assertEquals(sanitized.kind, "operation");
             assertEquals(sanitized.type, "add");
             assertEquals(sanitized.operands.length, 2);
-            assertEquals(sanitized.operands[0].value, REDACTED); // Expect REDACTED string
-            assertEquals(sanitized.operands[1].value, REDACTED); // Expect REDACTED string
+            assertEquals(sanitized.operands[0].value, REDACTED_VALUE);
+            assertEquals(sanitized.operands[1].value, REDACTED_VALUE);
         });
 
         it("deve respeitar a sobreposição de PII nos metadados do nó", () => {
@@ -122,7 +123,7 @@ describe("Sanitizer Utilities", () => {
                 metadata: { pii: true, info: "Is PII" },
             };
             const sanitized2 = sanitizeAST(node2) as any; // Cast to any
-            assertEquals(sanitized2.value, REDACTED); // Expect REDACTED string
+            assertEquals(sanitized2.value, REDACTED_VALUE);
             assertEquals(sanitized2.metadata, REDACTED);
         });
     });
@@ -178,7 +179,7 @@ describe("Sanitizer Utilities", () => {
             assertEquals(sanitized.nested.metadata, REDACTED);
             assertEquals(sanitized.nested.public_key, "public");
             assertEquals(sanitized.nested.ast.kind, "literal");
-            assertEquals(sanitized.nested.ast.value, REDACTED); // Expect REDACTED string
+            assertEquals(sanitized.nested.ast.value, REDACTED_VALUE);
             assertEquals(sanitized.nested.ast.originalInput, REDACTED);
         });
 
