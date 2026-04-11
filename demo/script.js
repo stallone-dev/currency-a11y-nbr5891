@@ -15,11 +15,32 @@ function updateInteractiveDisplay(data) {
         toString: data.toString,
         toFloatNumber: data.toFloatNumber,
         toRawInternalBigInt: data.toRawInternalBigInt,
+        toScaledBigInt: data.toScaledBigInt,
         toMonetary: data.toMonetary,
         toLaTeX: data.toLaTeX,
         toUnicode: data.toUnicode,
         toVerbalA11y: data.toVerbalA11y,
-        toCustomOutput: data.toCustomOutput,
+        toCustomOutput: `
+            <div class="processor-info"><strong>Processor:</strong> <code>${data.toCustomOutputProcessor}</code></div>
+            <div class="custom-val">${data.toCustomOutput}</div>
+        `,
+        toSliceDemo: data.toSliceDemo,
+        toSliceByRatioDemo: data.toSliceByRatioDemo,
+        toAuditTrace: (function() {
+            try {
+                const parsed = typeof data.toAuditTrace === 'string' ? JSON.parse(data.toAuditTrace) : data.toAuditTrace;
+                let json = JSON.stringify(parsed, null, 2);
+                
+                // Highlight apenas a chave "metadata" e seu objeto imediato
+                // Usando uma abordagem mais precisa para evitar capturar chaves erradas
+                json = json.replace(/"metadata":\s*{[\s\S]*?}/g, (match) => {
+                    return `<mark class="metadata-marker">${match}</mark>`;
+                });
+                return `<div class="json-view forensic-trace">${json}</div>`;
+            } catch (e) {
+                return data.toAuditTrace;
+            }
+        })(),
         // toHTML handled separately below
         toJson: (function() {
             if (!data.toJson) return '';
@@ -33,7 +54,6 @@ function updateInteractiveDisplay(data) {
         })(),
         toImageBuffer: `
       <div class="image-output-wrapper">
-        <div class="binary-view">${data.toImageBufferHex}</div>
         <img src="${data.toImageDataBase64}" alt="Renderização visual do resultado" class="image-result">
       </div>
     `,

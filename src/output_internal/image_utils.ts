@@ -11,8 +11,8 @@ export function generateSVG(
     const paddingVertical = 16;
 
     const estimatedWidth: number = (fullLatex.length * averagePxPerChar * scaleFactor)
-        + (paddingHorizontal * 2);
-    const finalWidth: number = Math.max(300, Math.min(2000, Math.ceil(estimatedWidth)));
+        + (paddingHorizontal * 1.5);
+    const finalWidth: number = Math.max(300, Math.min(1000, Math.ceil(estimatedWidth)));
 
     let verticalExpansion = 0;
     const fracMatches: RegExpMatchArray | null = fullLatex.match(/\\frac/g);
@@ -45,7 +45,6 @@ export function generateSVG(
         box-sizing: border-box;
         padding: ${paddingVertical}px ${paddingHorizontal}px;
         margin: 0;
-        font-family: sans-serif;
       "
     >
       <div style="font-size: ${scaleFactor}em; margin: 0; color: #333;">

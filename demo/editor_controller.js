@@ -161,6 +161,7 @@ window.setupEditor = function (containerId) {
 
     // Código Inicial Restaurado
     const startCode = `CalcAUY.from("1234567.89")
+        .setMetadata("transaction_id", "ABC-123")
         .pow("353/1141")
         .add(
             CalcAUY.from(0.00123).div(
@@ -169,6 +170,7 @@ window.setupEditor = function (containerId) {
             ).group()
             .pow(9)
         )
+        .setMetadata("step", "final_audit")
         .mult(
             CalcAUY.from(3)
             .div(
