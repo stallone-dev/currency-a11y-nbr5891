@@ -4,7 +4,7 @@
     "exports": "./server.ts",
     "license": "MPL-2.0",
     "tasks": {
-        "demo": "deno serve --watch --allow-read server.ts",
+        "demo": "deno serve --watch -A server.ts",
         "bundle": "deno run -A npm:esbuild editor_controller.js --bundle --format=iife --outfile=editor_controller.bundle.js"
     },
     "imports": {

@@ -16,7 +16,7 @@
     "tasks": {
         "fmt": "deno fmt --config=deno.jsonc ./src ./tests ./deno.jsonc",
         "lint": "deno lint --config=deno.jsonc ./src",
-        "demo": "deno serve --watch --allow-read ./demo/server.ts",
+        "demo": "deno serve --watch -A ./demo/server.ts",
         "coverage:report": "deno task coverage && deno coverage ./tests/coverage-log --lcov > ./tests/coverage-log/coverage.lcov && genhtml -o ./tests/coverage-log ./tests/coverage-log/coverage.lcov",
         "coverage:dev": "deno task coverage && deno coverage ./tests/coverage-log",
         "coverage": "deno task test --reporter=dot --coverage=./coverage",
@@ -24,7 +24,8 @@
     },
     "workspace": [
         "./demo",
-        "./tests"
+        "./tests",
+        "./mini-scripts"
     ],
     "compilerOptions": {
         "lib": [

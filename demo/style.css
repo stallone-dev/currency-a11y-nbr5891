@@ -482,17 +482,16 @@ button:active {
 #barra-acessibilidade {
     flex-direction: column;
     /* Padrão para mobile */
-    padding: 1rem;
-    gap: 0.625rem;
-    /* 10px para 0.625rem */
+    padding: 0.5rem;
+    gap: 0.25rem;
     text-align: center;
 }
 
 #barra-acessibilidade ul {
-    flex-direction: column;
-    /* Padrão para mobile */
-    gap: 0.3125rem;
-    /* 5px para 0.3125rem */
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 2 botões por linha */
+    width: 100%;
+    gap: 0.25rem;
 }
 
 /* Media query para telas maiores (Tablet - 2 colunas) */
@@ -865,6 +864,26 @@ html[data-theme="dark"] ::-webkit-scrollbar-button:vertical:increment {
     /* Lighter arrows */
 }
 
+html[data-theme="dark"] .processor-info {
+    background: #1c1c1c;
+    border-color: #4a5568;
+    color: #a0aec0;
+}
+
+html[data-theme="dark"] .custom-val {
+    color: #e2e8f0;
+}
+
+html[data-theme="dark"] .metadata-marker {
+    background-color: #4a3712;
+    color: #fbd38d;
+}
+
+html[data-theme="dark"] .json-view.forensic-trace {
+    background: #1a202c;
+    border-left-color: #48bb78;
+}
+
 html[data-theme="dark"] .simulator-form {
     background: #1a202c;
     border-color: var(--primary);
@@ -1083,14 +1102,66 @@ body.alto-contraste strong {
     /* Padrão para strong fora da área especial */
 }
 
+.processor-info {
+    font-size: 0.75rem;
+    color: #666;
+    margin-bottom: 8px;
+    background: #f8f9fa;
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px dashed #ccc;
+}
+
+.processor-info code {
+    color: var(--primary);
+}
+
+.custom-val {
+    font-family: monospace;
+    font-size: 0.9em;
+    color: #333;
+    background: #eee;
+    padding: 10px;
+    border-radius: 4px;
+    display: block;
+}
+
+html[data-theme="dark"] .custom-val {
+    background: #1c1c1c;
+    color: #e2e8f0;
+}
+
+.json-view.forensic-trace {
+    border-left: 0.25rem solid #28a745; /* Verde para Auditoria */
+    background: #f0fff4;
+}
+
+.metadata-marker {
+    background-color: #ffeeba;
+    color: #856404;
+    padding: 0 2px;
+    border-radius: 2px;
+    font-weight: bold;
+}
+
 /* Área especial de resultados interativos */
 body.alto-contraste #res-box strong,
 body.alto-contraste #res-box label,
-body.alto-contraste #res-box .val {
+body.alto-contraste #res-box .val,
+body.alto-contraste .processor-info,
+body.alto-contraste .processor-info code,
+body.alto-contraste .custom-val {
     color: #000000 !important;
+    background: transparent !important;
+    border-color: #000000 !important;
 }
 
-body.alto-contraste .group-main-header {
+body.alto-contraste .processor-info {
+    border-style: solid;
+}
+
+body.alto-contraste #res-box strong,
+
     border-bottom-color: #ffff00;
 }
 
