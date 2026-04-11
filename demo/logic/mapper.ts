@@ -21,7 +21,7 @@ import { encodeBase64 } from "jsr:@std/encoding/base64";
 export function mapAllOutputs(
     output: CalcAUYOutput,
 ): Record<string, string | number | null> {
-    // 1. Gera todos os outputs padrão via toJSON (incluindo toAuditTrace)
+    // 1. Gera todos os outputs via toJSON, agora passando o katex para permitir HTML e Imagem
     const jsonStr = output.toJSON([
         "toStringNumber",
         "toFloatNumber",
@@ -32,11 +32,13 @@ export function mapAllOutputs(
         "toVerbalA11y",
         "toUnicode",
         "toAuditTrace",
-    ]);
+        "toHTML",
+        "toImageBuffer",
+    ], katex);
     const baseData = JSON.parse(jsonStr);
 
-    // 2. Métodos visuais e binários
-    const html = output.toHTML(katex);
+    // 2. Processamento de imagem (Responsabilidade da aplicação converter o Uint8Array do core para Base64)
+    // Nota: baseData.toImageBuffer vem como string JSON ou array de números dependendo do parser
     const buffer = output.toImageBuffer(katex);
     const base64 = encodeBase64(buffer);
 
@@ -63,7 +65,7 @@ export function mapAllOutputs(
         toVerbalA11y: baseData.toVerbalA11y,
         toUnicode: baseData.toUnicode,
         toAuditTrace: baseData.toAuditTrace,
-        toHTML: html,
+        toHTML: baseData.toHTML,
         toCustomOutput: customReport,
         toCustomOutputProcessor: processorCode,
         toImageDataBase64: `data:image/svg+xml;base64,${base64}`,

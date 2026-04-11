@@ -247,15 +247,49 @@ header h1 {
     /* Ex: de 32px a 56px */
 }
 
-/* Headers de Seção */
+/* Headers de Seção (Subtítulos das Keys) */
 h2 {
-    border-left: 0.625rem solid var(--accent);
-    /* 10px para 0.625rem */
-    padding-left: 1rem;
-    margin-top: 4rem;
+    border-left: 0.4rem solid var(--accent);
+    padding-left: 0.8rem;
+    margin-top: 2.5rem;
     color: var(--primary);
-    font-size: clamp(1.5rem, 4vw, 2.5rem);
-    /* Ex: de 24px a 40px */
+    font-size: clamp(1.1rem, 2.8vw, 1.75rem); /* Reduzido em ~30% */
+}
+
+.card-math-render {
+    background: white;
+    padding: 1rem;
+    border-radius: 0.3125rem;
+    border: 0.0625rem solid #eee;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow-x: auto;
+}
+
+/* Garante que o KaTeX dentro do card não estoure e seja centralizado */
+.card-math-render .calc-auy-result,
+#html-output .calc-auy-result {
+    transform: scale(0.9);
+    transform-origin: center;
+    margin: 0 !important;
+}
+
+#html-output {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    min-height: 80px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    padding: 10px;
+}
+
+html[data-theme="dark"] #html-output {
+    background: #2d3748;
+    border-color: #4a5568;
 }
 
 .nav-links {
@@ -615,21 +649,23 @@ button:active {
 
     .nav-links a {
         display: block;
-        padding: 0.5rem 1rem;
+        padding: 0.4rem 0.8rem;
         min-height: auto;
-        /* Reset min-height */
-        white-space: nowrap;
-        /* Ensure single line */
-        overflow: hidden;
-        text-overflow: ellipsis;
+        white-space: normal;
+        word-wrap: break-word;
+        font-size: 0.85rem;
+        line-height: 1.2;
     }
 
     .nav-group-title {
         border-bottom: 1px solid var(--border);
-        padding-bottom: 0.5rem;
-        margin-top: 1.5rem;
-        margin-bottom: 0.5rem;
+        padding-bottom: 0.3rem;
+        margin-top: 1.2rem;
+        margin-bottom: 0.4rem;
         width: 100%;
+        font-size: 0.8rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05rem;
     }
 
     /* Add indentation for hierarchy */
@@ -654,6 +690,23 @@ button:active {
     .output-item.full-width {
         grid-column: 1 / -1;
     }
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+}
+
+@media (min-width: 700px) {
+    .grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+/* Card que ocupa toda a largura disponível */
+.card.full-width {
+    grid-column: 1 / -1;
 }
 
 .card {

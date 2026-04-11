@@ -6,6 +6,14 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+// Utilitário para destacar metadados no JSON
+function highlightMetadata(jsonStr) {
+    if (typeof jsonStr !== "string") return jsonStr;
+    return jsonStr.replace(/"metadata":\s*{[\s\S]*?}/g, (match) => {
+        return `<mark class="metadata-marker">${match}</mark>`;
+    });
+}
+
 // Utilitário para atualizar a seção interativa
 function updateInteractiveDisplay(data) {
     const container = document.getElementById("interactive-outputs");
@@ -30,18 +38,11 @@ function updateInteractiveDisplay(data) {
             try {
                 const parsed = typeof data.toAuditTrace === 'string' ? JSON.parse(data.toAuditTrace) : data.toAuditTrace;
                 let json = JSON.stringify(parsed, null, 2);
-                
-                // Highlight apenas a chave "metadata" e seu objeto imediato
-                // Usando uma abordagem mais precisa para evitar capturar chaves erradas
-                json = json.replace(/"metadata":\s*{[\s\S]*?}/g, (match) => {
-                    return `<mark class="metadata-marker">${match}</mark>`;
-                });
-                return `<div class="json-view forensic-trace">${json}</div>`;
+                return `<div class="json-view forensic-trace">${highlightMetadata(json)}</div>`;
             } catch (e) {
                 return data.toAuditTrace;
             }
         })(),
-        // toHTML handled separately below
         toJson: (function() {
             if (!data.toJson) return '';
             try {
@@ -67,7 +68,6 @@ function updateInteractiveDisplay(data) {
         }
     }
 
-    // Atualiza o div de output com o HTML (seguro, pois vem do nosso gerador que já sanitiza/estiliza)
     const htmlOutput = document.getElementById("html-output");
     if (htmlOutput && data.toHTML) {
         htmlOutput.innerHTML = data.toHTML;
@@ -75,70 +75,101 @@ function updateInteractiveDisplay(data) {
 }
 
 const methodTitles = {
-    verbalMonetary: "1. locale",
-    currencyOptions: "1.1 Currency Options",
-    roundingShowcase: "2. Rounding",
-    strategyShowcase: "2.1 Strategies (Div/Mod)",
-    toString: "3. toString",
-    toFloatNumber: "4. toFloatNumber",
-    toRawInternalBigInt: "5. toRawInternalBigInt",
-    toMonetary: "6. toMonetary",
-    toLaTeX: "7. toLaTeX",
-    toHTML: "8. toHTML",
-    toUnicode: "9. toUnicode",
-    toVerbalA11y: "10. toVerbalA11y",
-    toCustomOutput: "10.1 toCustomOutput",
-    toImageBuffer: "11. toImageBuffer",
-    toJson: "12. toJSON",
-    add: "Adição",
-    sub: "Subtração",
-    mult: "Multiplicação",
-    div: "Divisão",
-    pow: "Potência",
-    mod: "Módulo",
-    divInt: "Divisão Inteira",
-    group: "Agrupamento",
+    "add/sub": "Soma/Sub",
+    "mult/div": "Mult/Div",
+    "div": "Div Racional",
+    "pow": "Pot/Raiz",
+    "mod/divInt": "Mod/DivInt",
+    "group": "Agrupamento",
+    "parser": "Parser",
+    "metadata": "Metadados",
+    "hibernate/hydrate": "Persistência",
+    "string/monetary": "Texto/Moeda",
+    "float/scaledBigInt": "Num/BigInt",
+    "unicode/html": "Unicode/HTML",
+    "LaTeX/rawInternalBigInt": "LaTeX/Bits",
+    "verbalA11y": "Voz (A11y)",
+    "customOutput": "Custom",
+    "auditTrace": "Auditoria",
+    "json": "JSON",
+    "imageBuffer": "Imagem",
 };
 
-function renderCategory(method, examples, groupType, container) {
-    const section = document.createElement("section");
-    section.id = `sec-${method}`;
-    section.innerHTML = `<h2>${methodTitles[method] || method}</h2>`;
+function renderCategory(examplesByKey, container, navList) {
+    for (const [key, examples] of Object.entries(examplesByKey)) {
+        const sectionId = `sec-${key.replace("/", "-")}`;
+        
+        // Adiciona à barra lateral
+        if (navList) {
+            const li = document.createElement("li");
+            li.innerHTML = `<a href="#${sectionId}">${methodTitles[key] || key}</a>`;
+            navList.appendChild(li);
+        }
 
-    const grid = document.createElement("div");
-    grid.className = "grid";
+        const section = document.createElement("section");
+        section.id = sectionId;
+        section.innerHTML = `<h2>${methodTitles[key] || key}</h2>`;
 
-    examples.forEach((ex) => {
-        const article = document.createElement("article");
-        article.className = "card";
+        const grid = document.createElement("div");
+        grid.className = "grid";
 
-        // Injeta o resultado diretamente (Texto ou HTML)
-        const resultView = `<div class="card-result-text">${ex.result}</div>`;
+        examples.forEach((ex) => {
+            const article = document.createElement("article");
+            article.className = examples.length === 1 ? "card full-width" : "card";
 
-        article.innerHTML = `
-                  <h3>${ex.title}</h3>
-                  <p class="context"><strong>Contexto:</strong> ${ex.context}</p>
-                  <div class="card-code"><code>${ex.code}</code></div>
-                  <div class="result-label">Resultado:</div>
-                  <div class="result-area">${resultView}</div>
-                `;
-        grid.appendChild(article);
-    });
+            let resultView = "";
+            const res = ex.result;
 
-    section.appendChild(grid);
-    container.appendChild(section);
+            if (res === null || res === undefined) {
+                resultView = `<div class="card-result-text">--</div>`;
+            } else if (typeof res === "string") {
+                if (res.startsWith("data:image")) {
+                    resultView = `<img src="${res}" alt="Resultado visual" class="image-result">`;
+                } else if (res.includes("calc-auy-result")) {
+                    resultView = `<div class="card-math-render">${res}</div>`;
+                } else if (res.startsWith("{") || res.startsWith("[")) {
+                    resultView = `<div class="json-view">${highlightMetadata(res)}</div>`;
+                } else {
+                    resultView = `<div class="card-result-text">${res}</div>`;
+                }
+            } else if (typeof res === "number") {
+                // FIX: Trata toFloatNumber que chega como tipo number
+                resultView = `<div class="card-result-text">${res.toString()}</div>`;
+            } else {
+                resultView = `<div class="card-result-text">${JSON.stringify(res)}</div>`;
+            }
+
+            const processorHtml = ex.customProcessor 
+                ? `<div class="processor-info"><strong>Processor:</strong> <code>${ex.customProcessor}</code></div>`
+                : "";
+
+            article.innerHTML = `
+                <h3>${ex.title}</h3>
+                <p class="context"><strong>Contexto:</strong> ${ex.context}</p>
+                <div class="card-code"><code>${ex.code}</code></div>
+                <div class="result-label">Resultado:</div>
+                <div class="result-area">
+                    ${processorHtml}
+                    ${resultView}
+                </div>
+            `;
+            grid.appendChild(article);
+        });
+
+        section.appendChild(grid);
+        container.appendChild(section);
+    }
 }
 
-// Carregar e categorizar exemplos
 async function loadExamples() {
     const container = document.getElementById("categories-container");
-    if (!container) { return; }
+    const navLinks = document.querySelector(".nav-links");
+    if (!container || !navLinks) { return; }
 
     try {
         const response = await fetch("/api/examples");
         const data = await response.json();
         
-        // 1. Injeta o CSS comum do KaTeX apenas UMA vez para todos os cards
         if (data.common_css) {
             let styleTag = document.getElementById("katex-common-styles");
             if (!styleTag) {
@@ -150,36 +181,42 @@ async function loadExamples() {
         }
 
         container.innerHTML = "";
+        
+        // Limpa a barra lateral (mantendo apenas o Interactive)
+        navLinks.innerHTML = '<li><a href="#sec-interactive">Interactive</a></li>';
 
-        // 2. Renderiza Grupo OPERAÇÕES
-        const operationsHeader = document.createElement("h1");
-        operationsHeader.className = "group-main-header";
-        operationsHeader.textContent = "Operações";
-        container.appendChild(operationsHeader);
+        const groupConfigs = [
+            { id: "operations", title: "Cálculo" },
+            { id: "audit", title: "Auditoria" },
+            { id: "outputs", title: "Output" }
+        ];
 
-        for (const [method, examples] of Object.entries(data.operations)) {
-            renderCategory(method, examples, "operations", container);
-        }
+        groupConfigs.forEach(group => {
+            if (data[group.id] && Object.keys(data[group.id]).length > 0) {
+                // Adiciona Título do Grupo no Nav
+                const navHeader = document.createElement("li");
+                navHeader.className = "nav-group-title";
+                navHeader.textContent = group.title;
+                navLinks.appendChild(navHeader);
 
-        // 3. Renderiza Grupo OUTPUTS
-        const outputHeader = document.createElement("h1");
-        outputHeader.className = "group-main-header";
-        outputHeader.textContent = "Outputs";
-        container.appendChild(outputHeader);
+                // Adiciona Título do Grupo no Conteúdo
+                const header = document.createElement("h1");
+                header.className = "group-main-header";
+                header.textContent = group.title;
+                container.appendChild(header);
 
-        for (const [method, examples] of Object.entries(data.outputs)) {
-            renderCategory(method, examples, "outputs", container);
-        }
+                renderCategory(data[group.id], container, navLinks);
+            }
+        });
+
     } catch (err) {
         console.error(err);
         container.innerHTML = `<p class="error">Erro ao carregar exemplos: ${err.message}</p>`;
     }
 }
 
-// Global resolve for code request
 let codePromiseResolve = null;
 
-// Inicialização
 function init() {
     const htmlEl = document.documentElement;
     const currentTheme = htmlEl.getAttribute("data-theme") || "light";
@@ -191,7 +228,6 @@ function init() {
         darkModeBtn.querySelector("span").textContent = isDark ? "☾" : "☼";
     }
 
-    // Sincroniza estado de alto contraste se aplicado pelo head
     const contrastBtn = document.getElementById("alto-contraste");
     if (contrastBtn) {
         const isContrast = htmlEl.classList.contains("alto-contraste-init")
@@ -201,14 +237,11 @@ function init() {
             document.body.classList.add("alto-contraste");
             contrastBtn.setAttribute("aria-pressed", "true");
         }
-        // Limpa a classe temporária do head
         htmlEl.classList.remove("alto-contraste-init");
     }
 
-    // Carregar Exemplos
     loadExamples();
 
-    // Listener para mensagens do Editor Sandbox
     globalThis.addEventListener("message", (event) => {
         if (event.data.type === "CODE_RESPONSE") {
             if (codePromiseResolve) {
@@ -222,7 +255,6 @@ function init() {
                 codePromiseResolve = null;
             }
         } else if (event.data.type === "EDITOR_READY") {
-            // Sincroniza o tema quando o editor estiver pronto
             const iframe = document.getElementById("editor-iframe");
             if (iframe && iframe.contentWindow) {
                 iframe.contentWindow.postMessage(
@@ -241,11 +273,9 @@ function init() {
 
             if (!iframe || !iframe.contentWindow) { return; }
 
-            // Solicita o código ao editor via postMessage
             const expression = await new Promise((resolve) => {
                 codePromiseResolve = resolve;
                 iframe.contentWindow.postMessage({ type: "GET_CODE" }, "*");
-                // Timeout de segurança
                 setTimeout(() => {
                     if (codePromiseResolve === resolve) {
                         codePromiseResolve(null);
@@ -260,8 +290,6 @@ function init() {
             btnExecutar.disabled = true;
             btnExecutar.textContent = "Processando...";
 
-            const payload = { expression };
-
             try {
                 const response = await fetch("/api/calculate", {
                     method: "POST",
@@ -269,7 +297,7 @@ function init() {
                         "Content-Type": "application/json",
                         "X-Requested-With": "CalcAUD-Demo",
                     },
-                    body: JSON.stringify(payload),
+                    body: JSON.stringify({ expression }),
                 });
                 const data = await response.json();
                 if (data.error) {
@@ -287,7 +315,6 @@ function init() {
         });
     }
 
-    // Modo Escuro
     if (darkModeBtn) {
         darkModeBtn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -297,15 +324,12 @@ function init() {
             htmlEl.setAttribute("data-theme", newTheme);
             try {
                 localStorage.setItem("theme", newTheme);
-            } catch (_e) {
-                // localStorage might be blocked
-            }
+            } catch (_e) {}
 
             const isDark = newTheme === "dark";
             darkModeBtn.setAttribute("aria-pressed", isDark);
             darkModeBtn.querySelector("span").textContent = isDark ? "☾" : "☼";
 
-            // Notificar o editor sobre a mudança de tema
             const iframe = document.getElementById("editor-iframe");
             if (iframe && iframe.contentWindow) {
                 iframe.contentWindow.postMessage({ type: "THEME_CHANGE", theme: newTheme }, "*");
@@ -313,7 +337,6 @@ function init() {
         });
     }
 
-    // Alto Contraste
     if (contrastBtn) {
         contrastBtn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -322,14 +345,11 @@ function init() {
             contrastBtn.setAttribute("aria-pressed", !isPressed);
             try {
                 localStorage.setItem("altoContraste", !isPressed);
-            } catch (_e) {
-                // localStorage might be blocked
-            }
+            } catch (_e) {}
         });
     }
 }
 
-// Inicialização segura após carregamento completo
 if (document.readyState === "complete") {
     init();
 } else {

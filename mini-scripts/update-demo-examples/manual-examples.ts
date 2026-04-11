@@ -32,10 +32,9 @@ export const manualExamples: RawExample[] = [
         title: "Subtração em cadeia",
         context: "Agrupamento de valores para desconto do valor principal.",
         code:
-            "CalcAUY.from(1_000_000).sub(CalcAUY.from('50_000').add(CalcAUY.from(5e4).mult('0.12'))).commit().toHTML(katex)",
-        result: CalcAUY.from(1_000_000).sub(CalcAUY.from("50_000").add(CalcAUY.from(5e4).mult("0.12"))).commit().toHTML(
-            katex,
-        ),
+            "CalcAUY.from(100_000).sub(CalcAUY.from('50000').add(CalcAUY.from(5e4).mult('0.12'))).commit().toMonetary({ decimalPrecision: 2 })",
+        result: CalcAUY.from(100_000).sub(CalcAUY.from("50000").add(CalcAUY.from(5e4).mult("0.12"))).commit()
+            .toMonetary({ decimalPrecision: 2 }),
     },
 
     // Multiplicações e Divisões
@@ -52,11 +51,11 @@ export const manualExamples: RawExample[] = [
     },
     {
         group: "operations",
-        key: "div",
+        key: "mult/div",
         title: "Divisão exata",
-        context: "Cálculo exato sem resíduos do IEEE 754",
-        code: "CalcAUY.from(10).div(3).mult(3).commit().toScaledBigInt({ decimalPrecision: 20 })",
-        result: CalcAUY.from(10).div(3).mult(3).commit().toScaledBigInt({ decimalPrecision: 20 }),
+        context: "Cálculo exato em 20 casas decimais sem resíduos do IEEE 754",
+        code: "CalcAUY.from(10).div(3).mult(3).commit().toStringNumber({ decimalPrecision: 20 })",
+        result: CalcAUY.from(10).div(3).mult(3).commit().toStringNumber({ decimalPrecision: 20 }),
     },
 
     // Potênciação
@@ -66,7 +65,7 @@ export const manualExamples: RawExample[] = [
         title: "Cálculo de juros compostos",
         context: "Cálculo de rendimento simples.",
         code:
-            "CalcAUY.from(1000).mult(CalcAUY.from(1).add('0.05').group().pow(12)).commit({ roundStrategy: 'NBR5891' }).toHTML(katex)",
+            "CalcAUY.from(1000).mult(CalcAUY.from(1).add('0.05').group().pow(12)).commit({ roundStrategy: 'NBR5891' }).toUnicode()",
         result: CalcAUY.from(1000).mult(CalcAUY.from(1).add("0.05").group().pow(12)).commit({
             roundStrategy: "NBR5891",
         }).toUnicode(),
@@ -156,12 +155,12 @@ export const manualExamples: RawExample[] = [
         title: "Inclusão de metadados para rastreio",
         context: "Cenário onde um cálculo foi feito na operação e carrega os metadados do operador",
         code:
-            "CalcAUY.from(5432).mult('1/3').setMetadata('operational_trace', {id: uuidv7.generate(), operator_name: 'José da Silva', date: new Date().toISOString()}).commit().toStringNumber()",
+            "CalcAUY.from(5432).mult('1/3').setMetadata('operational_trace', {id: uuidv7.generate(), operator_name: 'José da Silva', date: new Date().toISOString()}).commit().toAuditTrace()",
         result: CalcAUY.from(5432).mult("1/3").setMetadata("operational_trace", {
             id: uuidv7.generate(),
             operator_name: "José da Silva",
             date: new Date().toISOString(),
-        }).commit().toStringNumber(),
+        }).commit().toAuditTrace(),
     },
     {
         group: "audit",
@@ -249,7 +248,7 @@ export const manualExamples: RawExample[] = [
     },
     {
         group: "outputs",
-        key: "string/monetary",
+        key: "float/scaledBigInt",
         title: "Demonstração de output",
         context: "Cálculo de juros compostos (visão scaledBigInt)",
         code:
@@ -263,7 +262,7 @@ export const manualExamples: RawExample[] = [
     // toSlice/toSLiceByRatio
     {
         group: "outputs",
-        key: "float/scaledBigInt",
+        key: "toSlice/toSliceByRatio",
         title: "Demonstração de output",
         context: "Cálculo de juros compostos (visão toSlice(3))",
         code:
@@ -275,7 +274,7 @@ export const manualExamples: RawExample[] = [
     },
     {
         group: "outputs",
-        key: "string/monetary",
+        key: "toSlice/toSliceByRatio",
         title: "Demonstração de output",
         context: "Cálculo de juros compostos (visão toSliceByRatio(['10%', '5%', '25%', '60%']))",
         code:
@@ -301,7 +300,7 @@ export const manualExamples: RawExample[] = [
     },
     {
         group: "outputs",
-        key: "string/monetary",
+        key: "unicode/html",
         title: "Demonstração de output",
         context: "Cálculo de juros compostos (visão toHTML)",
         code:
@@ -327,7 +326,7 @@ export const manualExamples: RawExample[] = [
     },
     {
         group: "outputs",
-        key: "string/monetary",
+        key: "LaTeX/rawInternalBigInt",
         title: "Demonstração de output",
         context: "Cálculo de juros compostos (visão toRawInternalBigInt)",
         code:

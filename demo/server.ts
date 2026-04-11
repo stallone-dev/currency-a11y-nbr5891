@@ -11,7 +11,6 @@ import { CalcAUYError } from "../src/core/errors.ts";
 import { isRateLimited } from "./logic/rate_limit.ts";
 import { executeExpression } from "./logic/execution.ts";
 import { mapAllOutputs } from "./logic/mapper.ts";
-import { getCategorizedExamples } from "./data/examples.ts";
 import { serveFile } from "./handlers/static.ts";
 
 const __dirname = dirname(fromFileUrl(import.meta.url));
@@ -48,10 +47,13 @@ export default Deno.serve({ port: 8087 }, async (req) => {
                 },
             });
         } catch (e) {
-            return new Response(JSON.stringify({ error: "Exemplos pré-calculados não encontrados. Rode o script de geração." }), {
-                status: 500,
-                headers: { "content-type": "application/json" },
-            });
+            return new Response(
+                JSON.stringify({ error: "Exemplos pré-calculados não encontrados. Rode o script de geração." }),
+                {
+                    status: 500,
+                    headers: { "content-type": "application/json" },
+                },
+            );
         }
     }
 
