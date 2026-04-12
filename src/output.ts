@@ -110,8 +110,10 @@ export class CalcAUYOutput {
     readonly #ast: CalculationNode;
     readonly #strategy: RoundingStrategy;
     readonly #cache: Map<number, RationalNumber> = new Map<number, RationalNumber>();
-    private static cachedKaTeXCSS: string | null = null;
-    private static readonly formatterCache = new Map<string, Intl.NumberFormat>();
+    readonly #outputCache: Map<string, string | Uint8Array> = new Map();
+    static #cachedKaTeXCSS: string | null = null;
+    static readonly #formatterCache = new Map<string, Intl.NumberFormat>();
+    static readonly #encoder = new TextEncoder();
 
     public constructor(result: RationalNumber, ast: CalculationNode, strategy: RoundingStrategy) {
         this.#result = result;
@@ -170,9 +172,14 @@ export class CalcAUYOutput {
      * ```
      */
     public toStringNumber(options?: OutputOptions): string {
+        const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
+        const cacheKey = `toStringNumber:${p}`;
+        if (this.#outputCache.has(cacheKey)) { return this.#outputCache.get(cacheKey) as string; }
+
         return this.instrument("toStringNumber", options, () => {
-            const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
-            return this.getRounded(p).toDecimalString(p);
+            const result = this.getRounded(p).toDecimalString(p);
+            this.#outputCache.set(cacheKey, result);
+            return result;
         });
     }
 
@@ -306,7 +313,7 @@ export class CalcAUYOutput {
             if (Number.isNaN(numberValue)) { return val; }
 
             const cacheKey = `${loc.locale}:${currency}:${p}`;
-            let formatter = CalcAUYOutput.formatterCache.get(cacheKey);
+            let formatter = CalcAUYOutput.#formatterCache.get(cacheKey);
             if (!formatter) {
                 formatter = new Intl.NumberFormat(loc.locale, {
                     style: "currency",
@@ -314,7 +321,7 @@ export class CalcAUYOutput {
                     minimumFractionDigits: p,
                     maximumFractionDigits: p,
                 });
-                CalcAUYOutput.formatterCache.set(cacheKey, formatter);
+                CalcAUYOutput.#formatterCache.set(cacheKey, formatter);
             }
 
             return formatter.format(numberValue);
@@ -354,12 +361,17 @@ export class CalcAUYOutput {
      * ```
      */
     public toLaTeX(options?: OutputOptions): string {
+        const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
+        const cacheKey = `toLaTeX:${p}`;
+        if (this.#outputCache.has(cacheKey)) { return this.#outputCache.get(cacheKey) as string; }
+
         return this.instrument("toLaTeX", options, () => {
             const base: string = renderAST(this.#ast, "latex");
-            const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
             const roundedStr: string = this.toStringNumber(options);
             const strategyName: string = ROUNDING_IDS[this.#strategy];
-            return String.raw`\text{round}_{\text{${strategyName}}}(${base}, ${p}) = ${roundedStr}`;
+            const result = String.raw`\text{round}_{\text{${strategyName}}}(${base}, ${p}) = ${roundedStr}`;
+            this.#outputCache.set(cacheKey, result);
+            return result;
         });
     }
 
@@ -395,12 +407,17 @@ export class CalcAUYOutput {
      * ```
      */
     public toUnicode(options?: OutputOptions): string {
+        const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
+        const cacheKey = `toUnicode:${p}`;
+        if (this.#outputCache.has(cacheKey)) { return this.#outputCache.get(cacheKey) as string; }
+
         return this.instrument("toUnicode", options, () => {
             const base: string = renderAST(this.#ast, "unicode");
             const strategyName: string = ROUNDING_IDS[this.#strategy];
             const subStrategy: string = toSubscript(strategyName);
-            const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
-            return `round${subStrategy}(${base}, ${p}) = ${this.toStringNumber(options)}`;
+            const result = `round${subStrategy}(${base}, ${p}) = ${this.toStringNumber(options)}`;
+            this.#outputCache.set(cacheKey, result);
+            return result;
         });
     }
 
@@ -442,19 +459,8 @@ export class CalcAUYOutput {
      */
     public toHTML(katex: IKatex, options?: OutputOptions, customLocale?: CalcAUYLocaleA11y, skipA11y = false): string {
         return this.instrument("toHTML", options, () => {
-            if (!katex || typeof katex.renderToString !== "function") {
-                throw new CalcAUYError("invalid-syntax", "O módulo 'katex' é obrigatório para toHTML.");
-            }
-
             const fullLatex: string = this.toLaTeX(options);
-            const verbal: string = skipA11y ? "" : this.toVerbalA11y(options, customLocale);
-
-            const rendered: string = katex.renderToString(fullLatex, { displayMode: true, throwOnError: false });
-
-            if (!CalcAUYOutput.cachedKaTeXCSS) { CalcAUYOutput.cachedKaTeXCSS = KATEX_CSS_MINIFIED; }
-
-            const ariaAttr = skipA11y ? "" : ` aria-label="${verbal}"`;
-            return `<div class="calc-auy-result"${ariaAttr}><style>${CalcAUYOutput.cachedKaTeXCSS}.calc-auy-result { margin: 1em 0; overflow-x: auto; }</style>${rendered}</div>`;
+            return this.renderHTMLInternal(katex, fullLatex, options, customLocale, skipA11y);
         });
     }
 
@@ -467,13 +473,19 @@ export class CalcAUYOutput {
      * @returns Buffer (Uint8Array) contendo o código SVG.
      */
     public toImageBuffer(katex: IKatex, options?: OutputOptions, customLocale?: CalcAUYLocaleA11y): Uint8Array {
+        const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
+        const cacheKey = `toImageBuffer:${p}:${!!customLocale}`;
+        if (this.#outputCache.has(cacheKey)) { return this.#outputCache.get(cacheKey) as Uint8Array; }
+
         return this.instrument("toImageBuffer", options, () => {
-            const IGNORE_ARAI_LABEL = true;
-            const html: string = this.toHTML(katex, options, customLocale, IGNORE_ARAI_LABEL);
             const latex: string = this.toLaTeX(options);
+            const IGNORE_ARAI_LABEL = true;
+            const html: string = this.renderHTMLInternal(katex, latex, options, customLocale, IGNORE_ARAI_LABEL);
 
             const svg: string = generateSVG(html, latex);
-            return new TextEncoder().encode(svg);
+            const result = CalcAUYOutput.#encoder.encode(svg);
+            this.#outputCache.set(cacheKey, result);
+            return result;
         });
     }
 
@@ -808,6 +820,37 @@ export class CalcAUYOutput {
             duration,
             options,
         });
+        return result;
+    }
+
+    /**
+     * Lógica interna para renderização de HTML, permitindo o reaproveitamento de LaTeX já calculado.
+     * @private
+     */
+    private renderHTMLInternal(
+        katex: IKatex,
+        fullLatex: string,
+        options?: OutputOptions,
+        customLocale?: CalcAUYLocaleA11y,
+        skipA11y = false,
+    ): string {
+        const p: number = options?.decimalPrecision ?? DEFAULT_DECIMAL_PRECISION;
+        const cacheKey = `toHTML:${p}:${!!customLocale}:${skipA11y}`;
+        if (this.#outputCache.has(cacheKey)) { return this.#outputCache.get(cacheKey) as string; }
+
+        if (!katex || typeof katex.renderToString !== "function") {
+            throw new CalcAUYError("invalid-syntax", "O módulo 'katex' é obrigatório para toHTML.");
+        }
+
+        const verbal: string = skipA11y ? "" : this.toVerbalA11y(options, customLocale);
+        const rendered: string = katex.renderToString(fullLatex, { displayMode: true, throwOnError: false });
+
+        if (!CalcAUYOutput.#cachedKaTeXCSS) { CalcAUYOutput.#cachedKaTeXCSS = KATEX_CSS_MINIFIED; }
+
+        const ariaAttr = skipA11y ? "" : ` aria-label="${verbal}"`;
+        const result =
+            `<div class="calc-auy-result"${ariaAttr}><style>${CalcAUYOutput.#cachedKaTeXCSS}.calc-auy-result { margin: 1em 0; overflow-x: auto; }</style>${rendered}</div>`;
+        this.#outputCache.set(cacheKey, result);
         return result;
     }
 }
