@@ -25,7 +25,7 @@
  *   .setMetadata("context", "taxa_administrativa")
  *   .commit();
  *
- * console.log(total.toMonetary({ precision: 2 })); // "R$ 15,00"
+ * console.log(total.toMonetary({ decimalPrecision: 2 })); // "R$ 15,00"
  * ```
  *
  * @module

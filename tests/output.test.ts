@@ -110,7 +110,7 @@ describe("CalcAUYOutput - Output Methods and Customization", () => {
         assert(json.toImageBuffer === undefined);
 
         // Verify some values
-        assertEquals(json.toStringNumber, "15.0000");
+        assertEquals(json.toStringNumber, "15.00");
     });
 
     it("deve permitir processamento de saída customizado via processor", () => {
@@ -139,8 +139,8 @@ describe("CalcAUYOutput - Output Methods and Customization", () => {
 
         assertEquals(customResult.numerator, "10");
         assertEquals(customResult.denominator, "3");
-        assertStringIncludes(customResult.latexFormula, "\\text{round}_{\\text{NBR-5891}}(\\frac{10}{3}, 4) = 3.3333"); // Corrected LaTeX string
-        assertEquals(customResult.decimal, "3.3333");
+        assertStringIncludes(customResult.latexFormula, "\\text{round}_{\\text{NBR-5891}}(\\frac{10}{3}, 2) = 3.33"); // Corrected LaTeX string
+        assertEquals(customResult.decimal, "3.33");
     });
 
     it("deve chamar logger.info quando um método de output é invocado e o info está habilitado", () => {

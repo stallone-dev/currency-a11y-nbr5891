@@ -5,12 +5,12 @@
 **Infraestrutura de Cálculo AST para Engenharia Financeira e Acessibilidade Digital**
 
 [![License: MPL 2.0](https://img.shields.io/badge/License-MPL_2.0-2b3a42?style=for-the-badge)](https://opensource.org/licenses/MPL-2.0)
-[![JSR](https://img.shields.io/badge/JSR-F7DF1E?style=for-the-badge&logo=jsr&logoColor=000)](https://jsr.io/@seu-escopo/seu-pacote)
+[![JSR](https://img.shields.io/badge/JSR-F7DF1E?style=for-the-badge&logo=jsr&logoColor=000)](https://jsr.io/@st-all-one/calc-auy)
 [![Made in Brazil](https://img.shields.io/badge/Made_in-Brazil-009739?style=for-the-badge)](https://github.com/topics/brazil)
 
 </div>
 
-A **CalcAUY** é uma infraestrutura em **TypeScript** projetada para neutralizar a imprecisão do padrão IEEE 754, enquanto assegura integridade atuária através de **Imutabilidade estrita e Árvore de Sintaxe Abstrata (AST)**, transformando cada operação matemática em uma evidência confiável, transparente, acessível e auditável.
+A **CalcAUY** é uma infraestrutura em **TypeScript** projetada para neutralizar a imprecisão do padrão IEEE 754, assegurando integridade atuária através da **Imutabilidade estrita e Árvore de Sintaxe Abstrata (AST)**, transformando cada operação matemática em uma evidência confiável, transparente, acessível e auditável.
 
 ---
 
@@ -42,51 +42,48 @@ bunx    jsr add @st-all-one/calc-auy
 import { CalcAUY } from "@st-all-one/calc-auy";
 
 // ==== Cálculo de Juros Compostos ====
-// Parâmetros
-const capital = CalcAUY.from("1000.00");
-const taxaAnual = CalcAUY.from("0.10"); // 10% a.a.
+// == Parâmetros ==
+const capitalInicial = 10_000.00;
+const taxaJurosAnual = "14.75%";
 const anosDecorridos = 3;
 
-// Cálculo matemático M = C * (1 + i)^t
-const calcMontante = capital.mult(
-    CalcAUY.from(1)
-        .add(taxaAnual)
-        .group()
-        .pow(anosDecorridos),
-);
+// == Construção da AST de cálculo [ M = C * (1 + j)^t ] ==
+const montante = CalcAUY
+    .from(capitalInicial)
+    .mult(
+        CalcAUY.from(1)
+            .add(taxaJurosAnual)
+            .group()
+            .pow(anosDecorridos),
+    )
+    .setMetadata("obs", "Juros de 14,75% a.a. (SELIC, Mar/26)");
 
-// Colapso da AST e definição estratégia de arredondamento final
-const resultado = calcMontante.commit({ roundStrategy: "NBR5891" });
+// == Colapso da AST e definição estratégia de arredondamento ==
+const resultado = montante.commit({ roundStrategy: "NBR5891" });
 
-// Captura das diferentes visualizações do resultado
-const monetario = resultado.toMonetary();
-const scaledBigInt = resultado.toScaledBigInt({ decimalPrecision: 2 });
-const unicode = resultado.toUnicode();
-const latex = resultado.toLaTeX();
-const verbalA11y = resultado.toVerbalA11y({ locale: "fr-FR" });
-const auditTrace = resultado.toAuditTrace();
+// == Extração dos Outputs ==
+console.log(resultado.toMonetary());
+// R$ 15.109,78
 
-console.log(monetario);     // "R$ 1.331,0000"
-console.log(scaledBigInt); // 133100n
+console.log(resultado.toUnicode());
+// roundₙᵦᵣ₋₅₈₉₁(10000 × ((1 + 14.75%)³), 2) = 15109.78
 
-console.log(unicode);       // "roundₙᵦᵣ₋₅₈₉₁(1000.00 × ((1 + (0.10))³), 4) = 1331.0000"
-console.log(latex);         // "\text{round}_{\text{NBR-5891}}(1000.00 \times \left( \left( 1 + \left( 0.10 \right) \right)^{3} \right), 4) = 1331.0000"
+console.log(resultado.toVerbalA11y());
+// 10000 multiplicado por abre parênteses abre parênteses 1 mais 14.75% fecha parênteses elevado a 3 fecha parênteses é igual a 15109 vírgula 78 (Arredondamento: NBR-5891 para 2 casas decimais).
 
-console.log(verbalA11y);    // "1000.00 multiplié par ouvrir la parenthèse ouvrir la parenthèse 1 plus ouvrir la parenthèse 0.10 fermer la parenthèse fermer la parenthèse puissance 3 fermer la parenthèse est égal à 1331 virgule 0000 (Arrondi: NBR-5891 pour 4 décimales)."
-
-console.log(auditTrace);
+console.log(resultado.toAuditTrace());
 /*
-{"ast":{"kind":"operation","type":"mul","operands":[{"kind":"literal","value":{"n":"1000","d":"1"},"originalInput":"1000.00"},{"kind":"group","child":{"kind":"operation","type":"pow","operands":[{"kind":"group","child":{"kind":"operation","type":"add","operands":[{"kind":"literal","value":{"n":"1","d":"1"},"originalInput":"1"},{"kind":"group","child":{"kind":"literal","value":{"n":"1","d":"10"},"originalInput":"0.10"}}]}},{"kind":"literal","value":{"n":"3","d":"1"},"originalInput":"3"}]}}]},"finalResult":{"n":"1331","d":"1"},"strategy":"NBR5891"}
+{"ast":{"kind":"operation","type":"mul","operands":[{"kind":"literal","value":{"n":"10000","d":"1"},"originalInput":"10000"},{"kind":"group","child":{"kind":"operation","type":"pow","operands":[{"kind":"group","child":{"kind":"operation","type":"add","operands":[{"kind":"literal","value":{"n":"1","d":"1"},"originalInput":"1"},{"kind":"literal","value":{"n":"59","d":"400"},"originalInput":"14.75%"}]}},{"kind":"literal","value":{"n":"3","d":"1"},"originalInput":"3"}]}}],"metadata":{"obs":"Juros de 14,75% a.a. (SELIC, Mar/26)"}},"finalResult":{"n":"96702579","d":"6400"},"strategy":"NBR5891"}
 */
 ```
 
-## 🎯 Por que a CalcAUY existe?
+## 🎯 Qual problema a CalcAUY resolve?
 
 No desenvolvimento de softwares modernos, o uso do padrão **IEEE 754** (number/float) introduz um risco sistêmico. Erros de arredondamento binário, como o clássico `0.1 + 0.2 !== 0.3`, não são meras curiosidades matemáticas; em escala, transformam-se em rombos financeiros, falhas de compliance e passivos jurídicos.
 
-A `CalcAUY` busca neutralizar essa imprecisão ao tratar o cálculo como um **artefato de engenharia persistente e auditável**.
+A `CalcAUY` busca neutralizar essa imprecisão ao tratar o cálculo como um **artefato de engenharia persistente e auditável**, ao aplicar:
 
-### Engenharia Matemática
+### 1. Engenharia Matemática
 
 - **Precisão Racional**: Baseada em `BigInts`, a lib opera puramente com frações exatas `(n/d)`. Executando simplificação via **Algoritmo de Euclides** (MCD) em cada etapa, garantindo que a memória seja otimizada sem sacrificar o rigor matemático.
 
@@ -98,7 +95,7 @@ A `CalcAUY` busca neutralizar essa imprecisão ao tratar o cálculo como um **ar
 
 - **Integridade Atuária**: Implementação estrita da `NBR 5891` e algoritmos de `Resto de divisão Euclidiana` e `Maior Resto` para rateios monetários exatos, garantindo que nenhum centavo seja perdido ou tendenciado.
 
-### Developer Experience (DX), Portabilidade e Escalabilidade
+### 2. Developer Experience (DX), Portabilidade e Escalabilidade
 
 - **Tipagem Estrita**: Desenvolvida sob o `Strict Mode máximo` do TypeScript, a lib utiliza `Type Guards` e campos privados para garantir que a integridade dos dados seja mantida do código à transpilação.
 
@@ -108,9 +105,13 @@ A `CalcAUY` busca neutralizar essa imprecisão ao tratar o cálculo como um **ar
 
 - **Processamento em Lotes**: O utilitário `processBatch` permite processar volumes massivos de transações (ex: 100.000 cálculos) sem congelar o servidor, utilizando a API `scheduler.yield()` para equilibrar o Throughput e a Responsividade.
 
-### Acessibilidade (A11y) e Universalidade
+### 3. Acessibilidade (A11y) e Universalidade
 
 - **Matemática Acessível**: A `CalcAUY` transforma a AST em diferentes representações visuais e integrativas, como narrações verbais em 8 idiomas (`toVerbalA11y`), unicode para CLIs (`toUnicode`), LaTeX para relatórios (`toLaTeX`), HTML via KaTeX (`toHTML`), AST serializada para auditoria profunda (`toAuditTrace`) e diversos outros outputs, garantindo que cada cálculo possa ser lido por pessoas, máquinas e leitores de tela.
+
+## Por que a CalcAUY foi criada?
+
+> Em linhas gerais, porque não achei nenhuma outra maneira (sem gambiarras colossais) de fazer o que essa lib faz.
 
 ## 🔍 Testes
 

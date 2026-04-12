@@ -5,16 +5,16 @@ import { CalcAUY } from "../mod.ts";
 describe("Auditoria Exaustiva - CalcAUY (Rigor Matemático e Fiscal)", () => {
     describe("1. Aritmética Racional e Imunidade IEEE 754", () => {
         const precisionScenarios = [
-            { a: "0.1", b: "0.2", op: "add", exp: "0.3000" },
-            { a: "0.1", b: "0.2", op: "mult", exp: "0.0200" },
-            { a: "1", b: "3", op: "div", exp: "0.3333" },
-            { a: "10", b: "3", op: "div", exp: "3.3333" },
+            { a: "0.1", b: "0.2", op: "add", exp: "0.30" },
+            { a: "0.1", b: "0.2", op: "mult", exp: "0.02" },
+            { a: "1", b: "3", op: "div", exp: "0.33" },
+            { a: "10", b: "3", op: "div", exp: "3.33" },
             {
                 a: "0.00000000000000000000000000000000000000000000000001",
                 b: "0.00000000000000000000000000000000000000000000000001",
                 op: "add",
-                exp: "0.0000",
-            }, // Fora da escala de output 4, mas interna 50
+                exp: "0.00",
+            }, // Fora da escala de output 2, mas interna 50
         ];
 
         precisionScenarios.forEach(({ a, b, op, exp }) => {
@@ -57,12 +57,12 @@ describe("Auditoria Exaustiva - CalcAUY (Rigor Matemático e Fiscal)", () => {
 
     describe("3. Precedência PEMDAS e Associatividade", () => {
         const precedenceScenarios = [
-            { expr: "2 + 5 * 3", exp: "17.0000" },
-            { expr: "(2 + 5) * 3", exp: "21.0000" },
-            { expr: "10 - 2 / 2", exp: "9.0000" },
-            { expr: "2^3^2", exp: "512.0000" },
-            { expr: "100 / 10 % 3 * 2", exp: "2.0000" },
-            { expr: "2 + 5 * 3 ^ 2 ^ 2 ^ 2", exp: "215233607.0000" },
+            { expr: "2 + 5 * 3", exp: "17.00" },
+            { expr: "(2 + 5) * 3", exp: "21.00" },
+            { expr: "10 - 2 / 2", exp: "9.00" },
+            { expr: "2^3^2", exp: "512.00" },
+            { expr: "100 / 10 % 3 * 2", exp: "2.00" },
+            { expr: "2 + 5 * 3 ^ 2 ^ 2 ^ 2", exp: "215233607.00" },
         ];
 
         precedenceScenarios.forEach(({ expr, exp }) => {
@@ -122,10 +122,10 @@ describe("Auditoria Exaustiva - CalcAUY (Rigor Matemático e Fiscal)", () => {
 
     describe("6. Internacionalização Verbal (A11y)", () => {
         const localeScenarios = [
-            { loc: "pt-BR", expr: "10 + 5", exp: "10 mais 5 é igual a 15 vírgula 0000" },
-            { loc: "en-US", expr: "10 + 5", exp: "10 plus 5 is equal to 15 point 0000" },
-            { loc: "de-DE", expr: "10 + 5", exp: "10 plus 5 ist gleich 15 Komma 0000" },
-            { loc: "ja-JP", expr: "10 + 5", exp: "10 たす 5 は 15 点 0000" },
+            { loc: "pt-BR", expr: "10 + 5", exp: "10 mais 5 é igual a 15 vírgula 00" },
+            { loc: "en-US", expr: "10 + 5", exp: "10 plus 5 is equal to 15 point 00" },
+            { loc: "de-DE", expr: "10 + 5", exp: "10 plus 5 ist gleich 15 Komma 00" },
+            { loc: "ja-JP", expr: "10 + 5", exp: "10 たす 5 は 15 点 00" },
         ];
 
         localeScenarios.forEach(({ loc, expr, exp }) => {

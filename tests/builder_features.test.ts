@@ -103,13 +103,13 @@ describe("CalcAUY Builder Features", () => {
     describe("sub(value)", () => {
         it("deve realizar a operação de subtração corretamente", () => {
             const result = CalcAUY.from(10).sub(5).commit();
-            assertEquals(result.toStringNumber(), "5.0000");
+            assertEquals(result.toStringNumber(), "5.00");
         });
 
         it("deve realizar a subtração com uma instância CalcAUY como entrada", () => {
             const subValue = CalcAUY.from(3);
             const result = CalcAUY.from(10).sub(subValue).commit();
-            assertEquals(result.toStringNumber(), "7.0000");
+            assertEquals(result.toStringNumber(), "7.00");
         });
 
         it("deve chamar logger.debug quando um nó de operação é anexado e o debug está habilitado", () => {

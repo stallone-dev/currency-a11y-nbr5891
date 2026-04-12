@@ -15,7 +15,7 @@ Esse erro de "1 centavo" pode causar prejuízos milionários em faturas ou incon
 import { CalcAUY } from "calc-auy";
 
 const res = CalcAUY.from(0.1).add(0.2).commit();
-console.log(res.toStringNumber()); // "0.3000" ✅ (Precisão Racional Exata)
+console.log(res.toStringNumber()); // "0.30" ✅ (Precisão Racional Exata)
 ```
 
 ## 2. O Momento Mágico (O Rastro)
@@ -32,7 +32,7 @@ const fatura = CalcAUY.from(1000)
 console.log(fatura.toScaledBigInt({ decimalPrecision: 2 })); // 115500n
 
 // 2. O rastro para o Laudo Pericial (LaTeX)
-console.log(fatura.toLaTeX()); // \text{round}_{NBR}((1000 + 50) * 1.10, 4) = 1155.0000
+console.log(fatura.toLaTeX()); // \text{round}_{NBR}((1000 + 50) * 1.10, 2) = 1155.00
 
 // 3. Acessibilidade para deficientes visuais (Verbal)
 console.log(fatura.toVerbalA11y()); // "mil e cinquenta, multiplicado por um vírgula dez..."

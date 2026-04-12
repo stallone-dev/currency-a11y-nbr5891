@@ -7,7 +7,7 @@ Definir o contrato final de consumo dos resultados do cálculo. A classe `CalcAU
 
 ### `toStringNumber(options?: OutputOptions): string`
 - **Descrição:** Retorna a representação decimal do resultado final arredondado.
-- **Parâmetro:** `options.decimalPrecision` define a escala (Default: 4).
+- **Parâmetro:** `options.decimalPrecision` define a escala (Default: 2).
 - **Lógica:** Aplica a `roundStrategy` na precisão informada.
 - **Exemplo:** `1.2345` -> `toStringNumber({ decimalPrecision: 2 })` -> `"1.23"` (se TRUNCATE).
 
