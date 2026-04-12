@@ -155,36 +155,36 @@ A `CalcAUY` busca neutralizar essa imprecisão ao tratar o cálculo como um **ar
 > ```bash
 > // 2026-04-11
 > ❯ deno test tests/stress.test.ts
-> ┌───────────────────────────────┬──────────────────────────────────────────┐
-> │ (idx)                         │ Values                                   │
-> ├───────────────────────────────┼──────────────────────────────────────────┤
-> │ 1_cpu_limit_complex_root      │ "13.7199ms"                              │
-> │ 2_extensive_ast_depth         │ "6.6828ms"                               │
-> │ 3_costly_repeated_pow         │ "2094.4682ms (iterations: 100000)"       │
-> │ 4_simple_real_repeated        │ "950.7305ms (iterations: 100000)"        │
-> │ 5_metadata_cloning_stress     │ "268.3413ms (metadata_keys: 1000)"       │
-> │ 6_rational_explosion_gcd      │ "0.5983ms"                               │
-> │ 7_slicing_massacre            │ "137.7803ms (slices: 100000)"            │
-> │ 8_burst_concurrency_ddos      │ "1591.3037ms (concurrent_tasks: 100000)" │
-> │ 9_batch_processing_controlled │ "1518.0846ms (total_tasks: 100000)"      │
-> │ 10_logging_policy_race_stress │ "48.5323ms (errors: 0)"                  │
-> │ 11_bigint_limit_torture       │ "1.7954ms (caught_overflow: true)"       │
-> │ 12_malicious_json_hydration   │ "4.0073ms (deflected: true)"             │
-> └───────────────────────────────┴──────────────────────────────────────────┘
+> ┌───────────────────────────────┬─────────────────────────────────────────┐
+> │ (idx)                         │ Values                                  │
+> ├───────────────────────────────┼─────────────────────────────────────────┤
+> │ 1_cpu_limit_complex_root      │ "5.3984ms"                              │
+> │ 2_extensive_ast_depth         │ "2.6904ms"                              │
+> │ 3_costly_repeated_pow         │ "796.9134ms (iterations: 100000)"       │
+> │ 4_simple_real_repeated        │ "372.0489ms (iterations: 100000)"       │
+> │ 5_metadata_cloning_stress     │ "150.2125ms (metadata_keys: 1000)"      │
+> │ 6_rational_explosion_gcd      │ "0.2576ms"                              │
+> │ 7_slicing_massacre            │ "56.2544ms (slices: 100000)"            │
+> │ 8_burst_concurrency_ddos      │ "682.9196ms (concurrent_tasks: 100000)" │
+> │ 9_batch_processing_controlled │ "802.4321ms (total_tasks: 100000)"      │
+> │ 10_logging_policy_race_stress │ "19.8431ms (errors: 0)"                 │
+> │ 11_bigint_limit_torture       │ "0.8028ms (caught_overflow: true)"      │
+> │ 12_malicious_json_hydration   │ "1.8900ms (deflected: true)"            │
+> └───────────────────────────────┴─────────────────────────────────────────┘
 >
 > ❯ deno test tests/output_stress.test.ts
 > ┌────────────────────────────┬────────────────────────────────┐
 > │ (idx)                      │ Values                         │
 > ├────────────────────────────┼────────────────────────────────┤
-> │ 1_monetary_cache_hit_rate  │ "596.3240ms (iters: 100000)"   │
-> │ 2_verbal_a11y_deep_ast     │ "1.4227ms (chars: 9079)"       │
-> │ 3_render_complexity_nested │ "2.4287ms (latex_len: 4395)"   │
-> │ 4_html_generation_burst    │ "1144.7103ms (iters: 100000)"  │
-> │ 5_high_precision_slicing   │ "186.8159ms (slices: 100000)"  │
-> │ 6_to_json_consolidation    │ "3477.5152ms (iters: 100000)"  │
-> │ 7_locale_switching_burst   │ "666.1079ms (switches: 90000)" │
-> │ 8_custom_processor_stress  │ "1387.2218ms (iters: 100000)"  │
-> │ 9_image_buffer_svg_stress  │ "13741.4414ms (iters: 100000)" │
+> │ 1_monetary_cache_hit_rate  │ "168.4785ms (iters: 100000)"   │
+> │ 2_verbal_a11y_deep_ast     │ "0.7537ms (chars: 9079)"       │
+> │ 3_render_complexity_nested │ "1.9816ms (latex_len: 4395)"   │
+> │ 4_html_generation_burst    │ "56.6988ms (iters: 100000)"    │
+> │ 5_high_precision_slicing   │ "81.2635ms (slices: 100000)"   │
+> │ 6_to_json_consolidation    │ "750.2522ms (iters: 100000)"   │
+> │ 7_locale_switching_burst   │ "184.3834ms (switches: 90000)" │
+> │ 8_custom_processor_stress  │ "145.7747ms (iters: 100000)"   │
+> │ 9_image_buffer_svg_stress  │ "14.5307ms (iters: 100000)"    │
 > └────────────────────────────┴────────────────────────────────┘
 > ```
 
