@@ -84,39 +84,61 @@ function evaluateOperation(
     depth: number,
     parentNode: CalculationNode,
 ): RationalNumber {
-    if (operands.length === 0) {
+    const len = operands.length;
+    if (len === 0) {
         throw new CalcAUYError("corrupted-node", `Operação '${type}' sem operandos.`, { partialAST: parentNode });
     }
 
-    // Resolve todos os operandos recursivamente antes de aplicar o operador.
-    const values: RationalNumber[] = operands.map((op) => evaluate(op, depth));
+    // Resolve o primeiro operando para iniciar o acúmulo.
+    let acc: RationalNumber = evaluate(operands[0], depth);
+
+    // Validação de segurança: garante que o tipo da operação é conhecido,
+    // mesmo para nós com um único operando onde o loop não seria executado.
+    const supportedOps: OperationType[] = ["add", "sub", "mul", "div", "pow", "mod", "divInt"];
+    if (!supportedOps.includes(type)) {
+        throw new CalcAUYError("corrupted-node", `Operação não suportada: ${type}`, {
+            partialAST: parentNode,
+        });
+    }
 
     try {
-        const first = values[0];
-        const rest = values.slice(1);
+        // Resolve os demais operandos e aplica a operação sequencialmente.
+        // Otimização: Uso de loop for simples evita alocações de arrays temporários (map/slice/reduce).
+        for (let i = 1; i < len; i++) {
+            const val: RationalNumber = evaluate(operands[i], depth);
 
-        switch (type) {
-            case "add":
-                return rest.reduce((acc, val) => acc.add(val), first);
-            case "sub":
-                return rest.reduce((acc, val) => acc.sub(val), first);
-            case "mul":
-                return rest.reduce((acc, val) => acc.mul(val), first);
-            case "div":
-                return rest.reduce((acc, val) => acc.div(val), first);
-            case "pow":
-                return rest.reduce((acc, val) => acc.pow(val), first);
-            case "mod":
-                return rest.reduce((acc, val) => acc.mod(val), first);
-            case "divInt":
-                return rest.reduce((acc, val) => acc.divInt(val), first);
-            default: {
-                const unsupported: never = type;
-                throw new CalcAUYError("corrupted-node", `Operação não suportada: ${unsupported}`, {
-                    partialAST: parentNode,
-                });
+            switch (type) {
+                case "add":
+                    acc = acc.add(val);
+                    break;
+                case "sub":
+                    acc = acc.sub(val);
+                    break;
+                case "mul":
+                    acc = acc.mul(val);
+                    break;
+                case "div":
+                    acc = acc.div(val);
+                    break;
+                case "pow":
+                    acc = acc.pow(val);
+                    break;
+                case "mod":
+                    acc = acc.mod(val);
+                    break;
+                case "divInt":
+                    acc = acc.divInt(val);
+                    break;
+                default: {
+                    const unsupported: never = type;
+                    throw new CalcAUYError("corrupted-node", `Operação não suportada: ${unsupported}`, {
+                        partialAST: parentNode,
+                    });
+                }
             }
         }
+
+        return acc;
     } catch (err) {
         if (err instanceof CalcAUYError) {
             // Enriquece o erro com a AST parcial se ainda não tiver

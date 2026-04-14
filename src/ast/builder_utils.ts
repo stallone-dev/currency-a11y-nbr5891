@@ -16,10 +16,17 @@ export const PRECEDENCE: Record<OperationType, number> = {
 };
 
 /**
- * Limites de segurança para a estrutura da AST durante a hidratação.
+ * Limites de segurança para a estrutura da AST durante a hidratação e construção.
  */
 const MAX_HYDRATE_DEPTH = 500;
 const MAX_HYDRATE_NODES = 1000;
+
+/**
+ * Largura máxima de um nó de operação antes de criar uma nova camada (Hierarchical Flattening).
+ * Mantém a construção em O(N) e a profundidade em O(log N), evitando o custo O(N²) de cópia
+ * de arrays em acúmulos massivos.
+ */
+const MAX_OPERANDS = 100;
 
 /**
  * Estado compartilhado para validação recursiva da AST.
@@ -111,9 +118,9 @@ export function validateASTNode(
  * @returns {CalculationNode} Nova raiz da árvore reorganizada.
  */
 export function attachOp(target: CalculationNode, type: OperationType, right: CalculationNode): CalculationNode {
-    // Otimização: Aplanamento Associativo (Smart Flattening)
-    // Se o nó atual já for do mesmo tipo e estiver "limpo", apenas anexamos o operando.
-    // Isso reduz a profundidade da AST de O(N) para O(1) em sequências lineares.
+    // Otimização: Aplanamento Associativo Inteligente (Hierarchical Flattening)
+    // Se o nó atual já for do mesmo tipo, estiver "limpo" e DENTRO do limite de largura, apenas anexamos.
+    // Isso reduz a profundidade da AST de O(N) para O(log N) em sequências lineares massivas.
     // Pulamos 'pow' pois sua associatividade é à direita.
     if (
         target.kind === "operation"
@@ -122,6 +129,12 @@ export function attachOp(target: CalculationNode, type: OperationType, right: Ca
         && !target.metadata
         && !target.label
     ) {
+        // Se exceder a largura máxima, criamos uma nova camada (O(N) construction)
+        // em vez de continuar espalhando o array infinitamente (O(N²) cost).
+        if (target.operands.length >= MAX_OPERANDS) {
+            return { kind: "operation", type, operands: [target, right] };
+        }
+
         return {
             ...target,
             operands: [...target.operands, right],

@@ -216,20 +216,22 @@ export class CalcAUY {
     }
 
     /**
-     * Processa um array de itens de forma assíncrona e em lotes (Yielding).
+     * Processa um array de itens de forma assíncrona e em lotes, com suporte a
+     * paralelismo lógico (workers) e acúmulo (redução) nativo.
      *
-     * **Engenharia:** Evita o bloqueio do Event Loop em cálculos massivos, cedendo a CPU
-     * periodicamente para que o servidor possa atender outras requisições ou I/O.
+     * **Engenharia:** Evita o bloqueio do Event Loop em cálculos massivos. O suporte
+     * a `logicalWorkers` permite processar chunks do array concorrentemente,
+     * enquanto o `reducer` permite realizar somas/reduções de forma otimizada.
      *
      * @param items Array de dados.
      * @param task Função de transformação/cálculo.
-     * @param options Configuração do lote (batchSize e onProgress).
+     * @param options Configuração do lote (batchSize, logicalWorkers, reducer).
      */
-    public static async processBatch<T, R>(
-        items: T[],
-        task: (item: T, index: number) => R,
-        options?: BatchOptions,
-    ): Promise<R[]> {
+    public static async processBatch<InputType, ResultType>(
+        items: InputType[],
+        task: (item: InputType, index: number) => ResultType | Promise<ResultType>,
+        options?: BatchOptions<ResultType>,
+    ): Promise<ResultType[] | ResultType> {
         return await processBatch(items, task, options);
     }
 

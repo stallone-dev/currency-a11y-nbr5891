@@ -112,7 +112,9 @@ describe("CalcAUY - Testes de Estresse e Performance Extrema", () => {
         // Processa as mesmas 100.000 tarefas, mas em lotes de 5.000 com yielding
         await CalcAUY.processBatch(items, (i) => {
             return CalcAUY.from(i).add(10).mult("1.15").commit();
-        }, { batchSize: 1000 });
+        }, {
+            batchSize: 1000,
+        });
 
         const end = performance.now();
         results["9_batch_processing_controlled"] = `${(end - start).toFixed(4)}ms (total_tasks: ${TOTAL_TASKS})`;
