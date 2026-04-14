@@ -96,7 +96,7 @@ console.log(reabertura.toAuditTrace());
 
 No desenvolvimento de softwares, o uso do padrão **IEEE 754** (`number/float`) introduz um risco sistêmico. Imprecisãos binárias, como o clássico `0.1 + 0.2 !== 0.3`, não são meras curiosidades matemáticas; em escala, transformam-se em rombos financeiros, falhas de compliance e passivos jurídicos. Garantir a exatidão é apenas o início do desafio: **Provar como o cálculo foi feito** é o que garante segurança para aplicação.
 
-A **`CalcAUY`** elimina os riscos de imprecisão ao tratar cada operação como um **artefato auditável**. A biblioteca resolve a falta de transparência dos motores convencionais ao fornecer evidências verificáveis de todas as etapas que compõem o resultado, garantindo a integridade dos dados e a conformidade técnica da implementação ao fundamentar-se em três pilares:
+A **`CalcAUY`** elimina esses riscos ao tratar cada operação como um **artefato auditável**, resolvendo a falta de transparência dos motores convencionais ao fornecer evidências verificáveis de todas as etapas que compõem o resultado, garantindo a integridade dos dados e a conformidade técnica da implementação ao fundamentar-se em três pilares:
 
 ### 1. Integridade Matemática
 
