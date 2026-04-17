@@ -6,6 +6,11 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
+import { getSubLogger, startSpan } from "./logger.ts";
+import { createCacheSession } from "../core/rational.ts";
+
+const logger = getSubLogger("batch");
+
 /**
  * Opções para configuração do processamento em lote (Batch Processing).
  *
@@ -47,56 +52,58 @@ export interface BatchOptions<ResultType = unknown> {
      * Callback opcional chamado a cada lote concluído com o percentual de progresso (0-100).
      */
     onProgress?: (progress: number) => void;
+    /**
+     * Número total de itens (opcional).
+     *
+     * **Engenharia:** Útil para iteradores ou fluxos onde o tamanho total é conhecido
+     * antecipadamente, permitindo que o `onProgress` reporte o percentual correto.
+     */
+    totalItems?: number;
 }
 
 /**
  * ProcessBatchAUY - Engine de Processamento em Massa com Anti-Bloqueio.
  *
  * **Arquitetura Forense:** Este utilitário resolve o problema de cálculos pesados
- * em ambientes Single Thread (JS/TS). Ele utiliza técnicas de **Yielding** e
- * **Logical Parallelism** para processar milhões de registros mantendo a latência
- * de I/O sob controle.
+ * em ambientes Single Thread (JS/TS). Ele utiliza técnicas de **Yielding**,
+ * **Logical Parallelism** e **Streaming** para processar volumes industriais de dados.
  *
- * @template InputType - Tipo dos dados de entrada no array.
+ * @template InputType - Tipo dos dados de entrada (Array, Iterable ou AsyncIterable).
  * @template ResultType - Tipo do resultado gerado por cada tarefa.
  *
- * @param items - Array de itens a serem processados.
+ * @param items - Conjunto de itens a serem processados.
  * @param task - Função a ser executada para cada item (pode ser assíncrona).
  * @param options - Configurações de lote, concorrência e acúmulo.
  * @returns Um array de resultados ou o valor acumulado final se um reducer for usado.
- *
- * @example Exemplo Simples (Array de Resultados)
- * ```ts
- * const resultados = await ProcessBatchAUY(lista, async (item) => {
- *   return item * 2;
- * });
- * ```
- *
- * @example Consolidação com Reducer (Baixo consumo de RAM)
- * ```ts
- * const total = await ProcessBatchAUY(vendas, (v) => v.valor, {
- *   accumulator: 0,
- *   reducer: (acc, val) => acc + val
- * });
- * ```
  */
 export async function ProcessBatchAUY<InputType, ResultType>(
-    items: InputType[],
+    items: InputType[] | Iterable<InputType> | AsyncIterable<InputType>,
     task: (item: InputType, index: number) => ResultType | Promise<ResultType>,
     options: BatchOptions<ResultType> & { reducer: (acc: ResultType, item: ResultType) => ResultType },
 ): Promise<ResultType>;
 
 export async function ProcessBatchAUY<InputType, ResultType>(
-    items: InputType[],
+    items: InputType[] | Iterable<InputType> | AsyncIterable<InputType>,
     task: (item: InputType, index: number) => ResultType | Promise<ResultType>,
     options?: BatchOptions<ResultType>,
 ): Promise<ResultType[]>;
 
 export async function ProcessBatchAUY<InputType, ResultType>(
-    items: InputType[],
+    items: InputType[] | Iterable<InputType> | AsyncIterable<InputType>,
     task: (item: InputType, index: number) => ResultType | Promise<ResultType>,
     options: BatchOptions<ResultType> = {},
 ): Promise<ResultType[] | ResultType> {
+    const isArray = Array.isArray(items);
+    const totalCount = isArray ? (items as InputType[]).length : options.totalItems;
+
+    using _span = startSpan("ProcessBatchAUY", logger, {
+        totalItems: totalCount,
+        batchSize: options.batchSize,
+        logicalWorkers: options.logicalWorkers,
+        isStreaming: !isArray,
+    });
+    using _session = createCacheSession();
+
     const {
         batchSize = 1000,
         logicalWorkers = 0,
@@ -105,57 +112,120 @@ export async function ProcessBatchAUY<InputType, ResultType>(
         onProgress,
     } = options;
 
-    const total = items.length;
-    if (total === 0) {
-        return reducer ? (accumulator as ResultType) : [];
-    }
-
-    // Estratégia de Workers Lógicos (Divide and Conquer por Chunks)
-    if (logicalWorkers > 1) {
-        const workerCount = Math.min(logicalWorkers, total);
-        const chunkSize = Math.ceil(total / workerCount);
-        const promises: Promise<ResultType[] | ResultType>[] = [];
-
-        for (let i = 0; i < workerCount; i++) {
-            const start = i * chunkSize;
-            const end = Math.min(start + chunkSize, total);
-            const chunk = items.slice(start, end);
-
-            promises.push(
-                processSingleStream(chunk, task, {
-                    batchSize,
-                    accumulator: reducer ? accumulator : undefined,
-                    reducer,
-                    startIndex: start,
-                    totalItems: total,
-                    onProgress,
-                }),
-            );
+    if (isArray) {
+        const arrayItems = items as InputType[];
+        const total = arrayItems.length;
+        if (total === 0) {
+            return reducer ? (accumulator as ResultType) : [];
         }
 
-        const chunkResults = await Promise.all(promises);
+        // Estratégia de Workers Lógicos (Só para Arrays)
+        if (logicalWorkers > 1) {
+            const workerCount = Math.min(logicalWorkers, total);
+            const chunkSize = Math.ceil(total / workerCount);
+            const promises: Promise<ResultType[] | ResultType>[] = [];
 
-        if (reducer) {
-            let finalAcc: ResultType = accumulator as ResultType;
-            for (const res of chunkResults) {
-                finalAcc = reducer(finalAcc, res as ResultType);
+            for (let i = 0; i < workerCount; i++) {
+                const start = i * chunkSize;
+                const end = Math.min(start + chunkSize, total);
+                const chunk = arrayItems.slice(start, end);
+
+                promises.push(
+                    processSingleStream(chunk, task, {
+                        batchSize,
+                        accumulator: reducer ? accumulator : undefined,
+                        reducer,
+                        startIndex: start,
+                        totalItems: total,
+                        onProgress,
+                    }),
+                );
             }
+
+            const chunkResults = await Promise.all(promises);
+
+            if (reducer) {
+                let finalAcc: ResultType = accumulator as ResultType;
+                for (const res of chunkResults) {
+                    finalAcc = reducer(finalAcc, res as ResultType);
+                }
+                if (onProgress) { onProgress(100); }
+                return finalAcc;
+            }
+
             if (onProgress) { onProgress(100); }
-            return finalAcc;
+            return (chunkResults as ResultType[][]).flat();
         }
 
-        if (onProgress) { onProgress(100); }
-        return (chunkResults as ResultType[][]).flat();
+        // Fluxo Único (Array)
+        return await processSingleStream(arrayItems, task, {
+            batchSize,
+            accumulator,
+            reducer,
+            totalItems: total,
+            onProgress,
+        });
     }
 
-    // Fluxo Único
-    return await processSingleStream(items, task, {
+    // Fluxo Streaming (Iterable / AsyncIterable)
+    return await processIteratorStream(items as AsyncIterable<InputType>, task, {
         batchSize,
         accumulator,
         reducer,
-        totalItems: total,
+        totalItems: totalCount,
         onProgress,
     });
+}
+
+/** Fluxo interno para processamento de iteradores (Streaming). */
+async function processIteratorStream<InputType, ResultType>(
+    items: Iterable<InputType> | AsyncIterable<InputType>,
+    task: (item: InputType, index: number) => ResultType | Promise<ResultType>,
+    options: {
+        batchSize: number;
+        accumulator?: ResultType | undefined;
+        reducer?: ((acc: ResultType, item: ResultType) => ResultType) | undefined;
+        totalItems?: number | undefined;
+        onProgress?: ((p: number) => void) | undefined;
+    },
+): Promise<ResultType[] | ResultType> {
+    const { batchSize, accumulator, reducer, totalItems, onProgress } = options;
+    const isAccumulating = reducer !== undefined;
+    let acc: ResultType = accumulator as ResultType;
+    const results: ResultType[] = isAccumulating ? [] : [];
+
+    let index = 0;
+    for await (const item of items) {
+        const res = await task(item, index);
+
+        if (isAccumulating) {
+            acc = reducer(acc, res);
+        } else {
+            results.push(res);
+        }
+
+        index++;
+
+        if (index % batchSize === 0) {
+            if (onProgress && totalItems) {
+                onProgress(Math.round((index / totalItems) * 100));
+            }
+
+            // @ts-ignore: scheduler API
+            if (typeof globalThis.scheduler?.yield === "function") {
+                // @ts-ignore: scheduler API
+                await globalThis.scheduler.yield();
+            } else {
+                await new Promise((resolve) => setTimeout(resolve, 0));
+            }
+        }
+    }
+
+    if (onProgress) {
+        onProgress(100);
+    }
+
+    return isAccumulating ? acc : results;
 }
 
 /** Fluxo interno de processamento sequencial para um worker ou chunk. */

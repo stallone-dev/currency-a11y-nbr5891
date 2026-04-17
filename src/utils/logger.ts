@@ -22,18 +22,55 @@ export function getSubLogger(subName: string): Logger {
 }
 
 /**
- * Utility to measure execution time of a function using the Temporal API.
+ * TelemetrySpan - Gerenciador de Escopo para Telemetria de Performance.
+ *
+ * **Engenharia:** Utiliza o protocolo Explicit Resource Management (using) para
+ * medir e logar a duração de operações sem a necessidade de wrappers de função.
+ * Reduz a pressão sobre o Garbage Collector ao eliminar closures temporárias.
+ */
+export class TelemetrySpan implements Disposable {
+    readonly #name: string;
+    readonly #logger: Logger;
+    readonly #options: unknown;
+    readonly #start: number;
+
+    constructor(name: string, logger: Logger, options: unknown) {
+        this.#name = name;
+        this.#logger = logger;
+        this.#options = options;
+        this.#start = performance.now();
+    }
+
+    /** Finaliza o span e emite o log de performance. */
+    [Symbol.dispose]() {
+        if (!this.#logger.isEnabledFor("info")) { return; }
+
+        const end = performance.now();
+        const durationMs = `${(end - this.#start).toFixed(4)}ms`;
+
+        this.#logger.info("Output generated", {
+            output_method: this.#name,
+            duration: durationMs,
+            options: this.#options,
+        });
+    }
+}
+
+/**
+ * Inicia um novo span de telemetria para uso com a keyword 'using'.
+ */
+export function startSpan(name: string, logger: Logger, options: unknown = {}): TelemetrySpan | undefined {
+    if (!logger.isEnabledFor("info")) { return undefined; }
+    return new TelemetrySpan(name, logger, options);
+}
+
+/**
+ * Utility to measure execution time of a function using the performance API.
  * Returns a tuple [result, durationInMsString].
  */
 export function measureTime<T>(fn: () => T): [T, string] {
-    // @ts-ignore: Temporal is native in modern Deno but might lack types in some environments
-    // deno-lint-ignore no-undef
-    const start = Temporal.Now.instant();
+    const start = performance.now();
     const result = fn();
-    // @ts-ignore: Temporal is native in modern Deno but might lack types in some environment
-    // deno-lint-ignore no-undef
-    const end = Temporal.Now.instant();
-    const duration = end.since(start);
-    // @ts-ignore: Duration is calculated using Temporal's native API
-    return [result, `${duration.total({ unit: "milliseconds" }).toFixed(4)}ms`];
+    const end = performance.now();
+    return [result, `${(end - start).toFixed(4)}ms`];
 }

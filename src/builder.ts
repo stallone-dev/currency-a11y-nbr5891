@@ -14,7 +14,11 @@ import type {
     OperationType,
     RationalValue,
 } from "./ast/types.ts";
-import { RationalNumber } from "./core/rational.ts";
+import {
+    createCacheSession,
+    getActiveSession,
+    RationalNumber,
+} from "./core/rational.ts";
 import { validateMetadata } from "./core/metadata.ts";
 import type { RoundingStrategy } from "./core/constants.ts";
 import { evaluate } from "./ast/engine.ts";
@@ -22,14 +26,31 @@ import { CalcAUYOutput } from "./output.ts";
 import { Lexer } from "./parser/lexer.ts";
 import { Parser } from "./parser/parser.ts";
 import { attachOp, validateASTNode } from "./ast/builder_utils.ts";
-import { getSubLogger } from "./utils/logger.ts";
+import { getSubLogger, startSpan } from "./utils/logger.ts";
 import { sanitizeAST, setGlobalLoggingPolicy } from "./utils/sanitizer.ts";
 
 const logger = getSubLogger("engine");
 
-/** Cache para reuso de nós literais "limpos" (sem metadados). */
-const literalNodeCache = new Map<string, LiteralNode>();
-const MAX_NODE_CACHE_SIZE = 1024;
+/**
+ * FinalizationRegistry para limpeza automática de chaves no cache global da AST.
+ */
+const astCacheRegistry = new FinalizationRegistry<string>((key) => {
+    globalLiteralNodeCache.delete(key);
+});
+
+/**
+ * Hot Cache - Referências fortes para nós da AST mais frequentes.
+ */
+const hotLiteralNodeCache = new Map<string, LiteralNode>();
+const HOT_CACHE_LIMIT = 512;
+
+/**
+ * Cache Global Inteligente para reuso de nós literais "limpos".
+ *
+ * **Engenharia:** Utiliza Referências Fracas para permitir que o GC libere
+ * nós da AST que não pertencem mais a nenhuma árvore de cálculo ativa.
+ */
+const globalLiteralNodeCache = new Map<string, WeakRef<LiteralNode>>();
 
 export type InputValue = string | number | bigint | CalcAUY;
 
@@ -76,6 +97,26 @@ export class CalcAUY {
     }
 
     /**
+     * Inicia uma nova sessão de cache para otimização de memória em cálculos massivos.
+     *
+     * **Engenharia:** Ativa o Explicit Resource Management para gerenciar o ciclo de vida
+     * de números e nós da AST de forma escopada. Útil em loops de milhões de registros.
+     *
+     * @returns Um objeto Disposable para uso com a keyword 'using'.
+     *
+     * @example
+     * ```ts
+     * {
+     *   using _session = CalcAUY.createCacheSession();
+     *   // Cálculos pesados aqui serão cacheados e limpos ao final do bloco.
+     * }
+     * ```
+     */
+    public static createCacheSession(): Disposable {
+        return createCacheSession();
+    }
+
+    /**
      * Cria uma nova instância de CalcAUY a partir de um valor inicial.
      *
      * **Engenharia:** O valor de entrada é imediatamente convertido em um `RationalNumber`
@@ -118,15 +159,33 @@ export class CalcAUY {
             inputStr = `${cleanVal}/100`;
         }
 
-        const cached = literalNodeCache.get(inputStr);
-        if (cached) {
+        // Prioridade 1: Cache de Sessão (Escopado)
+        const session = getActiveSession();
+        const sessionCached = session?.getExtra<LiteralNode>(inputStr);
+        if (sessionCached) {
+            return new CalcAUY(sessionCached);
+        }
+
+        // Prioridade 2: Hot Cache (Referências Fortes)
+        const hotCached = hotLiteralNodeCache.get(inputStr);
+        if (hotCached) {
+            return new CalcAUY(hotCached);
+        }
+
+        // Prioridade 3: Cold Cache (WeakRef)
+        const globalRef = globalLiteralNodeCache.get(inputStr);
+        const globalCached = globalRef?.deref();
+        if (globalCached) {
+            if (hotLiteralNodeCache.size < HOT_CACHE_LIMIT) {
+                hotLiteralNodeCache.set(inputStr, globalCached);
+            }
             if (logger.isEnabledFor("debug")) {
                 logger.debug("CalcAUY Instance Created (Cached)", {
                     input_type: typeof value,
-                    structure: sanitizeAST(cached),
+                    structure: sanitizeAST(globalCached),
                 });
             }
-            return new CalcAUY(cached);
+            return new CalcAUY(globalCached);
         }
 
         const r: RationalNumber = RationalNumber.from(value);
@@ -136,8 +195,15 @@ export class CalcAUY {
             originalInput: inputStr,
         };
 
-        if (literalNodeCache.size < MAX_NODE_CACHE_SIZE) {
-            literalNodeCache.set(inputStr, node);
+        // Armazenamento
+        if (session) {
+            session.setExtra(inputStr, node);
+        } else {
+            if (hotLiteralNodeCache.size < HOT_CACHE_LIMIT) {
+                hotLiteralNodeCache.set(inputStr, node);
+            }
+            globalLiteralNodeCache.set(inputStr, new WeakRef(node));
+            astCacheRegistry.register(node, inputStr);
         }
 
         if (logger.isEnabledFor("debug")) {
@@ -183,6 +249,7 @@ export class CalcAUY {
      * ```
      */
     public static parseExpression(expression: string): CalcAUY {
+        using _span = startSpan("parseExpression", logger, { expression });
         const lexer: Lexer = new Lexer(expression);
         const tokens = lexer.tokenize();
         const parser: Parser = new Parser(tokens);
@@ -440,6 +507,7 @@ export class CalcAUY {
      * ```
      */
     public commit(options: { roundStrategy?: RoundingStrategy } = {}): CalcAUYOutput {
+        using _span = startSpan("commit", logger, options);
         const strategy: RoundingStrategy = options.roundStrategy ?? "NBR5891";
         const result: RationalNumber = evaluate(this.#ast);
         return new CalcAUYOutput(result, this.#ast, strategy);

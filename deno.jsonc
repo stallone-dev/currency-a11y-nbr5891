@@ -36,6 +36,7 @@
         "strict": true,
         "noImplicitAny": true,
         "strictNullChecks": true,
+        "target": "esnext",
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "exactOptionalPropertyTypes": true
