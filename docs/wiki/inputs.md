@@ -102,7 +102,7 @@ Para manter a integridade forense, a CalcAUY bloqueia entradas ambíguas ou mate
 
 ## 5. Estruturas de Árvore Inválidas (`hydrate()`)
 
-O método `hydrate()` reconstrói cálculos a partir de objetos JSON. Ele aplica uma validação estrutural profunda antes de aceitar a entrada.
+O método `hydrate()` reconstrói cálculos a partir de objetos JSON assinados. Ele exige o `salt` original e aplica uma validação estrutural profunda antes de aceitar a entrada.
 
 ### ❌ Tipos de Nó Desconhecidos
 - **Input:** `{ "kind": "magic-op", ... }`

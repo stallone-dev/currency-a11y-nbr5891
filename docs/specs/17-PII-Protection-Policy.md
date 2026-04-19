@@ -1,55 +1,46 @@
-# 17 - Política de Proteção de PII (Security by Default)
+# Especificação Técnica 17: Política de Proteção de PII e Integridade
 
-## Objetivo
-Definir o sistema de camadas para proteção de Informações Pessoais Identificáveis (PII) e dados sensíveis de negócio nos logs de telemetria da CalcAUY. A engine adota o princípio de **Segurança por Padrão**, garantindo que nenhum dado financeiro ou metadado sensível vaze para sistemas de monitoramento externos sem autorização explícita.
+A CalcAUY implementa um sistema de proteção de dados sensíveis (Personally Identifiable Information) e integridade forense em camadas, garantindo conformidade com LGPD/GDPR e auditabilidade militar.
 
-## Camada 1: Política Global (`setLoggingPolicy`)
-A primeira camada de controle é global e afeta toda a instância (ou classe) durante a construção e saída do cálculo.
+## Camada 1: Política Global (`setSecurityPolicy`)
 
-- **Método:** `CalcAUY.setLoggingPolicy({ sensitive: boolean })`
-- **Comportamento:**
-    - `sensitive: true` (**Padrão**): Os dados são considerados sensíveis. Valores de entrada, resultados intermediários e metadados são substituídos pelo marcador `[PII]` nos logs.
-    - `sensitive: false`: Desativa a proteção global. Os logs exibirão os valores reais para fins de depuração profunda (apenas em ambiente seguro).
+O controle mestre da biblioteca é feito através do método estático global.
 
-## Camada 2: Sobreposição por Nó (`setMetadata("pii", ...)`)
-A segunda camada permite um controle granular cirúrgico em nós específicos da AST, sobrepondo a decisão da política global.
+-   **Método:** `CalcAUY.setSecurityPolicy(config: { sensitive?: boolean, salt?: string, encoder?: SignatureEncoder })`
+-   **Configuração Padrão:** `{ sensitive: true, salt: "", encoder: "BASE58" }`
 
-- **Método:** `setMetadata("pii", boolean)`
-- **Comportamento:**
-    - `pii: true`: Identifica que o nó **é sensível**. Força a OCULTAÇÃO (`[PII]`) mesmo que a política global esteja em `false`.
-    - `pii: false`: Identifica que o nó **não é sensível**. Força a EXIBIÇÃO do dado real mesmo que a política global esteja em `true`.
+### Comportamento da Redação (sensitive: true)
+Quando ativado, os utilitários de log e erro (`sanitizeAST`, `sanitizeObject`) substituem automaticamente:
+1.  **Valores Numéricos:** O numerador (`n`) e denominador (`d`) são substituídos pela string `[PII]`.
+2.  **Input Original:** O campo `originalInput` é ofuscado.
+3.  **Metadados:** Todos os metadados são removidos do rastro de log, a menos que o nó permita a liberação.
 
-## Hierarquia de Decisão (shouldHide)
+### Lacre Digital (salt e encoder)
+A definição do `salt` ativa a geração de assinaturas BLAKE3 no `commit()` e `hibernate()`. 
+*   **Não-Repúdio:** O rastro de auditoria é selado matematicamente.
+*   ** BASE58:** Encoder padrão focado em legibilidade humana e transporte seguro.
 
-| Política Global (`sensitive`) | Metadado do Nó (`pii`) | Resultado no Log |
-| :--- | :--- | :--- |
-| `true` (Padrão) | *não definido* | **OCULTO** (`[PII]`) |
-| `true` | `true` | **OCULTO** (`[PII]`) |
-| `true` | `false` | **EXIBIDO** (Dado Real) |
-| `false` | *não definido* | **EXIBIDO** (Dado Real) |
-| `false` | `true` | **OCULTO** (`[PII]`) |
-| `false` | `false` | **EXIBIDO** (Dado Real) |
+## Camada 2: Controle Granular via Metadata (`pii`)
 
-## Sanitização de Objetos e Erros
-A lib utiliza a regex `NUMERIC_RE` para identificação rápida de PII em strings:
-- **Regex:** `/^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?%?$/` (Suporta decimais, notação científica e percentuais).
+O desenvolvedor pode marcar nós individuais da AST para forçar ou liberar a visibilidade, independente da política global.
 
-O utilitário `sanitizeObject` aplica estas regras recursivamente em:
-1.  **Logs de Debug:** Durante a construção da AST (`builder.ts`).
-2.  **Logs de Info:** Durante a geração de outputs (`output.ts`).
-3.  **Logs de Erro:** Antes de disparar telemetria no construtor de `CalcAUYError`.
+-   **Ocultação Forçada:** `.setMetadata("pii", true)` - Garante que o dado NUNCA apareça em logs, mesmo em ambiente de dev.
+-   **Liberação de Visibilidade:** `.setMetadata("pii", false)` - Permite que constantes públicas (ex: alíquota de 18%) apareçam nos logs técnicos para facilitar o debug, mesmo em produção.
 
-## Exemplo de Uso
+---
 
-```ts
-// Ativando exibição global para debug
-CalcAUY.setLoggingPolicy({ sensitive: false });
+## Exemplo de Fluxo Seguro
 
-// Forçando ocultação apenas em um valor extremamente sensível
-const calc = CalcAUY.from(5000)
-  .setMetadata("pii", true) // Este nó será [PII] no log
-  .add(150); // Este nó aparecerá como 150 no log
+```typescript
+// 1. Bloqueio global
+CalcAUY.setSecurityPolicy({ sensitive: true, salt: "secret-key" });
+
+// 2. Cálculo com dados sensíveis (Ocultos no log)
+const fatura = CalcAUY.from("1500.50").setMetadata("client_id", "USR-99");
+
+// 3. Taxa pública (Liberada no log)
+const imposto = CalcAUY.from("0.18").setMetadata("pii", false);
+
+const final = await fatura.mult(imposto).commit();
+// Logs técnicos mostrarão a operação de MULT, mas esconderão o valor 1500.50.
 ```
-
-## Benefícios
-Esta abordagem garante que a CalcAUY seja compatível com regulamentações rígidas de privacidade (LGPD, GDPR e PCI-DSS), permitindo que logs de produção sejam coletados sem risco de vazamento de dados bancários ou financeiros dos usuários.

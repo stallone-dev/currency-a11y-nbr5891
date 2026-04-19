@@ -12,10 +12,10 @@ A **CalcAUY** trata o cálculo não como um resultado volátil, mas como um **do
 3.  **Construção e Enriquecimento (`specs/10`):** 
     - **Fluent API:** Construção da árvore AST.
     - **Metadados:** `.setMetadata()` anexa o contexto de negócio a cada operação.
-    - **Hibernação:** `.hibernate()` (ou `.getAST()`) extrai o estado atual para armazenamento persistente.
-4.  **Precedência e Execução (`specs/07`, `specs/13`):** O `commit()` aplica regras como **NBR-5891**.
+    - **Hibernação:** `.hibernate()` (ou `.getAST()`) extrai o estado atual selado com assinatura digital.
+4.  **Precedência e Execução (`specs/07`, `specs/13`):** O `commit()` aplica regras como **NBR-5891** e assina o resultado.
 5.  **Saída e Acessibilidade (`specs/09`, `specs/14`):** Geração de multiformatos com rastro forense.
-6.  **Proteção de Dados e Telemetria (`specs/11`, `specs/17`):** Sistema de proteção de PII (*Security by Default*) com controle global e granular de logs.
+6.  **Proteção de Dados e Telemetria (`specs/11`, `specs/17`):** Sistema de proteção de PII (*Security by Default*) e integridade militar via **BLAKE3**.
 7.  **Qualidade e Rigor (`specs/15`):** Padrões de tipagem estrita e performance.
 8.  **Extensibilidade (`specs/16`):** Processadores de saída customizados e injeção de lógica.
 9.  **Processamento em Massa (`specs/18`):** Utilitários de *Batch Processing* para evitar o bloqueio do Event Loop.
@@ -25,21 +25,21 @@ A **CalcAUY** trata o cálculo não como um resultado volátil, mas como um **do
 ### Classe `CalcAUY` (Builder)
 - `add()`, `sub()`, `mult()`, `div()`, `pow()`, `mod()`, `divInt()`
 - `group()`: Agrupamento manual.
-- **`setLoggingPolicy({sensitive})`**: Controle global de PII nos logs (1ª camada).
+- **`setSecurityPolicy({salt, encoder})`**: Controle global de integridade (BLAKE3) e PII nos logs.
 - **`ProcessBatchAUY(items, task)`**: Processamento assíncrono em lotes (anti-bloqueio).
 - **`parseExpression(str)`**: Parser de strings matemáticas complexas (com auto-agrupamento).
-- **`setMetadata(key, val)`**: O pilar da auditoria. Use `pii: true|false` para controle granular (2ª camada).
-- **`hibernate()`**: Serializa a árvore atual (**string JSON**).
+- **`setMetadata(key, val)`**: O pilar da auditoria. Use `pii: true|false` para controle granular.
+- **`hibernate()`**: Serializa a árvore atual selada (**Promise<string>**).
 - **`getAST()`**: Retorna o objeto da árvore atual (**CalculationNode**).
-- **`static hydrate(ast)`**: Reconstrói a instância (aceita string ou objeto).
-- `commit(strategy)`: Finaliza e congela o cálculo.
+- **`static hydrate(ast, {salt})`**: Reconstrói a instância validando assinatura digital (**Promise**).
+- **`commit(strategy)`**: Finaliza, colapsa e assina o cálculo (**Promise**).
 
 ### Classe `CalcAUYOutput` (Result)
 - `toMonetary()`, `toStringNumber()`, `toLaTeX()`, `toHTML()`, `toUnicode()`, `toImageBuffer()`
 - **`toSlice()` / `toSliceByRatio()`**: Rateio exato de centavos (Algoritmo de Maior Resto).
 - `toVerbalA11y()`: Tradução humana da fórmula.
-- `toAuditTrace()`: Snapshot JSON completo com metadados e valores intermediários.
-- **`toJSON(keys?, katex?, options?)`**: Exportação consolidada com tipagem estática e validação de dependências.
+- `toAuditTrace()`: Snapshot JSON completo com metadados e assinatura de integridade.
+- **`toJSON(keys?, katex?, options?)`**: Exportação consolidada com assinatura injetada.
 
 ## Pilares de Performance
 1.  **GCD Híbrido:** Uso de atalhos de hardware e operador nativo V8 para simplificação ultra-rápida de frações.

@@ -124,5 +124,5 @@ const res = calc.commit({ roundStrategy: countryConfig.rounding });
 
 ## 🏗️ Anotações de Engenharia
 - **Idempotência:** O `commit()` é uma operação pura. Chamar `commit()` várias vezes em instâncias idênticas da AST sempre resultará no mesmo output.
-- **Ponto de Não Retorno:** Após o `commit()`, você sai da API fluida do Builder (`CalcAUY`) e entra na API de representação (`CalcAUYOutput`). Para adicionar novas operações matematicas, você precisará usar o método `.hydrate()` no resultado ou continuar a partir da instância original do builder.
+- **Ponto de Não Retorno:** Após o `commit()`, você sai da API fluida do Builder (`CalcAUY`) e entra na API de representação (`CalcAUYOutput`). Para adicionar novas operações matematicas, você precisará usar o método `.hydrate()` no resultado (passando o `salt`) ou continuar a partir da instância original do builder.
 - **Prevenção de Spam de Log:** O `commit()` possui seu próprio span de telemetria, permitindo rastrear o tempo exato que o motor de execução levou para colapsar a árvore, independente do tempo de construção.

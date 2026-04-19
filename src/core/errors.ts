@@ -20,6 +20,7 @@ export type ErrorCategory =
     | "complex-result"
     | "invalid-precision"
     | "corrupted-node"
+    | "integrity-critical-violation"
     | "math-overflow";
 
 /** Contexto técnico da falha para auditoria. */
@@ -67,6 +68,7 @@ export class CalcAUYError extends Error {
             "complex-result": 422,
             "invalid-precision": 400,
             "corrupted-node": 500,
+            "integrity-critical-violation": 500,
             "math-overflow": 422,
         };
 
@@ -77,6 +79,7 @@ export class CalcAUYError extends Error {
             "complex-result": "Resultado Matemático Não Suportado",
             "invalid-precision": "Precisão Inválida",
             "corrupted-node": "Estrutura AST Corrompida",
+            "integrity-critical-violation": "Violação Crítica de Integridade",
             "math-overflow": "Transbordo de Capacidade Matemática",
         };
 

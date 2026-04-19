@@ -16,32 +16,56 @@ const SENSITIVE_KEYS = new Set(["n", "d", "rawInput", "metadata", "label", "valu
 /** Regex otimizado e seguro para identificar strings que representam números ou percentuais (evita backtracking). */
 const NUMERIC_RE = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?%?$/;
 
-/** Política global de logging. */
-export const loggingPolicy = {
+/** Tipos de codificação suportados para a assinatura digital. */
+export type SignatureEncoder = "HEX" | "BASE64" | "BASE58" | "BASE32";
+
+/** Política global de segurança e logging. */
+export const securityPolicy = {
     /**
      * Se true (padrão), assume que os dados SÃO sensíveis e devem ser OCULTOS.
      * Se false, permite a exibição de dados sensíveis globalmente.
      */
     sensitive: true,
+    /**
+     * Sal secreto global usado para assinar árvores e resultados (BLAKE3).
+     * Engenharia: Garante a integridade militar do rastro de auditoria.
+     */
+    salt: "",
+    /**
+     * Codificação da assinatura final.
+     * Padrão: BASE58 (Melhor equilíbrio entre tamanho e legibilidade humana).
+     */
+    encoder: "BASE58" as SignatureEncoder,
 };
 
 /**
- * Define a política global de logging para a proteção de PII.
- * @param policy Configuração da política (sensitive: true oculta, false mostra).
+ * Define a política global de segurança para a proteção de PII e integridade.
+ * @param policy Configuração da política (sensitive, salt, encoder).
  */
-export function setGlobalLoggingPolicy(policy: { sensitive: boolean }): void {
-    loggingPolicy.sensitive = policy.sensitive;
+export function setGlobalSecurityPolicy(policy: {
+    sensitive?: boolean;
+    salt?: string;
+    encoder?: SignatureEncoder;
+}): void {
+    if (typeof policy.sensitive === "boolean") {
+        securityPolicy.sensitive = policy.sensitive;
+    }
+    if (typeof policy.salt === "string") {
+        securityPolicy.salt = policy.salt;
+    }
+    if (policy.encoder) {
+        securityPolicy.encoder = policy.encoder;
+    }
 }
 
 /**
  * Determina se um nó deve ter seus dados ocultados com base na política
- * global, na sobreposição específica do nó via metadados e na herança do pai.
+ * global ou na sobreposição específica do nó via metadados.
  *
  * @param node Nó a ser verificado.
- * @param parentHide Estado de ocultação herdado do pai (opcional).
  * @returns true se deve ocultar, false se deve mostrar.
  */
-function shouldHide(node: CalculationNode, parentHide?: boolean): boolean {
+function shouldHide(node: CalculationNode): boolean {
     const nodeOverride = node.metadata?.pii;
 
     // Se o nó tem uma sobreposição específica (pii: true|false), ela manda.
@@ -49,36 +73,20 @@ function shouldHide(node: CalculationNode, parentHide?: boolean): boolean {
         return nodeOverride;
     }
 
-    // Se o pai definiu explicitamente que É sensível (parentHide: true), herdamos.
-    if (parentHide === true) {
-        return true;
-    }
-
-    // Se o pai definiu explicitamente que NÃO é sensível (parentHide: false),
-    // herdamos a visibilidade apenas para nós "terminais" (literais) ou
-    // "transparentes" (grupos). Operações complexas devem ter sua própria
-    // marcação pii: false para serem reveladas.
-    if (parentHide === false && (node.kind === "literal" || node.kind === "group")) {
-        return false;
-    }
-
-    // Caso contrário, segue a política global (sensitive: true oculta, false mostra)
-    return loggingPolicy.sensitive;
+    // Caso contrário, segue estritamente a política global
+    return securityPolicy.sensitive;
 }
 
 /**
  * Sanitiza a estrutura da AST para logs, removendo valores literais e metadados.
- * Mantém apenas a hierarquia e os tipos de operações, a menos que a política
- * ou o nó permitam a liberação.
  *
  * @param node Nó da AST a ser sanitizado.
- * @param parentHide Estado de ocultação herdado do pai (interno).
  * @returns Objeto sanitizado pronto para log.
  */
-export function sanitizeAST(node: CalculationNode, parentHide?: boolean): object {
+export function sanitizeAST(node: CalculationNode): object {
     if (!node) { return { kind: "null" }; }
 
-    const hide = shouldHide(node, parentHide);
+    const hide = shouldHide(node);
 
     const sanitized: Record<string, unknown> = {
         kind: node.kind,
@@ -88,20 +96,14 @@ export function sanitizeAST(node: CalculationNode, parentHide?: boolean): object
         sanitized.value = hide ? { n: REDACTED, d: REDACTED } : node.value;
         sanitized.originalInput = hide ? REDACTED : node.originalInput;
     } else if (node.kind === "group") {
-        sanitized.child = sanitizeAST(node.child, hide);
+        sanitized.child = sanitizeAST(node.child);
     } else if (node.kind === "operation") {
-        // Engenharia: O tipo da operação e a existência de operandos não são considerados PII.
-        // Isso permite diagnosticar a lógica do cálculo sem revelar os valores sensíveis.
         sanitized.type = node.type;
-        sanitized.operands = node.operands.map((op) => sanitizeAST(op, hide));
+        sanitized.operands = node.operands.map((op) => sanitizeAST(op));
     }
 
     if (node.metadata) {
-        if (hide) {
-            sanitized.metadata = REDACTED;
-        } else {
-            sanitized.metadata = node.metadata;
-        }
+        sanitized.metadata = hide ? REDACTED : node.metadata;
     }
 
     if (node.label) {
@@ -123,7 +125,7 @@ export function sanitizeObject(obj: unknown, seen = new WeakSet<object>()): unkn
     if (obj === null || obj === undefined) { return obj; }
 
     // Se a política global NÃO for sensível (false), libera tudo
-    if (!loggingPolicy.sensitive) { return obj; }
+    if (!securityPolicy.sensitive) { return obj; }
 
     if (typeof obj === "object") {
         // Proteção contra referências circulares (evita trava de CPU)
@@ -136,13 +138,11 @@ export function sanitizeObject(obj: unknown, seen = new WeakSet<object>()): unkn
 
         const result: Record<string, unknown> = {};
         for (const [key, value] of Object.entries(obj)) {
-            // Se for um nó da AST (identificado pelo campo 'kind')
             if (value && typeof value === "object" && "kind" in value) {
                 result[key] = sanitizeAST(value as CalculationNode);
                 continue;
             }
 
-            // Campos conhecidos por conter dados sensíveis (O(1) via Set)
             if (SENSITIVE_KEYS.has(key)) {
                 result[key] = REDACTED;
             } else {
@@ -152,14 +152,11 @@ export function sanitizeObject(obj: unknown, seen = new WeakSet<object>()): unkn
         return result;
     }
 
-    // Se for um valor primitivo que parece ser numérico ou sensível
     if (typeof obj === "number" || typeof obj === "bigint" || typeof obj === "string") {
         if (typeof obj === "string") {
             if (obj.length > 50) { return REDACTED; }
-            // Otimização: Regex é mais rápido que Number() para triagem rápida
             if (obj.length > 0 && NUMERIC_RE.test(obj)) { return REDACTED; }
         } else {
-            // Numbers e BigInts sempre são redigidos em modo sensível
             return REDACTED;
         }
     }

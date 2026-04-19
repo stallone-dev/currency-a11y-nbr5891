@@ -1,3 +1,4 @@
+/* Create by Stallone L. S. (@st-all-one) - 2026 - License: MPL-2.0 */
 import { describe, it } from "@std/testing/bdd";
 import { expect } from "@std/expect";
 import { CalcAUY } from "@calcauy";
@@ -12,13 +13,12 @@ const mockKatex: IKatex = {
 describe("CalcAUY - Testes de Estresse de Output", () => {
     const results: Record<string, string> = {};
 
-    it("Cenário 1: Cache de toMonetary (100.000 chamadas)", () => {
+    it("Cenário 1: Cache de toMonetary (100.000 chamadas)", async () => {
         const ITERATIONS = 100_000;
-        const output = CalcAUY.from("1234.56").commit();
+        const output = await CalcAUY.from("1234.56").commit();
         const start = performance.now();
 
         for (let i = 0; i < ITERATIONS; i++) {
-            // Alterna entre 3 combinações para testar hits e misses do cache
             const locale = i % 3 === 0 ? "pt-BR" : (i % 3 === 1 ? "en-US" : "de-DE");
             output.toMonetary({ locale: locale as any });
         }
@@ -28,12 +28,12 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         expect(output.toMonetary()).toContain("1.234,56");
     });
 
-    it("Cenário 2: Verbalização A11y com AST Profunda (1_000 níveis)", () => {
+    it("Cenário 2: Verbalização A11y com AST Profunda (1_000 níveis)", async () => {
         let calc = CalcAUY.from("1");
         for (let i = 0; i < 1_000; i++) {
             calc = calc.add("1.1");
         }
-        const output = calc.commit();
+        const output = await calc.commit();
         const start = performance.now();
 
         const verbal = output.toVerbalA11y({ locale: "pt-BR" });
@@ -43,13 +43,12 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         expect(verbal).toContain("mais");
     });
 
-    it("Cenário 3: Unicode & LaTeX Complexity (Aninhamento Massivo)", () => {
-        // (1 + (1 / (1 + (1 / ...))))
+    it("Cenário 3: Unicode & LaTeX Complexity (Aninhamento Massivo)", async () => {
         let calc = CalcAUY.from("1");
         for (let i = 0; i < 150; i++) {
             calc = CalcAUY.from("1").div(calc.add("1"));
         }
-        const output = calc.commit();
+        const output = await calc.commit();
         const start = performance.now();
 
         const unicode = output.toUnicode();
@@ -61,9 +60,9 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         expect(latex).toContain("\\frac");
     });
 
-    it("Cenário 4: Geração de HTML Burst (1.000 fragmentos)", () => {
+    it("Cenário 4: Geração de HTML Burst (100.000 fragmentos)", async () => {
         const ITERATIONS = 100_000;
-        const output = CalcAUY.from("100.00").pow(2).div(3).commit();
+        const output = await CalcAUY.from("100.00").pow(2).div(3).commit();
         const start = performance.now();
 
         for (let i = 0; i < ITERATIONS; i++) {
@@ -74,12 +73,11 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         results["4_html_generation_burst"] = `${(end - start).toFixed(4)}ms (iters: ${ITERATIONS})`;
     });
 
-    it("Cenário 5: Slicing de Alta Precisão (100_000 fatias)", () => {
+    it("Cenário 5: Slicing de Alta Precisão (100_000 fatias)", async () => {
         const SLICES = 100_000;
-        const output = CalcAUY.from("1000000.00").commit();
+        const output = await CalcAUY.from("1000000.00").commit();
         const start = performance.now();
 
-        // Testa o algoritmo de maior resto com um volume grande
         const slices = output.toSlice(SLICES, { decimalPrecision: 10 });
 
         const end = performance.now();
@@ -87,9 +85,9 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         expect(slices.length).toBe(SLICES);
     });
 
-    it("Cenário 6: Consolidação toJSON Completa (100_000 objetos)", () => {
+    it("Cenário 6: Consolidação toJSON Completa (100_000 objetos)", async () => {
         const ITERATIONS = 100_000;
-        const output = CalcAUY.from("99.99").mult("1.15").commit();
+        const output = await CalcAUY.from("99.99").mult("1.15").commit();
         const start = performance.now();
 
         for (let i = 0; i < ITERATIONS; i++) {
@@ -100,12 +98,11 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         results["6_to_json_consolidation"] = `${(end - start).toFixed(4)}ms (iters: ${ITERATIONS})`;
     });
 
-    it("Cenário 7: Troca de Locale em Massa (Todos os suportados)", () => {
+    it("Cenário 7: Troca de Locale em Massa (Todos os suportados)", async () => {
         const locales = Object.keys(LOCALES);
-        const output = CalcAUY.from("1234567.89").commit();
+        const output = await CalcAUY.from("1234567.89").commit();
         const start = performance.now();
 
-        // Itera 100_000 vezes por todos os idiomas da engine
         for (let i = 0; i < 10_000; i++) {
             for (const loc of locales) {
                 output.toVerbalA11y({ locale: loc as any });
@@ -117,9 +114,9 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         results["7_locale_switching_burst"] = `${(end - start).toFixed(4)}ms (switches: ${locales.length * 10_000})`;
     });
 
-    it("Cenário 8: Custom Output Processor Pressure", () => {
+    it("Cenário 8: Custom Output Processor Pressure", async () => {
         const ITERATIONS = 100_000;
-        const output = CalcAUY.from("10").add("20").commit();
+        const output = await CalcAUY.from("10").add("20").commit();
         const start = performance.now();
 
         for (let i = 0; i < ITERATIONS; i++) {
@@ -132,9 +129,9 @@ describe("CalcAUY - Testes de Estresse de Output", () => {
         results["8_custom_processor_stress"] = `${(end - start).toFixed(4)}ms (iters: ${ITERATIONS})`;
     });
 
-    it("Cenário 9: Image Buffer SVG Generation (100_000 buffers)", () => {
+    it("Cenário 9: Image Buffer SVG Generation (100_000 buffers)", async () => {
         const ITERATIONS = 100_000;
-        const output = CalcAUY.from("10").div("3").commit();
+        const output = await CalcAUY.from("10").div("3").commit();
         const start = performance.now();
 
         for (let i = 0; i < ITERATIONS; i++) {

@@ -23,7 +23,6 @@ import { performSlice, performSliceByRatio } from "./output_internal/slicer.ts";
 import { generateSVG } from "./output_internal/image_utils.ts";
 import type { IKatex, OutputOptions } from "./core/types.ts";
 import { getSubLogger, startSpan } from "./utils/logger.ts";
-import { setGlobalLoggingPolicy } from "./utils/sanitizer.ts";
 
 const logger = getSubLogger("output");
 
@@ -117,24 +116,23 @@ export class CalcAUYOutput {
     readonly #result: RationalNumber;
     readonly #ast: CalculationNode;
     readonly #strategy: RoundingStrategy;
+    readonly #signature: string;
     readonly #cache: Map<number, RationalNumber> = new Map<number, RationalNumber>();
     readonly #outputCache: Map<string, string | Uint8Array> = new Map();
     static #cachedKaTeXCSS: string | null = null;
     static readonly #formatterCache = new Map<string, Intl.NumberFormat>();
     static readonly #encoder = new TextEncoder();
 
-    public constructor(result: RationalNumber, ast: CalculationNode, strategy: RoundingStrategy) {
+    public constructor(
+        result: RationalNumber,
+        ast: CalculationNode,
+        strategy: RoundingStrategy,
+        signature: string,
+    ) {
         this.#result = result;
         this.#ast = ast;
         this.#strategy = strategy;
-    }
-
-    /**
-     * Define a política global de logging para a liberação de PII (versão fluente no output).
-     */
-    public setLoggingPolicy(policy: { sensitive: boolean }): this {
-        setGlobalLoggingPolicy(policy);
-        return this;
+        this.#signature = signature;
     }
 
     private getRounded(precision: number): RationalNumber {
@@ -716,6 +714,7 @@ export class CalcAUYOutput {
             ast: this.#ast,
             finalResult: this.#result.toJSON(),
             strategy: this.#strategy,
+            signature: this.#signature,
         });
     }
 
@@ -821,8 +820,13 @@ export class CalcAUYOutput {
                 res[key] = typeof val === "bigint" ? val.toString() : val;
             }
         }
+
+        // Adiciona a assinatura de integridade ao JSON final
+        res.signature = this.#signature;
+
         return JSON.stringify(res, (_key, value) => typeof value === "bigint" ? value.toString() : value);
     }
+
 
     /**
      * Permite a injeção de processadores de saída customizados (Extensibilidade).

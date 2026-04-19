@@ -11,8 +11,8 @@ Abaixo estão os métodos públicos da classe `CalcAUY`, organizados por sua fun
 | :--- | :--- | :--- |
 | [`from`](./builder-methods/from.md) | `CalcAUY.from("10.50")` | Ingestão segura de valores (Static). |
 | [`parseExpression`](./builder-methods/parseExpression.md) | `CalcAUY.parseExpression("1+2")` | Parser de strings matemáticas (Static). |
-| [`hydrate`](./builder-methods/hydrate.md) | `CalcAUY.hydrate(json)` | Reconstrói árvore a partir de JSON (Static). |
-| [`hibernate`](./builder-methods/hibernate.md) | `calc.hibernate()` | Serializa a árvore atual para JSON. |
+| [`hydrate`](./builder-methods/hydrate.md) | `await CalcAUY.hydrate(j, {salt})` | Reconstrói árvore validando integridade (Static). |
+| [`hibernate`](./builder-methods/hibernate.md) | `await calc.hibernate()` | Serializa a árvore com assinatura digital. |
 
 ### 🏷️ Estrutura e Auditoria
 | Método | Exemplo Rápido | Descrição |
@@ -24,7 +24,7 @@ Abaixo estão os métodos públicos da classe `CalcAUY`, organizados por sua fun
 ### ⚡ Configuração e Otimização
 | Método | Exemplo Rápido | Descrição |
 | :--- | :--- | :--- |
-| [`setLoggingPolicy`](./builder-methods/setLoggingPolicy.md) | `calc.setLoggingPolicy(p)` | Define proteção de PII nos logs. |
+| [`setSecurityPolicy`](./builder-methods/setSecurityPolicy.md) | `CalcAUY.setSecurityPolicy(p)` | Define política de PII e integridade (Static). |
 | [`createCacheSession`](./builder-methods/createCacheSession.md) | `using _ = CalcAUY.session()` | Ativa cache de alta performance. |
 
 ### ➗ Operações Aritméticas (Fluentes)
@@ -40,7 +40,7 @@ Abaixo estão os métodos públicos da classe `CalcAUY`, organizados por sua fun
 ### 🏁 Execução
 | Método | Exemplo Rápido | Descrição |
 | :--- | :--- | :--- |
-| [`commit`](./builder-methods/commit.md) | `calc.commit()` | Colapsa a árvore e gera o Output. |
+| [`commit`](./builder-methods/commit.md) | `await calc.commit()` | Colapsa a árvore validando assinatura. |
 
 ---
 
@@ -49,6 +49,6 @@ Abaixo estão os métodos públicos da classe `CalcAUY`, organizados por sua fun
 1.  **Crie** a instância via `CalcAUY.from()` ou `parseExpression()`.
 2.  **Encadeie** as operações (`add`, `mult`, etc.) e use `group()` para garantir a precedência.
 3.  **Enriqueça** com `setMetadata()` em pontos críticos para auditoria.
-4.  **Finalize** com `commit()` escolhendo a estratégia de arredondamento ideal.
+4.  **Finalize** com `await commit()` escolhendo a estratégia de arredondamento ideal.
 
 Para detalhes profundos sobre cada método, incluindo 10 casos de uso reais e anotações de engenharia, clique nos links acima.

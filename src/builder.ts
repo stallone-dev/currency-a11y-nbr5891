@@ -23,7 +23,9 @@ import { Lexer } from "./parser/lexer.ts";
 import { Parser } from "./parser/parser.ts";
 import { attachOp, validateASTNode } from "./ast/builder_utils.ts";
 import { getSubLogger, startSpan } from "./utils/logger.ts";
-import { sanitizeAST, setGlobalLoggingPolicy } from "./utils/sanitizer.ts";
+import { sanitizeAST, securityPolicy, setGlobalSecurityPolicy, type SignatureEncoder } from "./utils/sanitizer.ts";
+import { generateSignature } from "./utils/security.ts";
+import { CalcAUYError } from "./core/errors.ts";
 
 const logger = getSubLogger("engine");
 
@@ -68,28 +70,21 @@ export class CalcAUY {
     }
 
     /**
-     * Define a política global de logging para a proteção de PII.
+     * Define a política global de segurança e logging.
      *
-     * **Engenharia:** Atua na 1ª camada de controle. Quando ativado (sensitive: true, padrão),
-     * os dados são considerados sensíveis e serão OCULTADOS nos logs, a menos que um nó
-     * tenha sido explicitamente marcado com pii: false via metadata.
+     * **Engenharia:** Atua na 1ª camada de controle. Permite configurar a sensibilidade
+     * dos logs (PII), o Salt secreto e a codificação (encoder) das assinaturas BLAKE3.
      *
-     * @param policy Configuração da política (ex: { sensitive: false } para mostrar dados).
+     * @param policy Configuração da política (ex: { salt: "meu_segredo", encoder: "BASE58" }).
      * @returns A classe CalcAUY para encadeamento.
      */
-    public static setLoggingPolicy(policy: { sensitive: boolean }): typeof CalcAUY {
-        setGlobalLoggingPolicy(policy);
+    public static setSecurityPolicy(policy: {
+        sensitive?: boolean;
+        salt?: string;
+        encoder?: SignatureEncoder;
+    }): typeof CalcAUY {
+        setGlobalSecurityPolicy(policy);
         return CalcAUY;
-    }
-
-    /**
-     * Define a política global de logging (versão de instância fluente).
-     * @param policy Configuração da política.
-     * @returns A instância atual para continuidade do builder.
-     */
-    public setLoggingPolicy(policy: { sensitive: boolean }): this {
-        setGlobalLoggingPolicy(policy);
-        return this;
     }
 
     /**
@@ -253,43 +248,98 @@ export class CalcAUY {
     }
 
     /**
-     * Reconstrói um cálculo a partir de um estado salvo (JSON).
+     * Reconstrói um cálculo a partir de um estado salvo (JSON) e valida sua integridade.
      *
-     * **Engenharia:** Suporta tanto a árvore pura (AST) quanto o objeto completo
-     * gerado pelo `toAuditTrace()`. Se um snapshot de auditoria for detectado,
-     * o método extrai automaticamente a árvore original, ignorando os resultados
-     * consolidados e permitindo a continuidade do cálculo.
+     * **Engenharia:** Além de reconstruir a árvore, este método verifica a assinatura
+     * digital BLAKE3 usando o Salt fornecido (ou vazio por padrão). Se houver qualquer
+     * alteração de 1 bit nos dados ou se a assinatura for inválida, lança um erro fatal.
      *
-     * @param ast - Objeto CalculationNode, Snapshot de Auditoria ou string JSON.
+     * @param ast - Objeto serializado contendo 'data' (AST) e 'signature'.
+     * @param config - Configuração de segurança (opcional).
      * @returns Instância hidratada pronta para novas operações.
-     *
-     * @example Exemplo Simples (AST Pura)
-     * ```ts
-     * const calc = CalcAUY.hydrate(node);
-     * ```
-     *
-     * @example Hidratação via Rastro de Auditoria (Audit Trace)
-     * ```ts
-     * const audit = res.toAuditTrace(); // { ast: {...}, finalResult: ..., strategy: ... }
-     * const calc = CalcAUY.hydrate(audit).add(50); // Retoma o cálculo
-     * ```
+     * @throws {CalcAUYError} 'integrity-critical-violation' se a validação falhar.
      */
-    public static hydrate(ast: CalculationNode | string | object): CalcAUY {
-        const data = typeof ast === "string" ? JSON.parse(ast) : ast;
+    public static async hydrate(
+        ast: CalculationNode | string | object,
+        config: { salt?: string; encoder?: SignatureEncoder } = {},
+    ): Promise<CalcAUY> {
+        const fullConfig = { salt: "", ...config };
+        await CalcAUY.checkSignature(ast, fullConfig);
 
-        // Se for um snapshot de auditoria (contém a chave 'ast'), extraímos apenas a árvore.
-        const node: CalculationNode = (data && typeof data === "object" && "ast" in data) ? data.ast : data;
+        const data = typeof ast === "string" ? JSON.parse(ast) : ast;
+        const node: CalculationNode = data.data || data.ast || data;
 
         validateASTNode(node);
-
         return new CalcAUY(node);
     }
 
     /**
-     * Captura e serializa a árvore atual em uma string JSON pronta para persistência.
+     * Verifica a validade da assinatura de um cálculo serializado.
+     *
+     * **Engenharia:** Aceita tanto a string JSON bruta quanto o objeto já parseado.
+     * Realiza o confronto do hash BLAKE3 usando o Salt e o Encoder fornecidos.
+     *
+     * @param ast - O rastro assinado (string JSON ou objeto).
+     * @param config - Configuração de segurança (salt e encoder opcional).
+     * @returns true se a assinatura for válida.
+     * @throws {CalcAUYError} 'integrity-critical-violation' se a assinatura falhar.
      */
-    public hibernate(): string {
-        return JSON.stringify(this.#ast);
+    public static async checkSignature(
+        ast: CalculationNode | string | object,
+        config: { salt: string; encoder?: SignatureEncoder },
+    ): Promise<boolean> {
+        let payload: Record<string, unknown>;
+
+        if (typeof ast === "string") {
+            try {
+                payload = JSON.parse(ast);
+            } catch {
+                throw new CalcAUYError("invalid-syntax", "Falha ao processar JSON para verificação de assinatura.");
+            }
+        } else {
+            payload = ast as Record<string, unknown>;
+        }
+
+        if (!payload || typeof payload !== "object" || !payload.signature) {
+            throw new CalcAUYError(
+                "integrity-critical-violation",
+                "Assinatura de integridade ausente no rastro de auditoria.",
+            );
+        }
+
+        const dataToVerify = payload.data || {
+            ast: payload.ast,
+            finalResult: payload.finalResult,
+            strategy: payload.strategy,
+        };
+
+        const expectedHash = await generateSignature(
+            dataToVerify,
+            config.salt,
+            config.encoder || securityPolicy.encoder,
+        );
+
+        if (payload.signature !== expectedHash) {
+            throw new CalcAUYError(
+                "integrity-critical-violation",
+                "Violação de integridade detectada: a assinatura não confere com o conteúdo.",
+                { expected: expectedHash, received: payload.signature as string },
+            );
+        }
+
+        return true;
+    }
+
+    /**
+     * Captura e serializa a árvore atual em uma string JSON pronta para persistência.
+     * Engenharia: O JSON retornado contém o campo 'signature' para garantir integridade.
+     */
+    public async hibernate(): Promise<string> {
+        const signature = await generateSignature(this.#ast, securityPolicy.salt, securityPolicy.encoder);
+        return JSON.stringify({
+            data: this.#ast,
+            signature,
+        });
     }
 
     /**
@@ -454,7 +504,11 @@ export class CalcAUY {
             inputType = "CalcAUY";
         } else {
             const r: RationalNumber = RationalNumber.from(value);
-            rightNode = { kind: "literal", value: r.toJSON() as RationalValue, originalInput: value.toString() };
+            rightNode = {
+                kind: "literal",
+                value: r.toJSON() as RationalValue,
+                originalInput: value.toString(),
+            };
             inputType = typeof value;
         }
 
@@ -483,29 +537,38 @@ export class CalcAUY {
      *
      * @example Exemplo Simples
      * ```ts
-     * const res = CalcAUY.from(10).add(5).commit();
+     * const res = await CalcAUY.from(10).add(5).commit();
      * ```
      *
      * @example Estratégia Customizada
      * ```ts
-     * const res = CalcAUY.from("1.255").commit({ roundStrategy: "HALF_EVEN" });
+     * const res = await CalcAUY.from("1.255").commit({ roundStrategy: "HALF_EVEN" });
      * ```
      *
      * @example Cenário Real: Fechamento de Venda
      * ```ts
-     * const total = CalcAUY.from("99.90").mult(3).commit({ roundStrategy: "NBR5891" });
+     * const total = await CalcAUY.from("99.90").mult(3).commit({ roundStrategy: "NBR5891" });
      * ```
      *
      * @example Cenário Real Complexo: Cálculo Fiscal com Truncagem
      * ```ts
      * // Muitos cálculos fiscais exigem TRUNCATE para não favorecer o contribuinte
-     * const icms = CalcAUY.from("1250.45").mult("0.18").commit({ roundStrategy: "TRUNCATE" });
+     * const icms = await CalcAUY.from("1250.45").mult("0.18").commit({ roundStrategy: "TRUNCATE" });
      * ```
      */
-    public commit(options: { roundStrategy?: RoundingStrategy } = {}): CalcAUYOutput {
+    public async commit(options: { roundStrategy?: RoundingStrategy } = {}): Promise<CalcAUYOutput> {
         using _span = startSpan("commit", logger, options);
         const strategy: RoundingStrategy = options.roundStrategy ?? "NBR5891";
         const result: RationalNumber = evaluate(this.#ast);
-        return new CalcAUYOutput(result, this.#ast, strategy);
+
+        // Gera a assinatura de integridade do resultado consolidado
+        const payload = {
+            ast: this.#ast,
+            finalResult: result.toJSON(),
+            strategy,
+        };
+        const signature = await generateSignature(payload, securityPolicy.salt, securityPolicy.encoder);
+
+        return new CalcAUYOutput(result, this.#ast, strategy, signature);
     }
 }
