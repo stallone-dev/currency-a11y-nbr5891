@@ -34,12 +34,12 @@ export function canonicalString(data: unknown): string {
     }
 
     const keys = Object.keys(data as object).sort();
-    return "{" +
-        keys.map((key) => {
+    return "{"
+        + keys.map((key) => {
             const val = (data as Record<string, unknown>)[key];
             return `"${key}":${canonicalString(val)}`;
-        }).join(",") +
-        "}";
+        }).join(",")
+        + "}";
 }
 
 /**
@@ -53,7 +53,7 @@ export function canonicalString(data: unknown): string {
 export async function generateSignature(
     data: unknown,
     salt: string,
-    encoderType: SignatureEncoder = "BASE58",
+    encoderType: SignatureEncoder = "HEX",
 ): Promise<string> {
     const cString = canonicalString(data);
     const encoder = new TextEncoder();
@@ -63,14 +63,14 @@ export async function generateSignature(
     const uint8 = new Uint8Array(hashBuffer);
 
     switch (encoderType) {
-        case "HEX":
-            return encodeHex(uint8);
         case "BASE64":
             return encodeBase64(uint8);
         case "BASE32":
             return encodeBase32(uint8);
         case "BASE58":
-        default:
             return encodeBase58(uint8);
+        case "HEX":
+        default:
+            return encodeHex(uint8);
     }
 }

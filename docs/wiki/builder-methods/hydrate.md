@@ -4,9 +4,9 @@ O `hydrate()` é o mecanismo de restauração de estado e validação de integri
 
 ## ⚙️ Funcionamento Interno
 
-1.  **Confronto de Assinatura:** O método extrai a assinatura do JSON e gera um novo hash BLAKE3 a partir dos dados recebidos, utilizando o **Salt** fornecido no segundo parâmetro.
-2.  **Proteção contra Tampering:** Se houver qualquer alteração de 1 bit nos dados ou metadados, ou se o Salt for inválido, o método lança um erro fatal de integridade.
-3.  **Validação Estrutural:** Após validar a assinatura, a árvore é percorrida recursivamente para garantir que a estrutura é legítima e não contém "bombas lógicas".
+1.  **Confronto de Assinatura:** O método utiliza internamente o método estático `checkIntegrity()` para validar o rastro. Ele extrai a assinatura do JSON e gera um novo hash BLAKE3 a partir dos dados recebidos, utilizando o **Salt** fornecido no segundo parâmetro.
+2.  **Proteção contra Tampering:** Se houver qualquer alteração de 1 bit nos dados ou metadados, ou se o Salt for inválido, o método lança um erro fatal de integridade (`integrity-critical-violation`).
+3.  **Validação Estrutural:** Após validar a assinatura, a árvore é percorrida recursivamente para garantir que a estrutura é legítima e não excede os limites de segurança (profundidade e número de nós).
 
 ## 🎯 Propósito
 Recuperar cálculos salvos em bancos de dados ou recebidos via API, garantindo que o que está sendo processado é exatamente o que foi assinado na origem, sem adulterações intermediárias.
@@ -14,12 +14,12 @@ Recuperar cálculos salvos em bancos de dados ou recebidos via API, garantindo q
 ## 💼 10 Casos de Uso Reais
 
 ### 1. Recuperação de Fluxo de Aprovação
-Restaurar um cálculo que foi submetido para análise humana e precisa de um acréscimo final.
+Restaurar um cálculo que foi submetido para análise humana e precisa de um acréscimo final após a aprovação.
 ```typescript
 const approval = await db.get("pending_calc");
 // Requer o salt secreto original para validar o que o usuário enviou
 const calc = await CalcAUY.hydrate(approval.math_state, { salt: "secret-123" });
-const final = await calc.add(50).commit();
+const final = await (await calc.add(50)).commit();
 ```
 
 ### 2. Validação Forense de Rastro em Logs
@@ -29,7 +29,9 @@ try {
   await CalcAUY.hydrate(traceFromLog, { salt: "audit-key-2026" });
   console.log("Cálculo íntegro e autêntico.");
 } catch (e) {
-  console.error("ALERTA: Rastro de auditoria corrompido!");
+  if (e instanceof CalcAUYError && e.code === "integrity-critical-violation") {
+    console.error("ALERTA: Rastro de auditoria corrompido!");
+  }
 }
 ```
 
@@ -46,7 +48,7 @@ Usar o JSON de auditoria para re-executar um cálculo antigo e validar o resulta
 ```typescript
 const audit = JSON.parse(await Deno.readTextFile("./audit.json"));
 const calc = await CalcAUY.hydrate(audit, { salt: "historical-salt" });
-const isValid = (await calc.commit()).toRawInternalBigInt() === BigInt(audit.expected);
+const isValid = (await (await calc.commit()).toRawInternalBigInt()) === BigInt(audit.expected);
 ```
 
 ### 5. Arquitetura de Microserviços Distribuídos
@@ -54,7 +56,7 @@ O Serviço A constrói a base do cálculo e o Serviço B aplica os impostos fina
 ```typescript
 // Serviço B recebe o payload assinado do Serviço A
 const baseCalc = await CalcAUY.hydrate(payloadFromServiceA, { salt: "inter-service-key" });
-const finalRes = await baseCalc.mult("1.15").commit();
+const finalRes = await (await baseCalc.mult("1.15")).commit();
 ```
 
 ### 6. Conformidade Regulatória (Não-Repúdio)
@@ -70,7 +72,7 @@ Garantir que mudanças no código da engine não alterem resultados de cálculos
 ```typescript
 const snapshot = await Deno.readTextFile("./tests/snapshots/complex_deal.json");
 const calc = await CalcAUY.hydrate(snapshot, { salt: "test-salt" });
-assertEquals((await calc.commit()).toStringNumber(), "1540.22");
+assertEquals((await (await calc.commit()).toStringNumber()), "1540.22");
 ```
 
 ### 8. Reversão de Estado (Undo/Redo Técnico)
@@ -86,7 +88,7 @@ Validar a integridade de uma fórmula complexa enviada via formulário por um op
 app.post("/calculate", async (req) => {
   // O salt garante que a fórmula foi gerada pela nossa própria UI de builder
   const calc = await CalcAUY.hydrate(req.body.signed_formula, { salt: "ui-secret" });
-  return (await calc.commit()).toJSON();
+  return (await (await calc.commit()).toJSON());
 });
 ```
 
@@ -109,3 +111,4 @@ const calc = await CalcAUY.hydrate(req.body.data, { salt: tenant.security_salt }
 - **Custo Computacional:** A hidratação envolve o parse do JSON e a execução do hash BLAKE3. Em sistemas de alta frequência, recomenda-se o uso de `createCacheSession()`.
 - **Segurança de Memória:** O `hydrate()` limita a profundidade da árvore restaurada para evitar ataques de DoS via JSON malformado.
 - **Assincronia:** Este método é obrigatoriamente `async` pois depende da Web Crypto API para o confronto da assinatura.
+- **Assinatura Interna:** Para verificações que não exigem a reconstrução da instância, utilize `CalcAUY.checkIntegrity()`.

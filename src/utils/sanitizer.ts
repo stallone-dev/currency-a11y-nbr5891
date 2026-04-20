@@ -33,9 +33,9 @@ export const securityPolicy = {
     salt: "",
     /**
      * Codificação da assinatura final.
-     * Padrão: BASE58 (Melhor equilíbrio entre tamanho e legibilidade humana).
+     * Padrão: HEX (Padrão mundial).
      */
-    encoder: "BASE58" as SignatureEncoder,
+    encoder: "HEX" as SignatureEncoder,
 };
 
 /**

@@ -21,13 +21,13 @@ A CalcAUY foi concebida sob o paradigma da **Auditabilidade Forense**. Isso sign
 A grande inovação da CalcAUY é o sistema de **Assinatura Digital Determinística**. Diferente de serializações JSON comuns, a engine garante que os dados salvos sejam matematicamente à prova de adulteração.
 
 ### Ordenação Canônica (k-sort)
-Para que um hash seja confiável, ele deve ser **determinístico**. A CalcAUY aplica um algoritmo de ordenação de chaves (k-sort) em todos os níveis da AST e metadados antes de gerar a assinatura. 
+Para que um hash seja confiável, ele deve ser **determinístico**. A CalcAUY aplica um algoritmo de ordenação de chaves (k-sort) em todos os níveis da AST e metadados antes de gerar a assinatura.
 *   Mesmo que você insira metadados em ordens diferentes no seu código, a assinatura final será idêntica para o mesmo conteúdo.
 
 ### BLAKE3 + Salt (Não-Repúdio)
-A biblioteca utiliza o algoritmo **BLAKE3** (conhecido por sua extrema performance e segurança) para gerar uma assinatura de 256 bits. 
+A biblioteca utiliza o algoritmo **BLAKE3** (conhecido por sua extrema performance e segurança) para gerar uma assinatura de 256 bits.
 *   **O Salt:** Funciona como uma chave secreta. Sem ele, um atacante não consegue gerar uma assinatura válida para um cálculo malicioso.
-*   **Encoders:** Suporte nativo para `BASE58` (padrão human-readable), `HEX`, `BASE64` e `BASE32`.
+*   **Encoders:** Suporte nativo para `HEX`,`BASE58`, `BASE64` e `BASE32`.
 
 ---
 

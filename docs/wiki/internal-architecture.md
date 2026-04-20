@@ -86,6 +86,24 @@ A CalcAUY resolve o problema do "centavo perdido" no rateio (`toSlice`) através
 
 ---
 
+## 5. Segurança e Integridade: O Lacre Digital (Integrity Lifetime)
+
+Para garantir a **Imutabilidade Forense**, a CalcAUY implementa um sistema de lacre digital que protege a árvore de cálculo e seus resultados contra qualquer alteração externa.
+
+### Geração da Assinatura (Signature)
+A `signature` é gerada através de um processo determinístico de quatro etapas:
+1.  **Canonização (Canonical K-Sort):** O objeto (seja a AST ou o rastro de auditoria) é transformado em uma string única. Todas as chaves do objeto são ordenadas alfabeticamente de forma recursiva, garantindo que a assinatura seja independente da ordem dos campos no JSON original.
+2.  **Injeção de Salt:** Um segredo (`salt`) definido globalmente via `setSecurityPolicy` ou passado localmente é anexado à string canonizada. Isso garante que a assinatura seja exclusiva para aquele ambiente ou aplicação, dificultando ataques de dicionário ou manipulações em massa.
+3.  **Hashing BLAKE3:** O payload final é processado pelo algoritmo **BLAKE3**, gerando um hash de alta performance e resistência militar contra colisões, garantindo a integridade total do rastro de auditoria.
+4.  **Encoding Customizado:** O hash resultante é codificado utilizando o `encoder` configurado (suportando `HEX`, `BASE64`, `BASE58` ou `BASE32`). O padrão é **BASE58**, que oferece o melhor equilíbrio entre compactação e legibilidade humana para auditoria manual.
+
+### Validação de Integridade
+A integridade é verificada automaticamente durante o `hydrate()` ou via `checkIntegrity()`:
+- A engine reconstrói a assinatura baseada no conteúdo atual e no salt fornecido.
+- **Proteção contra Adulteração:** Se um único bit da AST ou do rastro de auditoria for modificado (ex: alteração de um valor, tipo de operação ou metadado), a assinatura deixará de coincidir e a CalcAUY lançará uma exceção crítica (`integrity-critical-violation`), impedindo o processamento de dados fraudados.
+
+---
+
 ## Diagrama de Anatomia de um Nó (AST)
 
 ```mermaid

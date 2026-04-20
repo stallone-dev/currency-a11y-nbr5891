@@ -75,7 +75,7 @@ export class CalcAUY {
      * **Engenharia:** Atua na 1ª camada de controle. Permite configurar a sensibilidade
      * dos logs (PII), o Salt secreto e a codificação (encoder) das assinaturas BLAKE3.
      *
-     * @param policy Configuração da política (ex: { salt: "meu_segredo", encoder: "BASE58" }).
+     * @param policy Configuração da política (ex: { salt: "meu_segredo", encoder: "HEX" }).
      * @returns A classe CalcAUY para encadeamento.
      */
     public static setSecurityPolicy(policy: {
@@ -264,7 +264,7 @@ export class CalcAUY {
         config: { salt?: string; encoder?: SignatureEncoder } = {},
     ): Promise<CalcAUY> {
         const fullConfig = { salt: "", ...config };
-        await CalcAUY.checkSignature(ast, fullConfig);
+        await CalcAUY.checkIntegrity(ast, fullConfig);
 
         const data = typeof ast === "string" ? JSON.parse(ast) : ast;
         const node: CalculationNode = data.data || data.ast || data;
@@ -284,7 +284,7 @@ export class CalcAUY {
      * @returns true se a assinatura for válida.
      * @throws {CalcAUYError} 'integrity-critical-violation' se a assinatura falhar.
      */
-    public static async checkSignature(
+    public static async checkIntegrity(
         ast: CalculationNode | string | object,
         config: { salt: string; encoder?: SignatureEncoder },
     ): Promise<boolean> {

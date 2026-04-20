@@ -7,7 +7,7 @@ A CalcAUY implementa um sistema de proteção de dados sensíveis (Personally Id
 O controle mestre da biblioteca é feito através do método estático global.
 
 -   **Método:** `CalcAUY.setSecurityPolicy(config: { sensitive?: boolean, salt?: string, encoder?: SignatureEncoder })`
--   **Configuração Padrão:** `{ sensitive: true, salt: "", encoder: "BASE58" }`
+-   **Configuração Padrão:** `{ sensitive: true, salt: "", encoder: "HEX" }`
 
 ### Comportamento da Redação (sensitive: true)
 Quando ativado, os utilitários de log e erro (`sanitizeAST`, `sanitizeObject`) substituem automaticamente:
@@ -16,9 +16,9 @@ Quando ativado, os utilitários de log e erro (`sanitizeAST`, `sanitizeObject`) 
 3.  **Metadados:** Todos os metadados são removidos do rastro de log, a menos que o nó permita a liberação.
 
 ### Lacre Digital (salt e encoder)
-A definição do `salt` ativa a geração de assinaturas BLAKE3 no `commit()` e `hibernate()`. 
+A definição do `salt` é incorporada a geração de assinaturas BLAKE3 no `commit()` e `hibernate()`.
 *   **Não-Repúdio:** O rastro de auditoria é selado matematicamente.
-*   ** BASE58:** Encoder padrão focado em legibilidade humana e transporte seguro.
+*   **HEX:** Encoder padrão para transporte seguro e otimizado.
 
 ## Camada 2: Controle Granular via Metadata (`pii`)
 

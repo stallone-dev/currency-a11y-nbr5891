@@ -12,6 +12,7 @@ Abaixo estão os métodos públicos da classe `CalcAUY`, organizados por sua fun
 | [`from`](./builder-methods/from.md) | `CalcAUY.from("10.50")` | Ingestão segura de valores (Static). |
 | [`parseExpression`](./builder-methods/parseExpression.md) | `CalcAUY.parseExpression("1+2")` | Parser de strings matemáticas (Static). |
 | [`hydrate`](./builder-methods/hydrate.md) | `await CalcAUY.hydrate(j, {salt})` | Reconstrói árvore validando integridade (Static). |
+| [`checkIntegrity`](./builder-methods/checkIntegrity.md) | `await CalcAUY.checkIntegrity(t, {salt})` | Valida assinatura sem reconstruir a árvore (Static). |
 | [`hibernate`](./builder-methods/hibernate.md) | `await calc.hibernate()` | Serializa a árvore com assinatura digital. |
 
 ### 🏷️ Estrutura e Auditoria
@@ -46,9 +47,10 @@ Abaixo estão os métodos públicos da classe `CalcAUY`, organizados por sua fun
 
 ## 💡 Fluxo de Trabalho Recomendado
 
-1.  **Crie** a instância via `CalcAUY.from()` ou `parseExpression()`.
-2.  **Encadeie** as operações (`add`, `mult`, etc.) e use `group()` para garantir a precedência.
-3.  **Enriqueça** com `setMetadata()` em pontos críticos para auditoria.
-4.  **Finalize** com `await commit()` escolhendo a estratégia de arredondamento ideal.
+1.  **Controle a segurança**, definindo o `CalcAUY.setSecurityPolicy({ salt, encoder })`
+2.  **Inicie** a instância via `CalcAUY.from()` ou `CalcAUY.parseExpression()`.
+3.  **Encadeie** as operações (`add`, `mult`, etc.), use `group()` para controlar a precedência caso precise.
+4.  **Enriqueça** o contexto com `setMetadata()` onde for necessário.
+5.  **Finalize** com `await commit()`, defina a estratégia de arredondamento se necessário.
 
 Para detalhes profundos sobre cada método, incluindo 10 casos de uso reais e anotações de engenharia, clique nos links acima.

@@ -15,7 +15,7 @@ A **CalcAUY** trata o cálculo não como um resultado volátil, mas como um **do
     - **Hibernação:** `.hibernate()` (ou `.getAST()`) extrai o estado atual selado com assinatura digital.
 4.  **Precedência e Execução (`specs/07`, `specs/13`):** O `commit()` aplica regras como **NBR-5891** e assina o resultado.
 5.  **Saída e Acessibilidade (`specs/09`, `specs/14`):** Geração de multiformatos com rastro forense.
-6.  **Proteção de Dados e Telemetria (`specs/11`, `specs/17`):** Sistema de proteção de PII (*Security by Default*) e integridade militar via **BLAKE3**.
+6.  **Proteção de Dados e Telemetria (`specs/11`, `specs/17`, `specs/19`):** Sistema de proteção de PII (*Security by Default*) e integridade militar via **BLAKE3**.
 7.  **Qualidade e Rigor (`specs/15`):** Padrões de tipagem estrita e performance.
 8.  **Extensibilidade (`specs/16`):** Processadores de saída customizados e injeção de lógica.
 9.  **Processamento em Massa (`specs/18`):** Utilitários de *Batch Processing* para evitar o bloqueio do Event Loop.
@@ -29,9 +29,10 @@ A **CalcAUY** trata o cálculo não como um resultado volátil, mas como um **do
 - **`ProcessBatchAUY(items, task)`**: Processamento assíncrono em lotes (anti-bloqueio).
 - **`parseExpression(str)`**: Parser de strings matemáticas complexas (com auto-agrupamento).
 - **`setMetadata(key, val)`**: O pilar da auditoria. Use `pii: true|false` para controle granular.
-- **`hibernate()`**: Serializa a árvore atual selada (**Promise<string>**).
+- **`hibernate()`**: Serializa a árvore atual selada (**Promise<string>**). Veja `specs/19`.
 - **`getAST()`**: Retorna o objeto da árvore atual (**CalculationNode**).
-- **`static hydrate(ast, {salt})`**: Reconstrói a instância validando assinatura digital (**Promise**).
+- **`static hydrate(ast, {salt})`**: Reconstrói a instância validando assinatura digital (**Promise**). Veja `specs/19`.
+- **`static checkIntegrity(ast, {salt})`**: Valida a assinatura de um rastro sem reconstruir a árvore (**Promise<boolean>**). Veja `specs/19`.
 - **`commit(strategy)`**: Finaliza, colapsa e assina o cálculo (**Promise**).
 
 ### Classe `CalcAUYOutput` (Result)

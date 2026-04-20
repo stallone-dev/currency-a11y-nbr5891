@@ -94,17 +94,21 @@ describe("CalcAUY - Segurança e Integridade (BLAKE3)", () => {
         );
     });
 
-    it("deve verificar assinatura via método estático checkSignature", async () => {
+    it("deve verificar assinatura via método estático checkIntegrity", async () => {
         CalcAUY.setSecurityPolicy({ salt: "check" });
         const calc = CalcAUY.from(50);
         const signed = await calc.hibernate();
 
-        const isValid = await CalcAUY.checkSignature(signed, { salt: "check" });
+        const isValid = await CalcAUY.checkIntegrity(signed, { salt: "check" });
         assertEquals(isValid, true);
 
         // Se usar o salt errado na verificação, a assinatura deve invalidar
-        await assertRejects(async () => {
-            await CalcAUY.checkSignature(signed, { salt: "wrong_salt" });
-        }, CalcAUYError, "Violação de integridade detectada");
+        await assertRejects(
+            async () => {
+                await CalcAUY.checkIntegrity(signed, { salt: "wrong_salt" });
+            },
+            CalcAUYError,
+            "Violação de integridade detectada",
+        );
     });
 });
