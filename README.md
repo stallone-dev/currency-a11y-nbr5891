@@ -105,6 +105,7 @@ console.log(rastroAprovado);
 ```
 > **NOTA:**
 > Note que a `"signature"` mudou entre a versão **'original'** e a **'aprovada'**.
+> 
 > Esse comportamento é essencial para criar uma [**Cadeia de Custódia**](https://pt.wikipedia.org/wiki/Cadeia_de_cust%C3%B3dia), podendo ser usado para rastrear e validar modificações.
 
 <details>
@@ -139,7 +140,9 @@ CalcAUYError: Violação de integridade detectada: a assinatura não confere com
 
 > **NOTA:**
 > Embora tenha sido mostrada a alteração no item "`strategy`", qualquer alteração, em qualquer ponto do objeto serializado, seja um "`0`" a mais dentro da `AST` ou uma letra diferente em qualquer "`metadado`", invalidará a assinatura da mesma forma.
-> A integridade do objeto é total, ou tudo permanece idêntico, ou é considerado [violação crítica de integridade](./wiki/errors/integrity-critical-violation.md).
+> 
+> A integridade do objeto é total: ou tudo permanece idêntico, ou é considerado [violação crítica de integridade](./wiki/errors/integrity-critical-violation.md).
+> 
 > O método "`.hydrate`" também executa essa verificação antes de qualquer avaliação da `AST` em si.
 
 </details>
@@ -197,7 +200,7 @@ O que torna isso possível é a implementação destes três pilares:
     - `.toAuditTrace()`: JSON detalhado contendo o **"DNA do cálculo"** para auditoria profunda.
     - `.toCustomOutput(processo)`: Método especial para estender o `output` para novos formatos (_protobuf, XML, Excel..._) sem interferência no resultado original.
 
-- **Processamento Industrial**: Fornece o utilitário `ProcessBatchAUY(...)`, um motor de alta vazão projetado para processar volumes massivos _(1M+ registros)_ e fluxos contínuos (`Streaming`) sob complexidade `O(N)`, utilizando `workers lógicos`, `scheduler.yield()` e **redutores** para prevenir o bloqueio do `Event Loop` e consumo excessivo de memória durante processamentos intensivos.
+- **Processamento Industrial**: Fornece o utilitário `ProcessBatchAUY(...)`, um motor de alta vazão projetado para processar volumes massivos _(1M+ registros)_ e fluxos contínuos (`Streaming`) sob complexidade `O(N)`, utilizando `workers lógicos`, `scheduler.yield()` e **redutores** para prevenir o bloqueio do `Event Loop` e consumo excessivo de memória.
 
 ## 🔍 Testes
 
