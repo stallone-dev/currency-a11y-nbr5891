@@ -25,7 +25,7 @@ export function mapAllOutputs(
     const jsonStr = output.toJSON([
         "toStringNumber",
         "toFloatNumber",
-        "toRawInternalBigInt",
+        "toRawInternalNumber",
         "toScaledBigInt",
         "toMonetary",
         "toLaTeX",
@@ -58,7 +58,7 @@ export function mapAllOutputs(
     return {
         toString: baseData.toStringNumber,
         toFloatNumber: baseData.toFloatNumber,
-        toRawInternalBigInt: baseData.toRawInternalBigInt,
+        toRawInternalNumber: `${baseData.toRawInternalNumber.n}/${baseData.toRawInternalNumber.d}`,
         toScaledBigInt: baseData.toScaledBigInt,
         toMonetary: baseData.toMonetary,
         toLaTeX: baseData.toLaTeX,

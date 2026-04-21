@@ -24,10 +24,10 @@ describe("CalcAUY - Rounding Strategy: NONE", () => {
         expect(val).toBe("1.5241578750190521");
     });
 
-    it("toRawInternalBigInt deve retornar a parte inteira sem arredondar para o par", async () => {
-        // 10 / 3 = 3.333... -> Parte inteira é 3
+    it("toRawInternalNumber deve retornar o racional bruto (n/d) sem arredondamentos", async () => {
+        // 10 / 3 = 10/3 racional exato
         const res = await CalcAUY.from(10).div(3).commit({ roundStrategy: "NONE" });
-        expect(res.toRawInternalBigInt()).toBe(3n);
+        expect(res.toRawInternalNumber()).toEqual({ n: 10n, d: 3n });
     });
 
     it("toMonetary deve exibir precisão total com strategy NONE", async () => {

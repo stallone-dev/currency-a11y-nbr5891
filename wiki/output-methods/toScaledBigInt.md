@@ -126,5 +126,4 @@ const secret = dh.computeSecret(output.toScaledBigInt());
 - **Use o padrão da indústria:** 2 casas para moedas fiat, 8 ou mais para ativos digitais.
 
 ## 🏗️ Considerações de Engenharia
-- **Escala Direta:** Diferente do numerador bruto (`toRawInternalBigInt`), este método garante que o valor retornado seja proporcional à base decimal 10.
 - **Overflow:** Embora o `bigint` seja ilimitado em teoria, a CalcAUY possui guardas de 1 milhão de bits para evitar ataques de negação de serviço (DoS) via memória.

@@ -48,7 +48,7 @@ Usar o JSON de auditoria para re-executar um cálculo antigo e validar o resulta
 ```typescript
 const audit = JSON.parse(await Deno.readTextFile("./audit.json"));
 const calc = await CalcAUY.hydrate(audit, { salt: "historical-salt" });
-const isValid = (await (await calc.commit()).toRawInternalBigInt()) === BigInt(audit.expected);
+const isValid = (await (await calc.commit()).toRawInternalNumber()).n === BigInt(audit.expected);
 ```
 
 ### 5. Arquitetura de Microserviços Distribuídos

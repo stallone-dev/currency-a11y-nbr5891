@@ -19,7 +19,7 @@ Gatilho de execução determinístico. É o momento em que a "fórmula" se torna
 1.  **Fechamento de Nota Fiscal:** Aplicar arredondamento oficial NBR-5891 antes da emissão.
 ```typescript
 // Exemplo 1: Commit padrão
-const res = invoice.commit(); 
+const res = invoice.commit();
 ```
 ```typescript
 // Exemplo 2: Estratégia explícita
@@ -43,7 +43,7 @@ const exact = calc.commit({ roundStrategy: "NONE" });
 ```
 ```typescript
 // Exemplo 2: Comparação científica
-if (res.commit({ roundStrategy: "NONE" }).toRawInternalBigInt() === 10n) { /* ... */ }
+if (res.commit().toRawInternalNumber().n === 10n) { /* ... */ }
 ```
 
 4.  **Sistemas Bancários Internacionais:** Uso de arredondamento bancário (Half-Even).

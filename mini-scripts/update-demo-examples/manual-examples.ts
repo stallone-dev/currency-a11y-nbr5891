@@ -311,7 +311,7 @@ export const manualExamples: RawExample[] = [
         }).commit().toHTML(katex),
     },
 
-    // toLaTeX/toRawInternalBigInt
+    // toLaTeX/toRawInternalNumber
     {
         group: "outputs",
         key: "LaTeX/rawInternalBigInt",
@@ -328,13 +328,13 @@ export const manualExamples: RawExample[] = [
         group: "outputs",
         key: "LaTeX/rawInternalBigInt",
         title: "Demonstração de output",
-        context: "Cálculo de juros compostos (visão toRawInternalBigInt)",
+        context: "Cálculo de juros compostos (visão toRawInternalNumber)",
         code:
-            "CalcAUY.from(1_000).mult(CalcAUY.from(1).add('14.75%').group().pow(10)).setMetadata('meta', { id: 1, date: new Date().toISOString() }).commit().toRawInternalBigInt()",
+            "CalcAUY.from(1_000).mult(CalcAUY.from(1).add('14.75%').group().pow(10)).setMetadata('meta', { id: 1, date: new Date().toISOString() }).commit().toRawInternalNumber()",
         result: CalcAUY.from(1_000).mult(CalcAUY.from(1).add("14.75%").group().pow(10)).setMetadata("meta", {
             id: 1,
             date: new Date().toISOString(),
-        }).commit().toRawInternalBigInt(),
+        }).commit().toRawInternalNumber(),
     },
 
     // toVerbalA11y

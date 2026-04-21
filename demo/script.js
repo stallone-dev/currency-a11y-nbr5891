@@ -22,7 +22,7 @@ function updateInteractiveDisplay(data) {
     const mapping = {
         toString: data.toString,
         toFloatNumber: data.toFloatNumber,
-        toRawInternalBigInt: data.toRawInternalBigInt,
+        toRawInternalNumber: data.toRawInternalNumber,
         toScaledBigInt: data.toScaledBigInt,
         toMonetary: data.toMonetary,
         toLaTeX: data.toLaTeX,
@@ -34,7 +34,7 @@ function updateInteractiveDisplay(data) {
         `,
         toSliceDemo: data.toSliceDemo,
         toSliceByRatioDemo: data.toSliceByRatioDemo,
-        toAuditTrace: (function() {
+        toAuditTrace: (function () {
             try {
                 const parsed = typeof data.toAuditTrace === 'string' ? JSON.parse(data.toAuditTrace) : data.toAuditTrace;
                 let json = JSON.stringify(parsed, null, 2);
@@ -43,7 +43,7 @@ function updateInteractiveDisplay(data) {
                 return data.toAuditTrace;
             }
         })(),
-        toJson: (function() {
+        toJson: (function () {
             if (!data.toJson) return '';
             try {
                 const parsed = typeof data.toJson === 'string' ? JSON.parse(data.toJson) : data.toJson;
@@ -98,7 +98,7 @@ const methodTitles = {
 function renderCategory(examplesByKey, container, navList) {
     for (const [key, examples] of Object.entries(examplesByKey)) {
         const sectionId = `sec-${key.replace("/", "-")}`;
-        
+
         // Adiciona à barra lateral
         if (navList) {
             const li = document.createElement("li");
@@ -139,7 +139,7 @@ function renderCategory(examplesByKey, container, navList) {
                 resultView = `<div class="card-result-text">${JSON.stringify(res)}</div>`;
             }
 
-            const processorHtml = ex.customProcessor 
+            const processorHtml = ex.customProcessor
                 ? `<div class="processor-info"><strong>Processor:</strong> <code>${ex.customProcessor}</code></div>`
                 : "";
 
@@ -169,7 +169,7 @@ async function loadExamples() {
     try {
         const response = await fetch("/api/examples");
         const data = await response.json();
-        
+
         if (data.common_css) {
             let styleTag = document.getElementById("katex-common-styles");
             if (!styleTag) {
@@ -181,7 +181,7 @@ async function loadExamples() {
         }
 
         container.innerHTML = "";
-        
+
         // Limpa a barra lateral (mantendo apenas o Interactive)
         navLinks.innerHTML = '<li><a href="#sec-interactive">Interactive</a></li>';
 
@@ -324,7 +324,7 @@ function init() {
             htmlEl.setAttribute("data-theme", newTheme);
             try {
                 localStorage.setItem("theme", newTheme);
-            } catch (_e) {}
+            } catch (_e) { }
 
             const isDark = newTheme === "dark";
             darkModeBtn.setAttribute("aria-pressed", isDark);
@@ -345,7 +345,7 @@ function init() {
             contrastBtn.setAttribute("aria-pressed", !isPressed);
             try {
                 localStorage.setItem("altoContraste", !isPressed);
-            } catch (_e) {}
+            } catch (_e) { }
         });
     }
 }

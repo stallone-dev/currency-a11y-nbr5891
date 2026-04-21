@@ -66,7 +66,7 @@ export interface ICalcAUYCustomOutputContext {
         | "toStringNumber"
         | "toFloatNumber"
         | "toScaledBigInt"
-        | "toRawInternalBigInt"
+        | "toRawInternalNumber"
         | "toMonetary"
         | "toLaTeX"
         | "toUnicode"
@@ -87,7 +87,7 @@ export type OutputKey =
     | "toStringNumber"
     | "toFloatNumber"
     | "toScaledBigInt"
-    | "toRawInternalBigInt"
+    | "toRawInternalNumber"
     | "toMonetary"
     | "toLaTeX"
     | "toUnicode"
@@ -285,20 +285,21 @@ export class CalcAUYOutput {
     }
 
     /**
-     * Retorna o resultado final como um BigInt arredondado para inteiro.
+     * Retorna o resultado racional bruto (n/d) sem qualquer arredondamento ou processamento.
      *
-     * **Engenharia:** Diferente de apenas retornar o numerador, este método
-     * aplica a estratégia de arredondamento definida no commit para a precisão zero,
-     * garantindo que o rastro matemático seja preservado na conversão para inteiro.
+     * **Engenharia:** Este é o método definitivo para obter a precisão absoluta do motor interno.
+     * Útil para sistemas que desejam realizar seu próprio processamento ou persistência
+     * de frações puras.
+     *
+     * @returns Objeto contendo o numerador (n) e o denominador (d) como BigInts.
      */
-    public toRawInternalBigInt(): bigint {
-        using _span = startSpan("toRawInternalBigInt", logger, {});
-        return this.toRawInternalBigIntInternal();
+    public toRawInternalNumber(): { n: bigint; d: bigint } {
+        using _span = startSpan("toRawInternalNumber", logger, {});
+        return this.toRawInternalNumberInternal();
     }
 
-    private toRawInternalBigIntInternal(): bigint {
-        const rounded: RationalNumber = this.getRounded(0);
-        return rounded.n / rounded.d;
+    private toRawInternalNumberInternal(): { n: bigint; d: bigint } {
+        return { n: this.#result.n, d: this.#result.d };
     }
 
     /**
@@ -827,7 +828,6 @@ export class CalcAUYOutput {
         return JSON.stringify(res, (_key, value) => typeof value === "bigint" ? value.toString() : value);
     }
 
-
     /**
      * Permite a injeção de processadores de saída customizados (Extensibilidade).
      *
@@ -882,7 +882,7 @@ export class CalcAUYOutput {
                 toStringNumber: this.toStringNumber.bind(this),
                 toFloatNumber: this.toFloatNumber.bind(this),
                 toScaledBigInt: this.toScaledBigInt.bind(this),
-                toRawInternalBigInt: this.toRawInternalBigInt.bind(this),
+                toRawInternalNumber: this.toRawInternalNumber.bind(this),
                 toMonetary: this.toMonetary.bind(this),
                 toLaTeX: this.toLaTeX.bind(this),
                 toUnicode: this.toUnicode.bind(this),

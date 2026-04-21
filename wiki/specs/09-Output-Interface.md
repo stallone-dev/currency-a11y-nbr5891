@@ -19,8 +19,8 @@ Definir o contrato final de consumo dos resultados do cálculo. A classe `CalcAU
 - **Descrição:** Retorna o valor inteiro escalado para a precisão informada.
 - **Exemplo:** `10.50` com `decimalPrecision: 2` retorna `1050n`.
 
-### `toRawInternalBigInt(): bigint`
-- **Descrição:** Retorna o numerador puro do `RationalNumber` resultante sem arredondamentos.
+### `toRawInternalNumber(): { n: bigint, d: bigint }`
+- **Descrição:** Retorna o objeto racional bruto (numerador e denominador) resultante do cálculo, sem qualquer arredondamento.
 
 ### `toMonetary(options?: MonetaryOptions): string`
 - **Descrição:** Retorna o valor formatado com símbolos monetários localizados (ex: `R$ 1.250,50`).

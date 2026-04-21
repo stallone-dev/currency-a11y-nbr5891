@@ -1,252 +1,247 @@
 <!DOCTYPE html>
 <html lang="pt-BR" dir="ltr">
-    <head>
-        <!--
+
+<head>
+    <!--
     Create by Stallone L. S. (@st-all-one) - 2026 - License: MPL-2.0
         * Copyright (c) 2026, Stallone L. S. (@st-all-one)
         * This Source Code Form is subject to the terms of the Mozilla Public
         * License, v. 2.0. If a copy of the MPL was not distributed with this
         * file, You can obtain one at https://mozilla.org/MPL/2.0/.
     -->
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="theme-color" content="#003366">
-        <meta name="referrer" content="no-referrer">
-        <meta name="color-scheme" content="light dark">
-        <meta name="robots" content="noindex, nofollow">
-        <meta name="keywords" content="math, finance, audit, latex, bigint, precision, currency, money">
-        <meta
-            name="description"
-            content="Biblioteca TypeScript de matemática financeira com exportação LaTeX e texto próprio para leitura e acessibilidade."
-        >
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#003366">
+    <meta name="referrer" content="no-referrer">
+    <meta name="color-scheme" content="light dark">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="keywords" content="math, finance, audit, latex, bigint, precision, currency, money">
+    <meta name="description"
+        content="Biblioteca TypeScript de matemática financeira com exportação LaTeX e texto próprio para leitura e acessibilidade.">
 
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
 
-        <title>CalcAUY - Demonstração Completa de Auditabilidade</title>
-        <link rel="icon" id="favicon" href="favicon.ico">
-        <meta name="session-token" content="{{SESSION_TOKEN}}">
-        <link rel="stylesheet" href="style.css">
-        <script>
-            // Bloqueia FOUC aplicando o tema antes do body renderizar
-            (function () {
-                try {
-                    const theme = localStorage.getItem("theme") || "light";
-                    document.documentElement.setAttribute("data-theme", theme);
-                    const contrast = localStorage.getItem("altoContraste");
-                    if (contrast === "true") {
-                        document.documentElement.classList.add("alto-contraste-init");
-                    }
-                } catch (e) {}
-            })();
-        </script>
-    </head>
+    <title>CalcAUY - Demonstração Completa de Auditabilidade</title>
+    <link rel="icon" id="favicon" href="favicon.ico">
+    <meta name="session-token" content="{{SESSION_TOKEN}}">
+    <link rel="stylesheet" href="style.css">
+    <script>
+        // Bloqueia FOUC aplicando o tema antes do body renderizar
+        (function () {
+            try {
+                const theme = localStorage.getItem("theme") || "light";
+                document.documentElement.setAttribute("data-theme", theme);
+                const contrast = localStorage.getItem("altoContraste");
+                if (contrast === "true") {
+                    document.documentElement.classList.add("alto-contraste-init");
+                }
+            } catch (e) { }
+        })();
+    </script>
+</head>
 
-    <body>
-        <div id="barra-acessibilidade" role="region" aria-label="Barra de Acessibilidade">
-            <ul id="atalhos">
-                <li><a href="#menu-principal" accesskey="1">Ir para o conteúdo [1]</a></li>
-                <li><a href="#footer" accesskey="2">Ir para o rodapé [2]</a></li>
+<body>
+    <div id="barra-acessibilidade" role="region" aria-label="Barra de Acessibilidade">
+        <ul id="atalhos">
+            <li><a href="#menu-principal" accesskey="1">Ir para o conteúdo [1]</a></li>
+            <li><a href="#footer" accesskey="2">Ir para o rodapé [2]</a></li>
+        </ul>
+        <ul id="opcoes-acessibilidade">
+            <li>
+                <a href="#" id="modo-escuro" aria-pressed="false"><span aria-hidden="true">☼</span> Modo Escuro</a>
+            </li>
+            <li>
+                <a href="#" id="alto-contraste" aria-pressed="false"><span aria-hidden="true">◐</span> Alto
+                    Contraste</a>
+            </li>
+        </ul>
+    </div>
+
+    <a href="#menu-principal" class="skip-link">Pular para o conteúdo principal</a>
+
+    <div class="page-container">
+        <header role="banner">
+            <h1>CalcAUY: Demonstração</h1>
+            <p>Demonstração os <code>métodos</code> e <code>outputs</code> da classe <code>CalcAUY</code>.</p>
+        </header>
+
+        <nav id="menu-principal" aria-label="Navegação rápida">
+            <ul class="nav-links">
+                <li><a href="#sec-interactive">Interactive</a></li>
+
+                <li class="nav-group-title">Operações</li>
+                <li><a href="#sec-add">add</a></li>
+                <li><a href="#sec-sub">sub</a></li>
+                <li><a href="#sec-mult">mult</a></li>
+                <li><a href="#sec-div">div</a></li>
+                <li><a href="#sec-pow">pow</a></li>
+                <li><a href="#sec-mod">mod</a></li>
+                <li><a href="#sec-divInt">divInt</a></li>
+                <li><a href="#sec-group">group</a></li>
+
+                <li class="nav-group-title">Outputs</li>
+                <li><a href="#sec-verbalMonetary">1. locale</a></li>
+                <li><a href="#sec-currencyOptions">1.1 Currency</a></li>
+                <li><a href="#sec-roundingShowcase">2. Rounding</a></li>
+                <li><a href="#sec-strategyShowcase">2.1 Strategies</a></li>
+                <li><a href="#sec-toString">3. toString</a></li>
+                <li><a href="#sec-toFloatNumber">4. toFloatNumber</a></li>
+                <li><a href="#sec-toRawInternalNumber">5. toRawInternalNumber</a></li>
+                <li><a href="#sec-toMonetary">6. toMonetary</a></li>
+                <li><a href="#sec-toLaTeX">7. toLaTeX</a></li>
+                <li><a href="#sec-toHTML">8. toHTML</a></li>
+                <li><a href="#sec-toUnicode">9. toUnicode</a></li>
+                <li><a href="#sec-toVerbalA11y">10. toVerbalA11y</a></li>
+                <li><a href="#sec-toCustomOutput">10.1 toCustomOutput</a></li>
+                <li><a href="#sec-toImageBuffer">11. toImageBuffer</a></li>
+                <li><a href="#sec-toJson">12. toJson</a></li>
             </ul>
-            <ul id="opcoes-acessibilidade">
-                <li>
-                    <a href="#" id="modo-escuro" aria-pressed="false"><span aria-hidden="true">☼</span> Modo Escuro</a>
-                </li>
-                <li>
-                    <a href="#" id="alto-contraste" aria-pressed="false"><span aria-hidden="true">◐</span> Alto
-                        Contraste</a>
-                </li>
-            </ul>
-        </div>
+        </nav>
 
-        <a href="#menu-principal" class="skip-link">Pular para o conteúdo principal</a>
+        <main id="main-content" role="main">
+            <!-- 1. SIMULADOR INTERATIVO -->
+            <section id="sec-interactive" aria-labelledby="h-interactive">
+                <h2 id="h-interactive">Modo Interativo</h2>
+                <div class="interactive-container">
+                    <form id="f" class="simulator-form" onsubmit="return false;">
+                        <div class="form-group full-width">
+                            <label for="editor-iframe">Expressão de Cálculo (TypeScript):</label>
 
-        <div class="page-container">
-            <header role="banner">
-                <h1>CalcAUY: Demonstração</h1>
-                <p>Demonstração os <code>métodos</code> e <code>outputs</code> da classe <code>CalcAUY</code>.</p>
-            </header>
+                            <!-- Editor CodeMirror em Sandbox -->
+                            <iframe id="editor-iframe" src="editor.html" sandbox="allow-scripts"
+                                title="Editor de Código"
+                                style="width: 100%; height: 450px; border: 2px solid var(--primary); border-radius: 12px; background: #fcfcfc"></iframe>
 
-            <nav id="menu-principal" aria-label="Navegação rápida">
-                <ul class="nav-links">
-                    <li><a href="#sec-interactive">Interactive</a></li>
+                            <small>Use a sintaxe da biblioteca. Limite de 16 operações.</small>
+                        </div>
+                        <button type="button" id="btn-executar">Executar e Gerar Auditoria</button>
+                    </form>
 
-                    <li class="nav-group-title">Operações</li>
-                    <li><a href="#sec-add">add</a></li>
-                    <li><a href="#sec-sub">sub</a></li>
-                    <li><a href="#sec-mult">mult</a></li>
-                    <li><a href="#sec-div">div</a></li>
-                    <li><a href="#sec-pow">pow</a></li>
-                    <li><a href="#sec-mod">mod</a></li>
-                    <li><a href="#sec-divInt">divInt</a></li>
-                    <li><a href="#sec-group">group</a></li>
-
-                    <li class="nav-group-title">Outputs</li>
-                    <li><a href="#sec-verbalMonetary">1. locale</a></li>
-                    <li><a href="#sec-currencyOptions">1.1 Currency</a></li>
-                    <li><a href="#sec-roundingShowcase">2. Rounding</a></li>
-                    <li><a href="#sec-strategyShowcase">2.1 Strategies</a></li>
-                    <li><a href="#sec-toString">3. toString</a></li>
-                    <li><a href="#sec-toFloatNumber">4. toFloatNumber</a></li>
-                    <li><a href="#sec-toRawInternalBigInt">5. toRawInternalBigInt</a></li>
-                    <li><a href="#sec-toMonetary">6. toMonetary</a></li>
-                    <li><a href="#sec-toLaTeX">7. toLaTeX</a></li>
-                    <li><a href="#sec-toHTML">8. toHTML</a></li>
-                    <li><a href="#sec-toUnicode">9. toUnicode</a></li>
-                    <li><a href="#sec-toVerbalA11y">10. toVerbalA11y</a></li>
-                    <li><a href="#sec-toCustomOutput">10.1 toCustomOutput</a></li>
-                    <li><a href="#sec-toImageBuffer">11. toImageBuffer</a></li>
-                    <li><a href="#sec-toJson">12. toJson</a></li>
-                </ul>
-            </nav>
-
-            <main id="main-content" role="main">
-                <!-- 1. SIMULADOR INTERATIVO -->
-                <section id="sec-interactive" aria-labelledby="h-interactive">
-                    <h2 id="h-interactive">Modo Interativo</h2>
-                    <div class="interactive-container">
-                        <form id="f" class="simulator-form" onsubmit="return false;">
-                            <div class="form-group full-width">
-                                <label for="editor-iframe">Expressão de Cálculo (TypeScript):</label>
-
-                                <!-- Editor CodeMirror em Sandbox -->
-                                <iframe
-                                    id="editor-iframe"
-                                    src="editor.html"
-                                    sandbox="allow-scripts"
-                                    title="Editor de Código"
-                                    style="width: 100%; height: 450px; border: 2px solid var(--primary); border-radius: 12px; background: #fcfcfc"
-                                ></iframe>
-
-                                <small>Use a sintaxe da biblioteca. Limite de 16 operações.</small>
+                    <div id="res-box" class="interactive-results" aria-live="polite">
+                        <h3>Resultados em Tempo Real</h3>
+                        <div class="output-grid" id="interactive-outputs">
+                            <!-- 1. Visual Principal (Linha Isolada) -->
+                            <div class="output-item full-width" data-type="toHTML">
+                                <strong>toHTML():</strong>
+                                <div id="html-output">--</div>
                             </div>
-                            <button type="button" id="btn-executar">Executar e Gerar Auditoria</button>
-                        </form>
 
-                        <div id="res-box" class="interactive-results" aria-live="polite">
-                            <h3>Resultados em Tempo Real</h3>
-                            <div class="output-grid" id="interactive-outputs">
-                                <!-- 1. Visual Principal (Linha Isolada) -->
-                                <div class="output-item full-width" data-type="toHTML">
-                                    <strong>toHTML():</strong>
-                                    <div id="html-output">--</div>
-                                </div>
+                            <!-- 2. Imagem (Linha Isolada) -->
+                            <div class="output-item full-width" data-type="toImageBuffer">
+                                <strong>toImageBuffer():</strong>
+                                <div class="img-preview">--</div>
+                            </div>
 
-                                <!-- 2. Imagem (Linha Isolada) -->
-                                <div class="output-item full-width" data-type="toImageBuffer">
-                                    <strong>toImageBuffer():</strong>
-                                    <div class="img-preview">--</div>
-                                </div>
+                            <!-- 3. Par: String & Monetary -->
+                            <div class="output-item" data-type="toString">
+                                <strong>toString():</strong>
+                                <span class="val">--</span>
+                            </div>
+                            <div class="output-item" data-type="toMonetary">
+                                <strong>toMonetary():</strong>
+                                <span class="val">--</span>
+                            </div>
 
-                                <!-- 3. Par: String & Monetary -->
-                                <div class="output-item" data-type="toString">
-                                    <strong>toString():</strong>
-                                    <span class="val">--</span>
-                                </div>
-                                <div class="output-item" data-type="toMonetary">
-                                    <strong>toMonetary():</strong>
-                                    <span class="val">--</span>
-                                </div>
+                            <!-- 4. Par: Float & Scaled BigInt -->
+                            <div class="output-item" data-type="toFloatNumber">
+                                <strong>toFloatNumber():</strong>
+                                <span class="val">--</span>
+                            </div>
+                            <div class="output-item" data-type="toScaledBigInt">
+                                <strong>toScaledBigInt():</strong>
+                                <span class="val">--</span>
+                            </div>
 
-                                <!-- 4. Par: Float & Scaled BigInt -->
-                                <div class="output-item" data-type="toFloatNumber">
-                                    <strong>toFloatNumber():</strong>
-                                    <span class="val">--</span>
-                                </div>
-                                <div class="output-item" data-type="toScaledBigInt">
-                                    <strong>toScaledBigInt():</strong>
-                                    <span class="val">--</span>
-                                </div>
+                            <!-- 5. Par: Slices -->
+                            <div class="output-item" data-type="toSliceDemo">
+                                <strong>toSlice(3):</strong>
+                                <span class="val">--</span>
+                            </div>
+                            <div class="output-item" data-type="toSliceByRatioDemo">
+                                <strong>toSliceByRatio(["60%", "30%", "10%"]):</strong>
+                                <span class="val">--</span>
+                            </div>
 
-                                <!-- 5. Par: Slices -->
-                                <div class="output-item" data-type="toSliceDemo">
-                                    <strong>toSlice(3):</strong>
-                                    <span class="val">--</span>
-                                </div>
-                                <div class="output-item" data-type="toSliceByRatioDemo">
-                                    <strong>toSliceByRatio(["60%", "30%", "10%"]):</strong>
-                                    <span class="val">--</span>
-                                </div>
+                            <!-- 6. Par: LaTeX & Unicode -->
+                            <div class="output-item" data-type="toLaTeX">
+                                <strong>toLaTeX():</strong>
+                                <span class="val">--</span>
+                            </div>
+                            <div class="output-item" data-type="toUnicode">
+                                <strong>toUnicode():</strong>
+                                <span class="val">--</span>
+                            </div>
 
-                                <!-- 6. Par: LaTeX & Unicode -->
-                                <div class="output-item" data-type="toLaTeX">
-                                    <strong>toLaTeX():</strong>
-                                    <span class="val">--</span>
-                                </div>
-                                <div class="output-item" data-type="toUnicode">
-                                    <strong>toUnicode():</strong>
-                                    <span class="val">--</span>
-                                </div>
+                            <!-- 7. Rigor Interno (Linha Isolada) -->
+                            <div class="output-item full-width" data-type="toRawInternalNumber">
+                                <strong>toRawInternalNumber():</strong>
+                                <span class="val">--</span>
+                            </div>
 
-                                <!-- 7. Rigor Interno (Linha Isolada) -->
-                                <div class="output-item full-width" data-type="toRawInternalBigInt">
-                                    <strong>toRawInternalBigInt():</strong>
-                                    <span class="val">--</span>
-                                </div>
+                            <!-- 8. Acessibilidade (Linha Isolada) -->
+                            <div class="output-item full-width" data-type="toVerbalA11y">
+                                <strong>toVerbalA11y():</strong>
+                                <span class="val">--</span>
+                            </div>
 
-                                <!-- 8. Acessibilidade (Linha Isolada) -->
-                                <div class="output-item full-width" data-type="toVerbalA11y">
-                                    <strong>toVerbalA11y():</strong>
-                                    <span class="val">--</span>
-                                </div>
+                            <!-- 9. Custom Output (Linha Isolada) -->
+                            <div class="output-item full-width" data-type="toCustomOutput">
+                                <strong>toCustomOutput(processor):</strong>
+                                <span class="val">--</span>
+                            </div>
 
-                                <!-- 9. Custom Output (Linha Isolada) -->
-                                <div class="output-item full-width" data-type="toCustomOutput">
-                                    <strong>toCustomOutput(processor):</strong>
-                                    <span class="val">--</span>
-                                </div>
+                            <!-- 10. Audit Trace (Linha Isolada) -->
+                            <div class="output-item full-width" data-type="toAuditTrace">
+                                <strong>toAuditTrace():</strong>
+                                <div class="val">--</div>
+                            </div>
 
-                                <!-- 10. Audit Trace (Linha Isolada) -->
-                                <div class="output-item full-width" data-type="toAuditTrace">
-                                    <strong>toAuditTrace():</strong>
-                                    <div class="val">--</div>
-                                </div>
-
-                                <!-- 11. JSON Consolidado (Linha Isolada) -->
-                                <div class="output-item full-width" data-type="toJson">
-                                    <strong>toJson():</strong>
-                                    <div class="val">--</div>
-                                </div>
+                            <!-- 11. JSON Consolidado (Linha Isolada) -->
+                            <div class="output-item full-width" data-type="toJson">
+                                <strong>toJson():</strong>
+                                <div class="val">--</div>
                             </div>
                         </div>
                     </div>
-                </section>
-
-                <!-- EXEMPLOS ESTÁTICOS POR CATEGORIA -->
-                <div id="categories-container">
-                    <p class="loading">Carregando galeria de exemplos...</p>
                 </div>
-            </main>
+            </section>
 
-            <footer id="footer" role="contentinfo">
-                <p>Licenciado através da Mozilla Public License v2.0 (MPL-2.0)</p>
-                <span class="credits">
-                    <a href="https://github.com/st-all-one/calcaud-nbr-a11y" target="_blank" rel="noopener noreferrer">
-                        Desenvolvido por Stallone L.S.
-                        <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
-                            <path
-                                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"
-                            >
-                            </path>
-                        </svg>
-                    </a>
-                </span>
-            </footer>
-        </div>
-
-        <!--Vlibras-->
-        <div vw class="enabled">
-            <div vw-access-button class="active"></div>
-            <div vw-plugin-wrapper>
-                <div class="vw-plugin-top-wrapper"></div>
+            <!-- EXEMPLOS ESTÁTICOS POR CATEGORIA -->
+            <div id="categories-container">
+                <p class="loading">Carregando galeria de exemplos...</p>
             </div>
-        </div>
+        </main>
 
-        <!-- High Contrast & Common Scripts -->
-        <script src="script.js" type="module"></script>
-        <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
-        <script>
-            new window.VLibras.Widget("https://vlibras.gov.br/app");
-        </script>
-    </body>
+        <footer id="footer" role="contentinfo">
+            <p>Licenciado através da Mozilla Public License v2.0 (MPL-2.0)</p>
+            <span class="credits">
+                <a href="https://github.com/st-all-one/calcaud-nbr-a11y" target="_blank" rel="noopener noreferrer">
+                    Desenvolvido por Stallone L.S.
+                    <svg height="20" width="20" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+                        <path
+                            d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z">
+                        </path>
+                    </svg>
+                </a>
+            </span>
+        </footer>
+    </div>
+
+    <!--Vlibras-->
+    <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper>
+            <div class="vw-plugin-top-wrapper"></div>
+        </div>
+    </div>
+
+    <!-- High Contrast & Common Scripts -->
+    <script src="script.js" type="module"></script>
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>
+        new window.VLibras.Widget("https://vlibras.gov.br/app");
+    </script>
+</body>
+
 </html>

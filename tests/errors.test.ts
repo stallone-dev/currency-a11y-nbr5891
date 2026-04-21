@@ -27,7 +27,7 @@ describe("CalcAUYError - Gerenciamento de Erros e Telemetria", () => {
         const err = new CalcAUYError(category, detail, context);
 
         assertEquals(err.name, "CalcAUYError");
-        assertStringIncludes(err.type, `calc-auy/${category}`);
+        assertStringIncludes(err.type, `wiki/errors/${category}.md`);
         assertEquals(err.detail, detail);
         assertEquals(err.context, context); // Context should be raw in the error object itself
         assert(
@@ -36,7 +36,7 @@ describe("CalcAUYError - Gerenciamento de Erros e Telemetria", () => {
         );
 
         // Check title and status mapping
-        assertEquals(err.title, "Divisão por Zero Detectada");
+        assertEquals(err.title, category);
         assertEquals(err.status, 422);
 
         // Test toJSON serialization
@@ -82,7 +82,7 @@ describe("CalcAUYError - Gerenciamento de Erros e Telemetria", () => {
         assert(errorCalled, "logger.error should have been called");
         assertEquals(loggedMessage, "CalcAUY Exception Triggered");
         assert(loggedPayload !== null, "Logged payload should not be null");
-        assertEquals(loggedPayload.error_type, `calc-auy/${category}`);
+        assertStringIncludes(loggedPayload.error_type, `wiki/errors/${category}.md`);
         // This is a direct comparison, so ensure instance ID is the same
         assert(loggedPayload.instance !== undefined, "Instance ID should be present");
         assertEquals(loggedPayload.detail, detail);

@@ -12,7 +12,7 @@ Abaixo estão os métodos disponíveis na classe `CalcAUYOutput` (gerada após o
 | [`toStringNumber`](./output-methods/toStringNumber.md) | `res.toStringNumber()` | String decimal plana (ex: `"10.50"`). |
 | [`toFloatNumber`](./output-methods/toFloatNumber.md) | `res.toFloatNumber()` | Converte para `number` nativo do JS. |
 | [`toScaledBigInt`](./output-methods/toScaledBigInt.md) | `res.toScaledBigInt({ p: 2 })` | Retorna centavos como `bigint` (`1050n`). |
-| [`toRawInternalBigInt`](./output-methods/toRawInternalBigInt.md) | `res.toRawInternalBigInt()` | Retorna o valor inteiro arredondado. |
+| [`toRawInternalNumber`](./output-methods/toRawInternalNumber.md) | `res.toRawInternalNumber()` | Retorna o objeto racional bruto (n/d). |
 
 ### 🏦 Financeiro e Localização
 | Método | Exemplo Rápido | Descrição |

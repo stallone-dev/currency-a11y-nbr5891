@@ -73,9 +73,9 @@ describe("CalcAUYOutput - Output Methods and Customization", () => {
         securityPolicy.sensitive = originalsecurityPolicySensitive; // Reset logging policy
     });
 
-    it("deve retornar o resultado arredondado como BigInt", async () => {
+    it("deve retornar o resultado racional bruto como objeto {n, d}", async () => {
         const res = await CalcAUY.from(10).div(3).commit();
-        assertEquals(res.toRawInternalBigInt(), 3n); // 10/3 rounded to 0 decimals is 3
+        assertEquals(res.toRawInternalNumber(), { n: 10n, d: 3n });
     });
 
     it("deve formatar o resultado como valor monetário padrão (pt-BR, BRL)", async () => {
