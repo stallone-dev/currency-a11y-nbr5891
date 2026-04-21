@@ -141,12 +141,13 @@ CalcAUYError: Violação de integridade detectada: a assinatura não confere com
 > **NOTA:**
 > Embora tenha sido mostrada a alteração no item "`strategy`", qualquer alteração, em qualquer ponto do objeto serializado, seja um "`0`" a mais dentro da `AST` ou uma letra diferente em qualquer "`metadado`", invalidará a assinatura da mesma forma.
 > 
-> A integridade do objeto é total: ou tudo permanece idêntico, ou é considerado [violação crítica de integridade](./wiki/errors/integrity-critical-violation.md).
+> A integridade do objeto é total: ou **tudo** permanece idêntico, ou é considerado [violação crítica de integridade](./wiki/errors/integrity-critical-violation.md).
 > 
-> O método "`.hydrate`" também executa essa verificação antes de qualquer avaliação da `AST` em si.
+> O método "`.hydrate`" também executa essa verificação antes de qualquer avaliação da `AST`.
 
 </details>
 
+<br>
 
 ## 🌐 Possibilidades de Uso
 
