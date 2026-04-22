@@ -174,7 +174,7 @@ O que torna isso possível é a implementação destes três pilares:
 
 - **Aritmética Racional**: Operação baseada em frações verdadeiras `(n/d)` utilizando `BigInt`, com simplificações via **Algoritmo de Euclides (MCD)** em cada etapa, garantindo que o erro acumulado seja estruturalmente **zero**.
 
-- **Determinismo Lógico**: Implementação rigorosa de **precedência matemática** [`(PEMDAS/BODMAS)`](https://pt.wikipedia.org/wiki/Ordem_de_opera%C3%A7%C3%B5es), garantindo que as operações respeitem a **intenção do cálculo** independente da plataforma de implantação.
+- **Determinismo Lógico**: Implementação rigorosa de **precedência matemática** [`(PEMDAS/BODMAS)`](https://pt.wikipedia.org/wiki/Ordem_de_opera%C3%A7%C3%B5es), garantindo que as operações alinhem a **intenção da conta** com as regras matemáticas, independente da plataforma de implantação.
 
 - **Conformidade Técnica**: Arredondamento padrão [`ABNT NBR 5891`](https://pt.wikipedia.org/wiki/Arredondamento#Norma_ABNT_NBR_5891) e rateio por [`Maior Resto`](https://en.wikipedia.org/wiki/Mathematics_of_apportionment), assegurando justiça matemática em distribuições decimais.
 
