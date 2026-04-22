@@ -197,11 +197,11 @@ O que torna isso possível é a implementação destes três pilares:
 - **Outputs Multiformato**: Processadores de saída que traduzem a lógica interna em representações úteis para fins técnicos, de auditoria e de inclusividade digital:
     - `.toUnicode()`: Representação visual para interfaces de terminal (CLI).
     - `.toLaTeX() / .toHTML()`: Documentação técnica para relatórios e exibição via [KaTeX](https://katex.org/).
-    - `.toVerbalA11y()` Para tradução da AST em linguagem natural em 8 idiomas para adesão às diretrizes [`WCAG`](https://www.w3.org/WAI/standards-guidelines/wcag/) e [`eMAG`](https://emag.governoeletronico.gov.br/), com possibilidade de extensão.
+    - `.toVerbalA11y()` Para tradução da AST em linguagem natural em 8 idiomas; útil para adesão às diretrizes [`WCAG`](https://www.w3.org/WAI/standards-guidelines/wcag/) e [`eMAG`](https://emag.governoeletronico.gov.br/), com possibilidade de extensão.
     - `.toAuditTrace()`: JSON detalhado contendo o **"DNA do cálculo"** para auditoria profunda.
-    - `.toCustomOutput(processo)`: Método especial para estender o `output` para novos formatos (_protobuf, XML, Excel..._) sem interferência no resultado original.
+    - `.toCustomOutput(processor)`: Extensor do `output` para novos formatos (_protobuf, XML, Excel..._) sem interferência no resultado original.
 
-- **Processamento Industrial**: Fornece o utilitário `ProcessBatchAUY(...)`, um motor de alta vazão projetado para processar volumes massivos _(1M+ registros)_ e fluxos contínuos (`Streaming`) sob complexidade `O(N)`, utilizando `workers lógicos`, `scheduler.yield()` e **redutores** para prevenir o bloqueio do `Event Loop` e consumo excessivo de memória.
+- **Processamento Industrial**: Implementado o utilitário `ProcessBatchAUY(...)`, um motor de alta vazão projetado para processar volumes massivos _(1M+ registros)_ e fluxos contínuos (`Streaming`) sob complexidade `O(N)`, utilizando `workers lógicos`, `scheduler.yield()` e **redutores de memória** para prevenir o bloqueio do `Event Loop`.
 
 ## 🔍 Testes
 
