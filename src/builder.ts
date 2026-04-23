@@ -25,7 +25,7 @@ import { Lexer } from "./parser/lexer.ts";
 import { Parser } from "./parser/parser.ts";
 import { attachOp, validateASTNode } from "./ast/builder_utils.ts";
 import { getSubLogger, startSpan } from "./utils/logger.ts";
-import { sanitizeAST, SignatureEncoder } from "./utils/sanitizer.ts";
+import { sanitizeAST, type SignatureEncoder } from "./utils/sanitizer.ts";
 import { generateSignature } from "./utils/security.ts";
 import { CalcAUYError } from "./core/errors.ts";
 import type { InstanceConfig } from "./core/types.ts";
@@ -204,13 +204,13 @@ export class CalcAUYLogic<Context extends string, Config extends InstanceConfig 
         if (this.#ast === null) {
             // Padrão Birth Certificate: Fixa o timestamp no nascimento da árvore completa
             const birth = this.#config[BIRTH_TICKET_MOCK] || new Date().toISOString();
-            newNode = { 
-                ...newNode, 
-                metadata: { ...newNode.metadata, timestamp: birth } 
+            newNode = {
+                ...newNode,
+                metadata: { ...newNode.metadata, timestamp: birth },
             } as CalculationNode;
             return new CalcAUYLogic<Context, Config>(newNode, this.#instanceId, this.#config);
         }
-        
+
         // Se já houver AST, adiciona a expressão à árvore atual
         return this.add(new CalcAUYLogic<Context, Config>(newNode, this.#instanceId, this.#config));
     }
@@ -305,15 +305,22 @@ export class CalcAUYLogic<Context extends string, Config extends InstanceConfig 
             // Instância "Viva": Fecha com assinatura imediata e valida
             const hibernated = await external.hibernate();
             const payload: SerializedCalculation = JSON.parse(hibernated);
+            // deno-lint-ignore no-non-null-assertion
             externalAST = (payload.data || payload.ast)!;
             externalSignature = payload.signature;
             externalContextLabel = external.getContextConfig().contextLabel;
         } else {
             // Objeto ou JSON serializado
-            const payload: SerializedCalculation = typeof external === "string" ? JSON.parse(external) : external as SerializedCalculation;
+            const payload: SerializedCalculation = typeof external === "string"
+                ? JSON.parse(external)
+                : external as SerializedCalculation;
             if (!payload.signature) {
-                throw new CalcAUYError("integrity-critical-violation", "Instância externa sem assinatura de integridade.");
+                throw new CalcAUYError(
+                    "integrity-critical-violation",
+                    "Instância externa sem assinatura de integridade.",
+                );
             }
+            // deno-lint-ignore no-non-null-assertion
             externalAST = (payload.data || payload.ast)!;
             externalSignature = payload.signature;
             externalContextLabel = payload.contextLabel || "";
@@ -523,7 +530,7 @@ export class CalcAUYLogic<Context extends string, Config extends InstanceConfig 
     public async commit(options: { roundStrategy?: RoundingStrategy } = {}): Promise<CalcAUYOutput> {
         using _span = startSpan("commit", logger, options);
         const ast = this.assertAST();
-        
+
         const strategy: RoundingStrategy = options.roundStrategy ?? "NBR5891";
         const result: RationalNumber = evaluate(ast);
 

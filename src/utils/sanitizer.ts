@@ -40,6 +40,7 @@ export const DEFAULT_INSTANCE_CONFIG: Required<InstanceConfig> = {
  */
 export function sanitizeAST(
     node: CalculationNode,
+    // deno-lint-ignore default-param-last
     config: InstanceConfig = DEFAULT_INSTANCE_CONFIG,
     parentHide?: boolean,
 ): object {

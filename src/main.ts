@@ -8,7 +8,7 @@
 
 import { CalcAUYLogic } from "./builder.ts";
 import type { CalculationNode } from "./ast/types.ts";
-import { DEFAULT_INSTANCE_CONFIG, SignatureEncoder } from "./utils/sanitizer.ts";
+import { DEFAULT_INSTANCE_CONFIG, type SignatureEncoder } from "./utils/sanitizer.ts";
 import { generateSignature } from "./utils/security.ts";
 import { CalcAUYError } from "./core/errors.ts";
 import type { InstanceConfig } from "./core/types.ts";
