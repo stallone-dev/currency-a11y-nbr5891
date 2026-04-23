@@ -10,7 +10,7 @@ import { DEFAULT_LOCALE } from "../core/constants.ts";
 import type { CalcAUYLocale } from "../core/types.ts";
 
 /**
- * Define a estrutura de tradução e regras de verbalização (A11y) para a CalcAUY.
+ * Define a estrutura de tradução e regras de verbalização (A11y) para a CalcAUYLogic.
  *
  * **Engenharia:** Esta interface permite a internacionalização completa do rastro de auditoria
  * falado. Ao fornecer uma implementação customizada, é obrigatório preencher todos os tokens

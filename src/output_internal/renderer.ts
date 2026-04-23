@@ -69,14 +69,19 @@ export function renderAST(
         return `(${inner})`;
     }
 
-    const ops: string[] = node.operands.map((o, i) => {
+    if (node.kind === "control") {
+        return renderAST(node.child, format, loc, forceCaret);
+    }
+
+    const operands = node.operands;
+    const ops: string[] = operands.map((o, i) => {
         const isExp = node.type === "pow" && i === 1;
         const nextForce = format === "unicode" && isExp;
         return renderAST(o, format, loc, forceCaret || nextForce);
     });
 
     if (node.type === "pow") {
-        const root = getRootInfo(node.operands[1]);
+        const root = getRootInfo(operands[1]);
         if (root) {
             const { num, den } = root;
             if (format === "latex") {
@@ -118,6 +123,7 @@ export function renderAST(
             mul: String.raw`\times`,
             mod: String.raw`\bmod`,
             divInt: "//",
+            crossContextAdd: "+",
         };
         return ops.join(` ${symbols[node.type]} `);
     }
@@ -129,12 +135,21 @@ export function renderAST(
             }
             return `${ops[0]}${toSuperscript(ops[1])}`;
         }
-        const symbols: Record<string, string> = { add: "+", sub: "-", mul: "×", div: "÷", mod: "%", divInt: "//" };
+        const symbols: Record<string, string> = {
+            add: "+",
+            sub: "-",
+            mul: "×",
+            div: "÷",
+            mod: "%",
+            divInt: "//",
+            crossContextAdd: "+",
+        };
         return ops.join(` ${symbols[node.type]} `);
     }
 
     if (format === "verbal" && loc) {
-        return ops.join(` ${loc.operators[node.type]} `);
+        const type = node.type === "crossContextAdd" ? "add" : node.type;
+        return ops.join(` ${loc.operators[type]} `);
     }
 
     const symbols: Record<string, string> = {
@@ -145,6 +160,7 @@ export function renderAST(
         pow: "^",
         mod: "%",
         divInt: "//",
+        crossContextAdd: "+",
     };
     return ops.join(` ${symbols[node.type]} `);
 }

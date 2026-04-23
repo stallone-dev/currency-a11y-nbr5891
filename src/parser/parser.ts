@@ -19,7 +19,7 @@ import { RationalNumber } from "../core/rational.ts";
 import { CalcAUYError } from "../core/errors.ts";
 
 /**
- * Parser de Descida Recursiva para a CalcAUY.
+ * Parser de Descida Recursiva para a CalcAUYLogic.
  *
  * Implementa as regras de precedência (PEMDAS) através de camadas de métodos,
  * garantindo que a árvore seja construída com a hierarquia matemática correta.

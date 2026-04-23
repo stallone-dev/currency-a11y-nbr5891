@@ -22,6 +22,7 @@ export type ErrorCategory =
     | "invalid-precision"
     | "corrupted-node"
     | "integrity-critical-violation"
+    | "instance-mismatch"
     | "math-overflow";
 
 /** Contexto técnico da falha para auditoria. */
@@ -33,7 +34,7 @@ export interface ErrorContext {
 }
 
 /**
- * Erro customizado da CalcAUY seguindo o padrão RFC 7807.
+ * Erro customizado da CalcAUYLogic seguindo o padrão RFC 7807.
  *
  * @class
  */
@@ -74,6 +75,7 @@ export class CalcAUYError extends Error {
             "invalid-precision": 400,
             "corrupted-node": 500,
             "integrity-critical-violation": 500,
+            "instance-mismatch": 403,
             "math-overflow": 422,
         };
 
@@ -82,7 +84,7 @@ export class CalcAUYError extends Error {
 
         // Telemetria Sanitizada
         if (logger.isEnabledFor("error")) {
-            logger.error("CalcAUY Exception Triggered", {
+            logger.error("CalcAUYLogic Exception Triggered", {
                 error_type: this.type,
                 instance: this.instance,
                 status: this.status,
@@ -99,7 +101,7 @@ export class CalcAUYError extends Error {
      * @example Exemplo Simples: Captura de Erro
      * ```ts
      * try {
-     *   CalcAUY.from(10).div(0).commit();
+     *   CalcAUYLogic.from(10).div(0).commit();
      * } catch (err) {
      *   if (err instanceof CalcAUYError) {
      *     console.error(err.title); // "Divisão por Zero Detectada"

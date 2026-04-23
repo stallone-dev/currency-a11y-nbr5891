@@ -7,7 +7,7 @@
  */
 
 /** Tipos de nós fundamentais da árvore. */
-export type NodeKind = "literal" | "operation" | "group";
+export type NodeKind = "literal" | "operation" | "group" | "control";
 
 /** Operações matemáticas suportadas pela engine. */
 export type OperationType =
@@ -17,7 +17,8 @@ export type OperationType =
     | "div"
     | "pow"
     | "mod"
-    | "divInt";
+    | "divInt"
+    | "crossContextAdd";
 
 /** Representação serializável de um RationalNumber para hibernação. */
 export interface RationalValue {
@@ -66,5 +67,36 @@ export interface GroupNode extends BaseNode {
     isRedundant?: boolean;
 }
 
+/**
+ * Representa um nó de controle para rastreabilidade de jurisdição.
+ * Engenharia: Usado em reidratação (hydrate) ou união de contextos externos.
+ */
+export interface ControlNode extends BaseNode {
+    kind: "control";
+    type: "reanimation_event";
+    metadata: {
+        timestamp: string;
+        previousContextLabel: string;
+        previousSignature: string;
+    } & Record<string, MetadataValue>;
+    child: CalculationNode;
+}
+
 /** Tipo unificado para navegação na árvore. */
-export type CalculationNode = LiteralNode | OperationNode | GroupNode;
+export type CalculationNode = LiteralNode | OperationNode | GroupNode | ControlNode;
+
+/** Representa a estrutura de um cálculo serializado (hibernado). */
+export interface SerializedCalculation {
+    /** A árvore de sintaxe (AST) no estado atual ou legado. */
+    data?: CalculationNode;
+    /** Assinatura digital BLAKE3 para garantia de integridade. */
+    signature: string;
+    /** Identificador do contexto original. */
+    contextLabel?: string;
+    /** Campo legado para AST. */
+    ast?: CalculationNode;
+    /** Resultado consolidado (apenas em traces de auditoria). */
+    finalResult?: RationalValue;
+    /** Estratégia de arredondamento aplicada (apenas em traces). */
+    strategy?: string;
+}

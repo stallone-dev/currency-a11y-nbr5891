@@ -70,6 +70,9 @@ function evaluateNode(node: CalculationNode, depth: number): RationalNumber {
         case "group":
             return evaluate(node.child, depth + 1);
 
+        case "control":
+            return evaluate(node.child, depth + 1);
+
         case "operation":
             return evaluateOperation(node.type, node.operands, depth + 1, node);
 
@@ -102,7 +105,7 @@ function evaluateOperation(
 
     // Validação de segurança: garante que o tipo da operação é conhecido,
     // mesmo para nós com um único operando onde o loop não seria executado.
-    const supportedOps: OperationType[] = ["add", "sub", "mul", "div", "pow", "mod", "divInt"];
+    const supportedOps: OperationType[] = ["add", "sub", "mul", "div", "pow", "mod", "divInt", "crossContextAdd"];
     if (!supportedOps.includes(type)) {
         throw new CalcAUYError("corrupted-node", `Operação não suportada: ${type}`, {
             partialAST: parentNode,
@@ -117,6 +120,7 @@ function evaluateOperation(
 
             switch (type) {
                 case "add":
+                case "crossContextAdd":
                     acc = acc.add(val);
                     break;
                 case "sub":

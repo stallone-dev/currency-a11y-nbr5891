@@ -46,14 +46,14 @@ export function canonicalString(data: unknown): string {
  * Gera uma assinatura digital BLAKE3 com a codificação escolhida.
  *
  * @param data Conteúdo a ser assinado.
- * @param salt Sal secreto global.
+ * @param salt Sal secreto da instância.
  * @param encoderType Tipo de codificação (HEX, BASE64, BASE58, BASE32).
  * @returns Assinatura digital formatada.
  */
 export async function generateSignature(
     data: unknown,
     salt: string,
-    encoderType: SignatureEncoder = "HEX",
+    encoderType: SignatureEncoder,
 ): Promise<string> {
     const cString = canonicalString(data);
     const encoder = new TextEncoder();

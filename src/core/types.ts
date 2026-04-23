@@ -7,6 +7,29 @@
  */
 
 import type { RoundingStrategy } from "./constants.ts";
+import type { SignatureEncoder } from "../utils/sanitizer.ts";
+
+/**
+ * Configuração de segurança e comportamento de uma instância CalcAUY.
+ */
+export interface InstanceConfig {
+    /**
+     * Se true (padrão), assume que os dados SÃO sensíveis e devem ser OCULTOS nos logs.
+     */
+    sensitive?: boolean;
+    /**
+     * Sal secreto usado para assinar árvores e resultados (BLAKE3).
+     */
+    salt?: string;
+    /**
+     * Codificação da assinatura final.
+     */
+    encoder?: SignatureEncoder;
+    /**
+     * Rótulo amigável para identificar a instância em logs e erros.
+     */
+    contextLabel?: string;
+}
 
 /**
  * Supported Locales for verbal and monetary formatting.

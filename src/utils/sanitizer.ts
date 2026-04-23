@@ -7,6 +7,7 @@
  */
 
 import type { CalculationNode } from "../ast/types.ts";
+import type { InstanceConfig } from "../core/types.ts";
 
 const REDACTED = "[PII]";
 
@@ -19,57 +20,33 @@ const NUMERIC_RE = /^[+-]?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?%?$/;
 /** Tipos de codificação suportados para a assinatura digital. */
 export type SignatureEncoder = "HEX" | "BASE64" | "BASE58" | "BASE32";
 
-/** Política global de segurança e logging. */
-export const securityPolicy = {
-    /**
-     * Se true (padrão), assume que os dados SÃO sensíveis e devem ser OCULTOS.
-     * Se false, permite a exibição de dados sensíveis globalmente.
-     */
+/** Configuração padrão para sanitização caso nenhuma seja fornecida. */
+export const DEFAULT_INSTANCE_CONFIG: Required<InstanceConfig> = {
     sensitive: true,
-    /**
-     * Sal secreto global usado para assinar árvores e resultados (BLAKE3).
-     * Engenharia: Garante a integridade militar do rastro de auditoria.
-     */
     salt: "",
-    /**
-     * Codificação da assinatura final.
-     * Padrão: HEX (Padrão mundial).
-     */
-    encoder: "HEX" as SignatureEncoder,
+    encoder: "HEX",
+    contextLabel: "",
 };
-
-/**
- * Define a política global de segurança para a proteção de PII e integridade.
- * @param policy Configuração da política (sensitive, salt, encoder).
- */
-export function setGlobalSecurityPolicy(policy: {
-    sensitive?: boolean;
-    salt?: string;
-    encoder?: SignatureEncoder;
-}): void {
-    if (typeof policy.sensitive === "boolean") {
-        securityPolicy.sensitive = policy.sensitive;
-    }
-    if (typeof policy.salt === "string") {
-        securityPolicy.salt = policy.salt;
-    }
-    if (policy.encoder) {
-        securityPolicy.encoder = policy.encoder;
-    }
-}
 
 /**
  * Sanitiza a estrutura da AST para logs, removendo valores literais e metadados.
  *
  * @param node Nó da AST a ser sanitizado.
+ * @param config Configuração da instância para controle de sensibilidade.
  * @param parentHide Estado de ocultação herdado do pai (opcional).
  * @returns Objeto sanitizado pronto para log.
  */
-export function sanitizeAST(node: CalculationNode, parentHide?: boolean): object {
+export function sanitizeAST(
+    node: CalculationNode,
+    config: InstanceConfig = DEFAULT_INSTANCE_CONFIG,
+    parentHide?: boolean,
+): object {
     if (!node) { return { kind: "null" }; }
 
     const nodeOverride = node.metadata?.pii;
     let hide: boolean;
+
+    const isSensitive = config.sensitive ?? DEFAULT_INSTANCE_CONFIG.sensitive;
 
     if (typeof nodeOverride === "boolean") {
         hide = nodeOverride;
@@ -77,8 +54,8 @@ export function sanitizeAST(node: CalculationNode, parentHide?: boolean): object
         // Literals inherit from parent if no override is present
         hide = parentHide;
     } else {
-        // Operations and Groups default to global policy if no override is present
-        hide = securityPolicy.sensitive;
+        // Operations and Groups default to instance policy if no override is present
+        hide = isSensitive;
     }
 
     const sanitized: Record<string, unknown> = {
@@ -89,13 +66,22 @@ export function sanitizeAST(node: CalculationNode, parentHide?: boolean): object
         sanitized.value = hide ? { n: REDACTED, d: REDACTED } : node.value;
         sanitized.originalInput = hide ? REDACTED : node.originalInput;
     } else if (node.kind === "group") {
-        sanitized.child = sanitizeAST(node.child, hide);
+        sanitized.child = sanitizeAST(node.child, config, hide);
     } else if (node.kind === "operation") {
         sanitized.type = node.type;
-        sanitized.operands = node.operands.map((op) => sanitizeAST(op, hide));
+        sanitized.operands = node.operands.map((op) => sanitizeAST(op, config, hide));
+    } else if (node.kind === "control") {
+        sanitized.type = node.type;
+        // Informações técnicas de rastro e segurança NUNCA devem ser redigidas
+        sanitized.metadata = {
+            timestamp: node.metadata.timestamp,
+            previousContextLabel: node.metadata.previousContextLabel,
+            previousSignature: node.metadata.previousSignature,
+        };
+        sanitized.child = sanitizeAST(node.child, config, hide);
     }
 
-    if (node.metadata) {
+    if (node.metadata && node.kind !== "control") {
         sanitized.metadata = hide ? REDACTED : node.metadata;
     }
 
@@ -108,17 +94,24 @@ export function sanitizeAST(node: CalculationNode, parentHide?: boolean): object
 
 /**
  * Sanitiza um objeto genérico (como o ErrorContext), removendo valores que
- * possam conter PII se a política global estiver restritiva.
+ * possam conter PII se a política da instância estiver restritiva.
  *
  * @param obj Objeto ou valor a ser sanitizado.
+ * @param config Configuração da instância para controle de sensibilidade.
  * @param seen Set para rastrear referências circulares (interno).
  * @returns Valor sanitizado.
  */
-export function sanitizeObject(obj: unknown, seen = new WeakSet<object>()): unknown {
+export function sanitizeObject(
+    obj: unknown,
+    config: InstanceConfig = DEFAULT_INSTANCE_CONFIG,
+    seen = new WeakSet<object>(),
+): unknown {
     if (obj === null || obj === undefined) { return obj; }
 
-    // Se a política global NÃO for sensível (false), libera tudo
-    if (!securityPolicy.sensitive) { return obj; }
+    const isSensitive = config.sensitive ?? DEFAULT_INSTANCE_CONFIG.sensitive;
+
+    // Se a política da instância NÃO for sensível (false), libera tudo
+    if (!isSensitive) { return obj; }
 
     if (typeof obj === "object") {
         // Proteção contra referências circulares (evita trava de CPU)
@@ -126,20 +119,20 @@ export function sanitizeObject(obj: unknown, seen = new WeakSet<object>()): unkn
         seen.add(obj);
 
         if (Array.isArray(obj)) {
-            return obj.map((item) => sanitizeObject(item, seen));
+            return obj.map((item) => sanitizeObject(item, config, seen));
         }
 
         const result: Record<string, unknown> = {};
         for (const [key, value] of Object.entries(obj)) {
             if (value && typeof value === "object" && "kind" in value) {
-                result[key] = sanitizeAST(value as CalculationNode);
+                result[key] = sanitizeAST(value as CalculationNode, config);
                 continue;
             }
 
             if (SENSITIVE_KEYS.has(key)) {
                 result[key] = REDACTED;
             } else {
-                result[key] = sanitizeObject(value, seen);
+                result[key] = sanitizeObject(value, config, seen);
             }
         }
         return result;

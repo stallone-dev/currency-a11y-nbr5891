@@ -21,6 +21,7 @@ export const PRECEDENCE: Record<OperationType, number> = {
     mod: 3,
     add: 4,
     sub: 4,
+    crossContextAdd: 4,
 };
 
 /**
@@ -77,7 +78,7 @@ export function validateASTNode(
     const type = n.type as OperationType;
     const kindStr = String(kind);
 
-    if (!["literal", "group", "operation"].includes(kind)) {
+    if (!["literal", "group", "operation", "control"].includes(kind)) {
         throw new CalcAUYError("corrupted-node", `Tipo de nó desconhecido: ${kindStr}`);
     }
 
@@ -95,6 +96,21 @@ export function validateASTNode(
     } else if (kind === "group") {
         if (!n.child) {
             throw new CalcAUYError("corrupted-node", "Nó de grupo sem nó filho.");
+        }
+        validateASTNode(n.child, depth + 1, s);
+    } else if (kind === "control") {
+        if (n.type !== "reanimation_event") {
+            throw new CalcAUYError("corrupted-node", `Tipo de nó de controle inválido: ${n.type}`);
+        }
+        if (!n.metadata || typeof n.metadata !== "object") {
+            throw new CalcAUYError("corrupted-node", "Nó de controle sem metadados obrigatórios.");
+        }
+        const m = n.metadata as Record<string, unknown>;
+        if (!m.timestamp || !m.previousSignature) {
+            throw new CalcAUYError("corrupted-node", "Metadados de controle incompletos (timestamp/signature faltando).");
+        }
+        if (!n.child) {
+            throw new CalcAUYError("corrupted-node", "Nó de controle sem nó filho.");
         }
         validateASTNode(n.child, depth + 1, s);
     } else if (kind === "operation") {
@@ -116,7 +132,7 @@ export function validateASTNode(
  * precedência (PEMDAS) e associatividade.
  *
  * **Engenharia de Construção:**
- * Esta função permite que a Fluent API da CalcAUY (`.add(5).mult(2)`)
+ * Esta função permite que a Fluent API da CalcAUYLogic (`.add(5).mult(2)`)
  * gere uma árvore semanticamente correta sem exigir parênteses manuais do usuário.
  * Ela "mergulha" a nova operação no operando à direita se a prioridade for maior.
  *

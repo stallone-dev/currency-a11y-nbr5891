@@ -23,13 +23,14 @@ import { performSlice, performSliceByRatio } from "./output_internal/slicer.ts";
 import { generateSVG } from "./output_internal/image_utils.ts";
 import type { IKatex, OutputOptions } from "./core/types.ts";
 import { getSubLogger, startSpan } from "./utils/logger.ts";
+import type { InstanceConfig } from "./core/types.ts";
 
 const logger = getSubLogger("output");
 
 /**
  * Assinatura para processadores de saída customizados.
  *
- * Permite estender a CalcAUY com novos formatos (XML, CSV, Protobuf, etc)
+ * Permite estender a CalcAUYLogic com novos formatos (XML, CSV, Protobuf, etc)
  * sem modificar o core da biblioteca.
  *
  * @typeParam Toutput - O tipo de retorno esperado pelo processador.
@@ -106,7 +107,7 @@ type KatexDependentKey = "toHTML" | "toImageBuffer";
 /**
  * CalcAUYOutput - Container imutável para resultados de cálculo e múltiplos formatos de exportação.
  *
- * Esta classe é gerada pelo método `CalcAUY.commit()`. Ela encapsula o resultado final
+ * Esta classe é gerada pelo método `CalcAUYLogic.commit()`. Ela encapsula o resultado final
  * (como um `RationalNumber`) e a AST original, permitindo que o desenvolvedor extraia
  * a informação no formato mais adequado para cada canal (UI, Relatórios, Logs, A11y).
  *
@@ -117,6 +118,7 @@ export class CalcAUYOutput {
     readonly #ast: CalculationNode;
     readonly #strategy: RoundingStrategy;
     readonly #signature: string;
+    readonly #config: Required<InstanceConfig>;
     readonly #cache: Map<number, RationalNumber> = new Map<number, RationalNumber>();
     readonly #outputCache: Map<string, string | Uint8Array> = new Map();
     static #cachedKaTeXCSS: string | null = null;
@@ -128,11 +130,13 @@ export class CalcAUYOutput {
         ast: CalculationNode,
         strategy: RoundingStrategy,
         signature: string,
+        config: Required<InstanceConfig>,
     ) {
         this.#result = result;
         this.#ast = ast;
         this.#strategy = strategy;
         this.#signature = signature;
+        this.#config = config;
     }
 
     private getRounded(precision: number): RationalNumber {
@@ -207,7 +211,7 @@ export class CalcAUYOutput {
      *
      * **Aviso de Engenharia:** Este método deve ser usado apenas para fins de exibição
      * em gráficos ou bibliotecas que não aceitam BigInt/Strings. Para cálculos
-     * subsequentes, prefira manter a fluidez da CalcAUY para evitar os erros
+     * subsequentes, prefira manter a fluidez da CalcAUYLogic para evitar os erros
      * de arredondamento inerentes ao padrão IEEE 754 (float).
      *
      * @param options - Configurações de saída.
@@ -716,6 +720,7 @@ export class CalcAUYOutput {
             finalResult: this.#result.toJSON(),
             strategy: this.#strategy,
             signature: this.#signature,
+            contextLabel: this.#config.contextLabel,
         });
     }
 
@@ -822,8 +827,9 @@ export class CalcAUYOutput {
             }
         }
 
-        // Adiciona a assinatura de integridade ao JSON final
+        // Adiciona a assinatura de integridade e o contexto ao JSON final
         res.signature = this.#signature;
+        res.contextLabel = this.#config.contextLabel;
 
         return JSON.stringify(res, (_key, value) => typeof value === "bigint" ? value.toString() : value);
     }

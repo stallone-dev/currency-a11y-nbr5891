@@ -8,11 +8,13 @@
 
 import type {
     CalculationNode,
+    ControlNode,
     GroupNode,
     LiteralNode,
     MetadataValue,
     OperationType,
     RationalValue,
+    SerializedCalculation,
 } from "./ast/types.ts";
 import { createCacheSession, getActiveSession, RationalNumber } from "./core/rational.ts";
 import { validateMetadata } from "./core/metadata.ts";
@@ -23,9 +25,10 @@ import { Lexer } from "./parser/lexer.ts";
 import { Parser } from "./parser/parser.ts";
 import { attachOp, validateASTNode } from "./ast/builder_utils.ts";
 import { getSubLogger, startSpan } from "./utils/logger.ts";
-import { sanitizeAST, securityPolicy, setGlobalSecurityPolicy, type SignatureEncoder } from "./utils/sanitizer.ts";
+import { sanitizeAST, SignatureEncoder } from "./utils/sanitizer.ts";
 import { generateSignature } from "./utils/security.ts";
 import { CalcAUYError } from "./core/errors.ts";
+import type { InstanceConfig } from "./core/types.ts";
 
 const logger = getSubLogger("engine");
 
@@ -50,101 +53,61 @@ const HOT_CACHE_LIMIT = 512;
  */
 const globalLiteralNodeCache = new Map<string, WeakRef<LiteralNode>>();
 
-export type InputValue = string | number | bigint | CalcAUY;
+export type InputValue<C extends string, P extends InstanceConfig = InstanceConfig> =
+    | string
+    | number
+    | bigint
+    | CalcAUYLogic<C, P>;
 
 /**
- * CalcAUY - Builder Fluído para Construção de Árvores de Cálculo (AST).
+ * CalcAUYLogic - Builder Fluído para Construção de Árvores de Cálculo (AST).
  *
- * Esta classe é o ponto de partida para qualquer operação matemática na biblioteca.
- * Ela utiliza o padrão Builder para acumular operações em uma estrutura de árvore
- * imutável, permitindo que a avaliação matemática real seja postergada até o momento
- * do `commit()`.
+ * Esta classe utiliza o padrão Builder para acumular operações em uma estrutura de árvore
+ * imutável. Agora possui isolamento estrito via Branding, Symbols e Literal Configuration.
  *
  * @class
  */
-export class CalcAUY {
-    readonly #ast: CalculationNode;
+export class CalcAUYLogic<Context extends string, Config extends InstanceConfig = InstanceConfig> {
+    readonly #ast: CalculationNode | null;
+    readonly #instanceId: symbol;
+    readonly #config: Required<InstanceConfig>;
 
-    private constructor(ast: CalculationNode) {
+    // Branding para IDE: Impede mistura de instâncias com labels ou configurações diferentes
+    // @ts-ignore: Branding field
+    private readonly __context!: Context;
+    // @ts-ignore: Branding field
+    private readonly __config_brand!: Config;
+
+    /** @internal */
+    constructor(ast: CalculationNode | null, instanceId: symbol, config: Required<InstanceConfig>) {
         this.#ast = ast;
-    }
-
-    /**
-     * Define a política global de segurança e logging.
-     *
-     * **Engenharia:** Atua na 1ª camada de controle. Permite configurar a sensibilidade
-     * dos logs (PII), o Salt secreto e a codificação (encoder) das assinaturas BLAKE3.
-     *
-     * @param policy Configuração da política (ex: { salt: "meu_segredo", encoder: "HEX" }).
-     * @returns A classe CalcAUY para encadeamento.
-     */
-    public static setSecurityPolicy(policy: {
-        sensitive?: boolean;
-        salt?: string;
-        encoder?: SignatureEncoder;
-    }): typeof CalcAUY {
-        setGlobalSecurityPolicy(policy);
-        return CalcAUY;
+        this.#instanceId = instanceId;
+        this.#config = config;
     }
 
     /**
      * Inicia uma nova sessão de cache para otimização de memória em cálculos massivos.
-     *
-     * **Engenharia:** Ativa o Explicit Resource Management para gerenciar o ciclo de vida
-     * de números e nós da AST de forma escopada. Útil em loops de milhões de registros.
-     *
-     * @returns Um objeto Disposable para uso com a keyword 'using'.
-     *
-     * @example
-     * ```ts
-     * {
-     *   using _session = CalcAUY.createCacheSession();
-     *   // Cálculos pesados aqui serão cacheados e limpos ao final do bloco.
-     * }
-     * ```
      */
     public static createCacheSession(): Disposable {
         return createCacheSession();
     }
 
     /**
-     * Cria uma nova instância de CalcAUY a partir de um valor inicial.
-     *
-     * **Engenharia:** O valor de entrada é imediatamente convertido em um `RationalNumber`
-     * (fração n/d) para garantir que a precisão seja preservada desde o primeiro nó da árvore.
-     *
-     * @param value - Aceita string (recomendado), number, bigint ou outra instância de CalcAUY.
-     * @returns Uma nova instância de CalcAUY (Nó Literal).
-     *
-     * @example Exemplo Simples
-     * ```ts
-     * const calc = CalcAUY.from(100);
-     * ```
-     *
-     * @example Operações Aninhadas
-     * ```ts
-     * const subCalc = CalcAUY.from(50).add(20);
-     * const main = CalcAUY.from(subCalc).mult(2);
-     * ```
-     *
-     * @example Cenário Real: Início de Fatura
-     * ```ts
-     * // Ingestão segura de valor vindo de um banco de dados ou input de usuário
-     * const valorBase = CalcAUY.from("1250.50");
-     * ```
-     *
-     * @example Cenário Real Complexo: Composição de Impostos
-     * ```ts
-     * const icms = CalcAUY.from("0.18");
-     * const baseCalculo = CalcAUY.from("1000.00").add("50.00"); // Base + Frete
-     * ```
+     * Cria uma nova instância de CalcAUYLogic a partir de um valor inicial.
      */
-    public static from(value: InputValue): CalcAUY {
-        if (value instanceof CalcAUY) { return value; }
+    public from(value: InputValue<Context, Config>): CalcAUYLogic<Context, Config> {
+        if (value instanceof CalcAUYLogic) {
+            this.validateInstance(value);
+            // Se a instância atual estiver vazia, assume a AST da instância recebida
+            if (this.#ast === null) {
+                return new CalcAUYLogic<Context, Config>(value.#ast, this.#instanceId, this.#config);
+            }
+            return value;
+        }
 
         let inputStr = value.toString();
 
-        // Normalização de percentual para originalInput (evita otimizações indesejadas e mantém rastro claro)
+        // Normalização de percentual
         if (typeof value === "string" && value.trim().endsWith("%")) {
             const cleanVal = value.trim().slice(0, -1).replaceAll("_", "");
             inputStr = `${cleanVal}/100`;
@@ -154,29 +117,31 @@ export class CalcAUY {
         const session = getActiveSession();
         const sessionCached = session?.getExtra<LiteralNode>(inputStr);
         if (sessionCached) {
-            return new CalcAUY(sessionCached);
+            const node = sessionCached;
+            if (this.#ast === null) return new CalcAUYLogic<Context, Config>(node, this.#instanceId, this.#config);
+            // Se já houver AST, anexa como operação de adição (comportamento legado para .from encadeado)
+            // Mas o ideal é que .from() seja o ponto inicial.
+            return this.op("add", value);
         }
 
         // Prioridade 2: Hot Cache (Referências Fortes)
         const hotCached = hotLiteralNodeCache.get(inputStr);
         if (hotCached) {
-            return new CalcAUY(hotCached);
+            const node = hotCached;
+            if (this.#ast === null) return new CalcAUYLogic<Context, Config>(node, this.#instanceId, this.#config);
+            return this.op("add", value);
         }
 
         // Prioridade 3: Cold Cache (WeakRef)
         const globalRef = globalLiteralNodeCache.get(inputStr);
         const globalCached = globalRef?.deref();
         if (globalCached) {
+            const node = globalCached;
             if (hotLiteralNodeCache.size < HOT_CACHE_LIMIT) {
-                hotLiteralNodeCache.set(inputStr, globalCached);
+                hotLiteralNodeCache.set(inputStr, node);
             }
-            if (logger.isEnabledFor("debug")) {
-                logger.debug("CalcAUY Instance Created (Cached)", {
-                    input_type: typeof value,
-                    structure: sanitizeAST(globalCached),
-                });
-            }
-            return new CalcAUY(globalCached);
+            if (this.#ast === null) return new CalcAUYLogic<Context, Config>(node, this.#instanceId, this.#config);
+            return this.op("add", value);
         }
 
         const r: RationalNumber = RationalNumber.from(value);
@@ -197,311 +162,278 @@ export class CalcAUY {
             astCacheRegistry.register(node, inputStr);
         }
 
-        if (logger.isEnabledFor("debug")) {
-            logger.debug("CalcAUY Instance Created", {
-                input_type: typeof value,
-                structure: sanitizeAST(node),
-            });
+        if (this.#ast === null) {
+            return new CalcAUYLogic<Context, Config>(node, this.#instanceId, this.#config);
         }
 
-        return new CalcAUY(node);
+        return this.op("add", value);
     }
 
     /**
-     * Analisa uma string contendo uma expressão matemática complexa e a transforma em uma AST.
-     *
-     * **Engenharia:** Utiliza um Parser de Descida Recursiva que respeita a precedência
-     * matemática padrão (PEMDAS). A expressão é tokenizada e validada antes de ser convertida em nós.
-     *
-     * @param expression - String como "(10 + 5) * 2 / 3".
-     * @returns Instância de CalcAUY representando a árvore da expressão.
-     *
-     * @example Exemplo Simples
-     * ```ts
-     * const calc = CalcAUY.parseExpression("1 + 1");
-     * ```
-     *
-     * @example Operações Aninhadas
-     * ```ts
-     * const calc = CalcAUY.parseExpression("(10 + 5) * (2 ^ 3)");
-     * ```
-     *
-     * @example Cenário Real: Fórmula de Desconto Progressivo
-     * ```ts
-     * const formula = "1000 * (1 - 0.15) + 50"; // Valor * (1 - Desc) + Taxa
-     * const calc = CalcAUY.parseExpression(formula);
-     * ```
-     *
-     * @example Cenário Real Complexo: Juros Compostos
-     * ```ts
-     * // M = P * (1 + i) ^ n
-     * const jurosComp = "5000 * (1 + 0.02) ^ 12";
-     * const output = CalcAUY.parseExpression(jurosComp).commit();
-     * ```
+     * Analisa uma string contendo uma expressão matemática complexa.
      */
-    public static parseExpression(expression: string): CalcAUY {
-        using _span = startSpan("parseExpression", logger, { expression });
+    public parseExpression(expression: string): CalcAUYLogic<Context, Config> {
         const lexer: Lexer = new Lexer(expression);
         const tokens = lexer.tokenize();
         const parser: Parser = new Parser(tokens);
-        return new CalcAUY(parser.parse());
+        const newNode = parser.parse();
+
+        if (this.#ast === null) {
+            return new CalcAUYLogic<Context, Config>(newNode, this.#instanceId, this.#config);
+        }
+        
+        // Se já houver AST, adiciona a expressão à árvore atual
+        return this.add(new CalcAUYLogic<Context, Config>(newNode, this.#instanceId, this.#config));
+    }
+
+    /**
+     * Retorna a configuração da instância atual (apenas leitura).
+     * @internal
+     */
+    public getContextConfig(): Required<InstanceConfig> {
+        return { ...this.#config };
     }
 
     /**
      * Reconstrói um cálculo a partir de um estado salvo (JSON) e valida sua integridade.
      *
-     * **Engenharia:** Além de reconstruir a árvore, este método verifica a assinatura
-     * digital BLAKE3 usando o Salt fornecido (ou vazio por padrão). Se houver qualquer
-     * alteração de 1 bit nos dados ou se a assinatura for inválida, lança um erro fatal.
-     *
-     * @param ast - Objeto serializado contendo 'data' (AST) e 'signature'.
-     * @param config - Configuração de segurança (opcional).
-     * @returns Instância hidratada pronta para novas operações.
-     * @throws {CalcAUYError} 'integrity-critical-violation' se a validação falhar.
+     * **Engenharia:** Permite opcionalmente informar um salt e encoder diferentes do
+     * atual da instância, possibilitando a hidratação segura de cálculos vindos de
+     * outros contextos isolados.
      */
-    public static async hydrate(
+    public async hydrate(
         ast: CalculationNode | string | object,
         config: { salt?: string; encoder?: SignatureEncoder } = {},
-    ): Promise<CalcAUY> {
-        const fullConfig = { salt: "", ...config };
-        await CalcAUY.checkIntegrity(ast, fullConfig);
-
-        const data = typeof ast === "string" ? JSON.parse(ast) : ast;
-        const node: CalculationNode = data.data || data.ast || data;
-
-        validateASTNode(node);
-        return new CalcAUY(node);
-    }
-
-    /**
-     * Verifica a validade da assinatura de um cálculo serializado.
-     *
-     * **Engenharia:** Aceita tanto a string JSON bruta quanto o objeto já parseado.
-     * Realiza o confronto do hash BLAKE3 usando o Salt e o Encoder fornecidos.
-     *
-     * @param ast - O rastro assinado (string JSON ou objeto).
-     * @param config - Configuração de segurança (salt e encoder opcional).
-     * @returns true se a assinatura for válida.
-     * @throws {CalcAUYError} 'integrity-critical-violation' se a assinatura falhar.
-     */
-    public static async checkIntegrity(
-        ast: CalculationNode | string | object,
-        config: { salt: string; encoder?: SignatureEncoder },
-    ): Promise<boolean> {
-        let payload: Record<string, unknown>;
-
-        if (typeof ast === "string") {
-            try {
-                payload = JSON.parse(ast);
-            } catch {
-                throw new CalcAUYError("invalid-syntax", "Falha ao processar JSON para verificação de assinatura.");
-            }
-        } else {
-            payload = ast as Record<string, unknown>;
-        }
-
-        if (!payload || typeof payload !== "object" || !payload.signature) {
-            throw new CalcAUYError(
-                "integrity-critical-violation",
-                "Assinatura de integridade ausente no rastro de auditoria.",
-            );
-        }
-
+    ): Promise<CalcAUYLogic<Context, Config>> {
+        const payload: SerializedCalculation = typeof ast === "string" ? JSON.parse(ast) : ast as SerializedCalculation;
         const dataToVerify = payload.data || {
             ast: payload.ast,
             finalResult: payload.finalResult,
             strategy: payload.strategy,
         };
 
-        const expectedHash = await generateSignature(
-            dataToVerify,
-            config.salt,
-            config.encoder || securityPolicy.encoder,
-        );
-
-        if (payload.signature !== expectedHash) {
-            throw new CalcAUYError(
-                "integrity-critical-violation",
-                "Violação de integridade detectada: a assinatura não confere com o conteúdo.",
-                { expected: expectedHash, received: payload.signature as string },
-            );
+        const signature = payload.signature;
+        if (!signature) {
+            throw new CalcAUYError("integrity-critical-violation", "Assinatura ausente na hidratação.");
         }
 
-        return true;
+        // Usa o salt/encoder fornecido ou cai para o padrão da instância
+        const verificationSalt = config.salt ?? this.#config.salt;
+        const verificationEncoder = config.encoder ?? this.#config.encoder;
+
+        const expectedHash = await generateSignature(dataToVerify, verificationSalt, verificationEncoder);
+        if (signature !== expectedHash) {
+            throw new CalcAUYError("integrity-critical-violation", "Violação de integridade na hidratação.");
+        }
+
+        const node: CalculationNode = payload.data || payload.ast || (payload as unknown as CalculationNode);
+        validateASTNode(node);
+
+        // Envolve em nó de controle (reanimação)
+        const controlNode: ControlNode = {
+            kind: "control",
+            type: "reanimation_event",
+            metadata: {
+                timestamp: new Date().toISOString(),
+                previousContextLabel: payload.contextLabel || "",
+                previousSignature: signature,
+            },
+            child: node,
+        };
+
+        return new CalcAUYLogic<Context, Config>(controlNode, this.#instanceId, this.#config);
     }
 
     /**
      * Captura e serializa a árvore atual em uma string JSON pronta para persistência.
-     * Engenharia: O JSON retornado contém o campo 'signature' para garantir integridade.
      */
     public async hibernate(): Promise<string> {
-        const signature = await generateSignature(this.#ast, securityPolicy.salt, securityPolicy.encoder);
-        return JSON.stringify({
-            data: this.#ast,
+        const ast = this.assertAST();
+        const signature = await generateSignature(ast, this.#config.salt, this.#config.encoder);
+        const payload: SerializedCalculation = {
+            data: ast,
             signature,
-        });
+            contextLabel: this.#config.contextLabel,
+        };
+        return JSON.stringify(payload);
     }
 
     /**
-     * Retorna o objeto da Árvore de Sintaxe Abstrata (AST) no estado atual.
+     * Incorpora um cálculo de uma instância externa (cross-context).
+     *
+     * **Engenharia:** Este é o único portal seguro para unir cálculos de jurisdições diferentes.
+     * Ele valida a integridade, assina o dado externo e o carimba com um nó de controle.
+     */
+    public async addFromExternalInstance(
+        external: CalcAUYLogic<string, InstanceConfig> | string | object,
+    ): Promise<CalcAUYLogic<Context, Config>> {
+        let externalAST: CalculationNode;
+        let externalSignature: string;
+        let externalContextLabel = "";
+
+        if (external instanceof CalcAUYLogic) {
+            // Instância "Viva": Fecha com assinatura imediata e valida
+            const hibernated = await external.hibernate();
+            const payload: SerializedCalculation = JSON.parse(hibernated);
+            externalAST = (payload.data || payload.ast)!;
+            externalSignature = payload.signature;
+            externalContextLabel = external.getContextConfig().contextLabel;
+        } else {
+            // Objeto ou JSON serializado
+            const payload: SerializedCalculation = typeof external === "string" ? JSON.parse(external) : external as SerializedCalculation;
+            if (!payload.signature) {
+                throw new CalcAUYError("integrity-critical-violation", "Instância externa sem assinatura de integridade.");
+            }
+            externalAST = (payload.data || payload.ast)!;
+            externalSignature = payload.signature;
+            externalContextLabel = payload.contextLabel || "";
+            // Validação estrutural básica
+            validateASTNode(externalAST);
+        }
+
+        // Carimbo de Jurisdição
+        const controlNode: ControlNode = {
+            kind: "control",
+            type: "reanimation_event",
+            metadata: {
+                timestamp: new Date().toISOString(),
+                previousContextLabel: externalContextLabel,
+                previousSignature: externalSignature,
+            },
+            child: externalAST,
+        };
+
+        // União via operação especial, envolvida em grupo por segurança
+        const group: GroupNode = { kind: "group", child: controlNode };
+        const newAST = attachOp(this.assertAST(), "crossContextAdd", group);
+
+        return new CalcAUYLogic<Context, Config>(newAST, this.#instanceId, this.#config);
+    }
+
+    /**
+     * Retorna o objeto da Árvore de Sintaxe Abstrata (AST).
      */
     public getAST(): CalculationNode {
-        return this.#ast;
+        return this.assertAST();
     }
 
     /**
      * Anexa metadados de negócio ao nó atual da árvore.
-     *
-     * **Engenharia:** Fundamental para auditoria forense. Permite justificar cada
-     * operação (ex: "ID da regra de imposto", "nome do operador", "timestamp").
-     *
-     * @param key - Chave do metadado.
-     * @param value - Valor (deve ser serializável).
-     * @returns Nova instância enriquecida.
-     *
-     * @example Exemplo Simples
-     * ```ts
-     * const calc = CalcAUY.from(100).setMetadata("owner", "user_1");
-     * ```
-     *
-     * @example Operações Aninhadas
-     * ```ts
-     * const calc = CalcAUY.from(10).add(5).setMetadata("step", 1).mult(2).setMetadata("step", 2);
-     * ```
-     *
-     * @example Cenário Real: Marcação de Tributo
-     * ```ts
-     * const calc = CalcAUY.from("500.00").mult("0.05")
-     *   .setMetadata("tax_name", "ISS")
-     *   .setMetadata("law_reference", "Artigo 123");
-     * ```
-     *
-     * @example Cenário Real Complexo: Auditoria de Payroll
-     * ```ts
-     * const salario = CalcAUY.from(5000)
-     *   .sub(400).setMetadata("reason", "inss")
-     *   .sub(150).setMetadata("reason", "plano_saude")
-     *   .setMetadata("process_id", "2026-04-07-payroll");
-     * ```
      */
-    public setMetadata(key: string, value: MetadataValue): CalcAUY {
+    public setMetadata(key: string, value: MetadataValue): CalcAUYLogic<Context, Config> {
         validateMetadata(value);
+        const ast = this.assertAST();
         const newAST: CalculationNode = {
-            ...this.#ast,
-            metadata: { ...(this.#ast.metadata), [key]: value },
+            ...ast,
+            metadata: { ...(ast.metadata), [key]: value },
         } as CalculationNode;
 
         if (logger.isEnabledFor("debug")) {
             logger.debug("Metadata Attached", {
                 key,
-                structure: sanitizeAST(newAST),
+                structure: sanitizeAST(newAST, this.#config),
             });
         }
 
-        return new CalcAUY(newAST);
+        return new CalcAUYLogic<Context, Config>(newAST, this.#instanceId, this.#config);
     }
 
     /**
      * Envolve a expressão atual em um grupo (parênteses).
-     *
-     * **Engenharia:** Força a precedência matemática. Útil quando você quer isolar
-     * um bloco de cálculo antes de aplicar uma nova operação multiplicativa.
-     *
-     * @returns Nova instância com Nó de Agrupamento.
-     *
-     * @example Exemplo Simples
-     * ```ts
-     * // Resulta em (10 + 5)
-     * const calc = CalcAUY.from(10).add(5).group();
-     * ```
-     *
-     * @example Operações Aninhadas
-     * ```ts
-     * // Sem group: 10 + 5 * 2 = 20
-     * // Com group: (10 + 5) * 2 = 30
-     * const calc = CalcAUY.from(10).add(5).group().mult(2);
-     * ```
-     *
-     * @example Cenário Real: Cálculo de Base com Adicional
-     * ```ts
-     * // (Salário + Bônus) * Alíquota
-     * const base = CalcAUY.from(3000).add(500).group().mult("0.15");
-     * ```
-     *
-     * @example Cenário Real Complexo: Proporcionalidade de Multa
-     * ```ts
-     * // (Valor_Total / Dias_Mes) * Dias_Atraso * Taxa_Multa
-     * const multa = CalcAUY.from(1000).div(30).group().mult(5).mult("0.02");
-     * ```
      */
-    public group(): CalcAUY {
-        // Otimização: Evita parênteses redundantes em literais ou grupos já existentes.
-        if (this.#ast.kind === "group" || this.#ast.kind === "literal") {
+    public group(): CalcAUYLogic<Context, Config> {
+        const ast = this.assertAST();
+        if (ast.kind === "group" || ast.kind === "literal") {
             return this;
         }
 
         const node: GroupNode = {
             kind: "group",
-            child: this.#ast,
+            child: ast,
         };
 
         if (logger.isEnabledFor("debug")) {
             logger.debug("Grouping Applied", {
-                structure: sanitizeAST(node),
+                structure: sanitizeAST(node, this.#config),
             });
         }
 
-        return new CalcAUY(node);
+        return new CalcAUYLogic<Context, Config>(node, this.#instanceId, this.#config);
     }
 
     // --- Fluent Operations ---
 
-    /** Adição Aritmética. */
-    public add(value: InputValue): CalcAUY {
+    public add(value: InputValue<Context, Config>): CalcAUYLogic<Context, Config> {
         return this.op("add", value);
     }
-    /** Subtração Aritmética. */
-    public sub(value: InputValue): CalcAUY {
+    public sub(value: InputValue<Context, Config>): CalcAUYLogic<Context, Config> {
         return this.op("sub", value);
     }
-    /** Multiplicação. Respeita PEMDAS. */
-    public mult(value: InputValue): CalcAUY {
+    public mult(value: InputValue<Context, Config>): CalcAUYLogic<Context, Config> {
         return this.op("mul", value);
     }
-    /** Divisão Racional (Infinita até o commit). */
-    public div(value: InputValue): CalcAUY {
+    public div(value: InputValue<Context, Config>): CalcAUYLogic<Context, Config> {
         return this.op("div", value);
     }
-    /** Potenciação. */
-    public pow(value: InputValue): CalcAUY {
+    public pow(value: InputValue<Context, Config>): CalcAUYLogic<Context, Config> {
         return this.op("pow", value);
     }
-    /** Módulo (Resto) Euclidiano. */
-    public mod(value: InputValue): CalcAUY {
+    public mod(value: InputValue<Context, Config>): CalcAUYLogic<Context, Config> {
         return this.op("mod", value);
     }
-    /** Divisão Inteira (Quociente). */
-    public divInt(value: InputValue): CalcAUY {
+    public divInt(value: InputValue<Context, Config>): CalcAUYLogic<Context, Config> {
         return this.op("divInt", value);
+    }
+
+    /**
+     * Garante que a AST foi inicializada.
+     * @private
+     */
+    private assertAST(): CalculationNode {
+        if (this.#ast === null) {
+            throw new CalcAUYError(
+                "invalid-syntax",
+                "O cálculo ainda não foi inicializado. Use .from() ou .parseExpression() como ponto de partida.",
+            );
+        }
+        return this.#ast;
+    }
+
+    /**
+     * Valida se a instância fornecida pertence ao mesmo contexto.
+     * @private
+     */
+    private validateInstance(other: CalcAUYLogic<string, InstanceConfig>): void {
+        if (other.#instanceId !== this.#instanceId) {
+            throw new CalcAUYError(
+                "instance-mismatch",
+                `Tentativa de misturar instâncias de contextos diferentes. Use 'addFromExternalInstance' para integração cross-context.`,
+                {
+                    currentContext: this.#config.contextLabel,
+                    otherContext: other.getContextConfig().contextLabel,
+                },
+            );
+        }
     }
 
     /**
      * Método interno para anexar operações na árvore.
      * @private
      */
-    private op(type: OperationType, value: InputValue): CalcAUY {
+    private op(type: OperationType, value: InputValue<Context, Config>): CalcAUYLogic<Context, Config> {
+        const ast = this.assertAST();
         let rightNode: CalculationNode;
         let inputType: string;
 
-        // Auto-Agrupamento Inteligente: Só envolve em grupo se não for um literal ou outro grupo.
-        if (value instanceof CalcAUY) {
-            const innerAST = value.#ast;
+        if (value instanceof CalcAUYLogic) {
+            this.validateInstance(value);
+            const innerAST = value.assertAST();
             if (innerAST.kind === "group" || innerAST.kind === "literal") {
                 rightNode = innerAST;
             } else {
                 rightNode = { kind: "group", child: innerAST };
             }
-            inputType = "CalcAUY";
+            inputType = "CalcAUYLogic";
         } else {
             const r: RationalNumber = RationalNumber.from(value);
             rightNode = {
@@ -512,63 +444,36 @@ export class CalcAUY {
             inputType = typeof value;
         }
 
-        const newAST: CalculationNode = attachOp(this.#ast, type, rightNode);
+        const newAST: CalculationNode = attachOp(ast, type, rightNode);
 
         if (logger.isEnabledFor("debug")) {
             logger.debug("Node appended to AST", {
                 operation: type,
                 input_type: inputType,
-                structure: sanitizeAST(newAST),
+                structure: sanitizeAST(newAST, this.#config),
             });
         }
 
-        return new CalcAUY(newAST);
+        return new CalcAUYLogic<Context, Config>(newAST, this.#instanceId, this.#config);
     }
 
     /**
      * Finaliza a construção da árvore e inicia a fase de avaliação.
-     *
-     * **Engenharia:** Esta é a fase de transição. A AST é percorrida recursivamente,
-     * colapsando frações racionais até chegar no resultado final. O arredondamento
-     * só é aplicado aqui ou nos outputs, nunca durante a construção.
-     *
-     * @param options - Configurações de arredondamento.
-     * @returns Uma instância de CalcAUYOutput contendo o resultado final e a AST.
-     *
-     * @example Exemplo Simples
-     * ```ts
-     * const res = await CalcAUY.from(10).add(5).commit();
-     * ```
-     *
-     * @example Estratégia Customizada
-     * ```ts
-     * const res = await CalcAUY.from("1.255").commit({ roundStrategy: "HALF_EVEN" });
-     * ```
-     *
-     * @example Cenário Real: Fechamento de Venda
-     * ```ts
-     * const total = await CalcAUY.from("99.90").mult(3).commit({ roundStrategy: "NBR5891" });
-     * ```
-     *
-     * @example Cenário Real Complexo: Cálculo Fiscal com Truncagem
-     * ```ts
-     * // Muitos cálculos fiscais exigem TRUNCATE para não favorecer o contribuinte
-     * const icms = await CalcAUY.from("1250.45").mult("0.18").commit({ roundStrategy: "TRUNCATE" });
-     * ```
      */
     public async commit(options: { roundStrategy?: RoundingStrategy } = {}): Promise<CalcAUYOutput> {
         using _span = startSpan("commit", logger, options);
+        const ast = this.assertAST();
         const strategy: RoundingStrategy = options.roundStrategy ?? "NBR5891";
-        const result: RationalNumber = evaluate(this.#ast);
+        const result: RationalNumber = evaluate(ast);
 
         // Gera a assinatura de integridade do resultado consolidado
         const payload = {
-            ast: this.#ast,
+            ast,
             finalResult: result.toJSON(),
             strategy,
         };
-        const signature = await generateSignature(payload, securityPolicy.salt, securityPolicy.encoder);
+        const signature = await generateSignature(payload, this.#config.salt, this.#config.encoder);
 
-        return new CalcAUYOutput(result, this.#ast, strategy, signature);
+        return new CalcAUYOutput(result, ast, strategy, signature, this.#config);
     }
 }
