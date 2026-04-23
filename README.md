@@ -46,8 +46,14 @@ import { CalcAUY } from "@st-all-one/calc-auy";
 const SALT = "MY-SECRET-SALT-2026";
 const ENCODER = "HEX";
 const ROUNDING_STRATEGY = "NBR5891";
+const CONTEXT_LABEL = "financial"
 
-const SafeCalc = CalcAUY.setSecurityPolicy({ salt: SALT, encoder: ENCODER });
+const SafeCalc = CalcAUY.create({ 
+    salt: SALT,
+    encoder: ENCODER,
+    roundingStrategy: ROUNDING_STRATEGY,
+    contextLabel: CONTEXT_LABEL,
+});
 
 // == Parâmetros ==
 const capitalInicial = 10_000.00;
@@ -68,8 +74,8 @@ const montante = SafeCalc
         usuário: { id: 99, calc_token: "...UUID...", username: "st-all-one" },
     });
 
-// Colapso da AST e definição estratégia de arredondamento
-const resultado = await montante.commit({ roundStrategy: ROUNDING_STRATEGY });
+// Colapso da AST
+const resultado = await montante.commit();
 
 // == Extração dos Outputs ==
 console.log(resultado.toMonetary());
