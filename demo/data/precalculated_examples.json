@@ -207,7 +207,7 @@
                 "context": "Cálculo de juros compostos (visão toCustomOutput)",
                 "code": "CalcAUYLogic.from(1_000).mult(CalcAUYLogic.from(1).add('14.75%').group().pow(10)).setMetadata('meta', { id: 1, date: new Date().toISOString() }).commit().toCustomOutput(processor)",
                 "result": "[REPORT] Result: 415075266459351724951597401/104857600000000000000000 | Strategy: NBR5891",
-                "customProcessor": "(ctx) => { return `[REPORT] Result: ${ctx.result.n}/${ctx.result.d} | Strategy: ${ctx.strategy}`; }"
+                "customProcessor": "(ctx) => { return `[REPORT] Result: ${ctx.result.n}/${ctx.result.d} | Strategy: ${ctx.roundStrategy}`; }"
             }
         ],
         "auditTrace": [
