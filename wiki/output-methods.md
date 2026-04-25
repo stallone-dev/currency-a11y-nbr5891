@@ -31,6 +31,7 @@ Abaixo estão os métodos disponíveis na classe `CalcAUYOutput` (gerada após o
 | Método | Exemplo Rápido | Descrição |
 | :--- | :--- | :--- |
 | [`toVerbalA11y`](./output-methods/toVerbalA11y.md) | `res.toVerbalA11y()` | Descrição fonética para leitores de tela. |
+| [`toMermaidGraph`](./output-methods/toMermaidGraph.md) | `res.toMermaidGraph()` | Diagrama de sequência (Ledger-view). |
 | [`toHTML`](./output-methods/toHTML.md) | `res.toHTML(katex)` | Fragmento HTML renderizado com KaTeX. |
 | [`toImageBuffer`](./output-methods/toImageBuffer.md) | `res.toImageBuffer(katex)` | Gera um buffer de imagem SVG do rastro. |
 

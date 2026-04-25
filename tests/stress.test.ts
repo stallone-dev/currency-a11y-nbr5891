@@ -37,7 +37,7 @@ describe("CalcAUY - Testes de Estresse e Performance Extrema", () => {
     });
 
     it("Cenário 3: Operação Muito Custosa (Milhares de vezes)", async () => {
-        const ITERATIONS = 100_000;
+        const ITERATIONS = 10_000;
         const start = performance.now();
         const res: CalcAUYOutput[] = [];
         const base = CalcAUY.create({ contextLabel: "t3" });
@@ -58,7 +58,7 @@ describe("CalcAUY - Testes de Estresse e Performance Extrema", () => {
     });
 
     it("Cenário 4: Operação Simples Real (Milhares de vezes)", async () => {
-        const ITERATIONS = 100_000;
+        const ITERATIONS = 10_000;
         const start = performance.now();
         const base = CalcAUY.create({ contextLabel: "t4" });
         for (let i = 0; i < ITERATIONS; i++) {

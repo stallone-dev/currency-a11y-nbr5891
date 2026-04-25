@@ -21,6 +21,7 @@ import { toSubscript } from "./utils/unicode.ts";
 import { renderAST } from "./output_internal/renderer.ts";
 import { performSlice, performSliceByRatio } from "./output_internal/slicer.ts";
 import { generateSVG } from "./output_internal/image_utils.ts";
+import { renderMermaidSequence } from "./output_internal/mermaid_sequence_renderer.ts";
 import type { IKatex, OutputOptions } from "./core/types.ts";
 import { getSubLogger, startSpan } from "./utils/logger.ts";
 import type { InstanceConfig } from "./core/types.ts";
@@ -72,6 +73,7 @@ export interface ICalcAUYCustomOutputContext {
         | "toMonetary"
         | "toLaTeX"
         | "toUnicode"
+        | "toMermaidGraph"
         | "toHTML"
         | "toImageBuffer"
         | "toVerbalA11y"
@@ -93,6 +95,7 @@ export type OutputKey =
     | "toMonetary"
     | "toLaTeX"
     | "toUnicode"
+    | "toMermaidGraph"
     | "toHTML"
     | "toImageBuffer"
     | "toVerbalA11y"
@@ -509,6 +512,29 @@ export class CalcAUYOutput {
     }
 
     /**
+     * Gera um diagrama de sequência Mermaid representando a linhagem e as
+     * transições de estado (jurisdições) do cálculo.
+     *
+     * **Engenharia:** Transforma a AST recursiva em uma narrativa cronológica,
+     * tratando o rastro como um Livro-Razão (Ledger) de eventos.
+     */
+    public toMermaidGraph(options?: OutputOptions): string {
+        using _span = startSpan("toMermaidGraph", logger, options);
+        return this.toMermaidGraphInternal(options);
+    }
+
+    private toMermaidGraphInternal(options?: OutputOptions): string {
+        const loc = getLocale(options?.locale);
+        const cacheKey = `toMermaidGraph:${loc.locale}`;
+        let graph = this.#outputCache.get(cacheKey) as string;
+        if (graph === undefined) {
+            graph = renderMermaidSequence(this.#ast, this.#config, this.#signature, loc);
+            this.#outputCache.set(cacheKey, graph);
+        }
+        return graph;
+    }
+
+    /**
      * Renderiza o resultado em um fragmento HTML altamente acessível e visualmente rico.
      *
      * **Engenharia:** Integra o motor KaTeX para renderização visual e injeta
@@ -922,6 +948,7 @@ export class CalcAUYOutput {
                 toMonetary: this.toMonetary.bind(this),
                 toLaTeX: this.toLaTeX.bind(this),
                 toUnicode: this.toUnicode.bind(this),
+                toMermaidGraph: this.toMermaidGraph.bind(this),
                 toHTML: this.toHTML.bind(this),
                 toImageBuffer: this.toImageBuffer.bind(this),
                 toVerbalA11y: this.toVerbalA11y.bind(this),

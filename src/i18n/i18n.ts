@@ -67,6 +67,31 @@ export interface CalcAUYLocaleA11y {
         /** Template para raiz enésima (deve conter o placeholder {den}). */
         root_n: string;
     };
+    /** Termos utilizados no Diagrama de Sequência Mermaid (Ledger-view). */
+    mermaid: {
+        /** Termo para Contexto (ex: "Contexto"). */
+        context: string;
+        /** Termo para transferência de rastro (ex: "Handover"). */
+        handover: string;
+        /** Termo para entrada de valor (ex: "Ingestão"). */
+        ingestion: string;
+        /** Termo para entrada em lote (ex: "Ingestão de Operandos"). */
+        ingestionOperands: string;
+        /** Termo para cálculo (ex: "Operação"). */
+        operation: string;
+        /** Termo para evento de controle (ex: "Evento"). */
+        event: string;
+        /** Termo para fechamento (ex: "Fechamento e Assinatura Final"). */
+        closing: string;
+        /** Termo para o rastro digital (ex: "Signature"). */
+        signature: string;
+        /** Termo para o dia atual (ex: "Hoje"). */
+        today: string;
+        /** Label para metadados do tipo Objeto. */
+        objectLabel: string;
+        /** Template para metadados do tipo Lista (deve conter {n}). */
+        listTemplate: string;
+    };
 }
 
 /**
@@ -99,6 +124,19 @@ export const LOCALES: Record<CalcAUYLocale, CalcAUYLocaleA11y> = {
             root_cubic: "raiz cúbica de ",
             root_n: "raiz {den}-ésima de ",
         },
+        mermaid: {
+            context: "Contexto",
+            handover: "Handover",
+            ingestion: "Ingestão",
+            ingestionOperands: "Ingestão de Operandos",
+            operation: "Operação",
+            event: "Evento",
+            closing: "Fechamento e Assinatura Final",
+            signature: "Signature",
+            today: "Hoje",
+            objectLabel: "[Objeto]",
+            listTemplate: "[Lista: {n} itens]",
+        },
     },
     "en-US": {
         locale: "en-US",
@@ -125,6 +163,19 @@ export const LOCALES: Record<CalcAUYLocale, CalcAUYLocaleA11y> = {
             root_square: "square root of ",
             root_cubic: "cubic root of ",
             root_n: "the {den}-th root of ",
+        },
+        mermaid: {
+            context: "Context",
+            handover: "Handover",
+            ingestion: "Ingestion",
+            ingestionOperands: "Ingestion of Operands",
+            operation: "Operation",
+            event: "Event",
+            closing: "Final Closing and Signature",
+            signature: "Signature",
+            today: "Today",
+            objectLabel: "[Object]",
+            listTemplate: "[List: {n} items]",
         },
     },
     "en-EU": {
@@ -153,6 +204,19 @@ export const LOCALES: Record<CalcAUYLocale, CalcAUYLocaleA11y> = {
             root_cubic: "cubic root of ",
             root_n: "the {den}-th root of ",
         },
+        mermaid: {
+            context: "Context",
+            handover: "Handover",
+            ingestion: "Ingestion",
+            ingestionOperands: "Ingestion of Operands",
+            operation: "Operation",
+            event: "Event",
+            closing: "Final Closing and Signature",
+            signature: "Signature",
+            today: "Today",
+            objectLabel: "[Object]",
+            listTemplate: "[List: {n} items]",
+        },
     },
     "es-ES": {
         locale: "es-ES",
@@ -179,6 +243,19 @@ export const LOCALES: Record<CalcAUYLocale, CalcAUYLocaleA11y> = {
             root_square: "raíz cuadrada de ",
             root_cubic: "raíz cúbica de ",
             root_n: "raíz {den}-ésima de ",
+        },
+        mermaid: {
+            context: "Contexto",
+            handover: "Handover",
+            ingestion: "Ingestión",
+            ingestionOperands: "Ingestión de Operandos",
+            operation: "Operación",
+            event: "Evento",
+            closing: "Cierre y Firma Final",
+            signature: "Signature",
+            today: "Hoy",
+            objectLabel: "[Objeto]",
+            listTemplate: "[Lista: {n} elementos]",
         },
     },
     "fr-FR": {
@@ -207,6 +284,19 @@ export const LOCALES: Record<CalcAUYLocale, CalcAUYLocaleA11y> = {
             root_cubic: "racine cubique de ",
             root_n: "racine {den}-ème de ",
         },
+        mermaid: {
+            context: "Contexte",
+            handover: "Passage",
+            ingestion: "Ingestion",
+            ingestionOperands: "Ingestion des opérandes",
+            operation: "Opération",
+            event: "Événement",
+            closing: "Clôture et Signature Finale",
+            signature: "Signature",
+            today: "Aujourd'hui",
+            objectLabel: "[Objet]",
+            listTemplate: "[Liste: {n} éléments]",
+        },
     },
     "de-DE": {
         locale: "de-DE",
@@ -233,6 +323,19 @@ export const LOCALES: Record<CalcAUYLocale, CalcAUYLocaleA11y> = {
             root_square: "Quadratwurzel aus ",
             root_cubic: "Kubikwurzel aus ",
             root_n: "{den}-te Wurzel aus ",
+        },
+        mermaid: {
+            context: "Kontext",
+            handover: "Übergabe",
+            ingestion: "Aufnahme",
+            ingestionOperands: "Aufnahme von Operanden",
+            operation: "Operation",
+            event: "Ereignis",
+            closing: "Abschluss und Endgültige Signatur",
+            signature: "Signature",
+            today: "Heute",
+            objectLabel: "[Objekt]",
+            listTemplate: "[Liste: {n} Elemente]",
         },
     },
     "ru-RU": {
@@ -261,6 +364,19 @@ export const LOCALES: Record<CalcAUYLocale, CalcAUYLocaleA11y> = {
             root_cubic: "кубический корень из ",
             root_n: "корень {den}-й степени из ",
         },
+        mermaid: {
+            context: "Контекст",
+            handover: "Передача",
+            ingestion: "Прием",
+            ingestionOperands: "Прием операндов",
+            operation: "Operation",
+            event: "Событие",
+            closing: "Закрытие и окончательная подпись",
+            signature: "Signature",
+            today: "Сегодня",
+            objectLabel: "[Объект]",
+            listTemplate: "[Список: {n} элементов]",
+        },
     },
     "zh-CN": {
         locale: "zh-CN",
@@ -288,6 +404,19 @@ export const LOCALES: Record<CalcAUYLocale, CalcAUYLocaleA11y> = {
             root_cubic: "立方根 ",
             root_n: "{den}次方根 ",
         },
+        mermaid: {
+            context: "上下文",
+            handover: "切换",
+            ingestion: "摄入",
+            ingestionOperands: "操作数摄入",
+            operation: "操作",
+            event: "事件",
+            closing: "完成与最终签名",
+            signature: "Signature",
+            today: "今天",
+            objectLabel: "[对象]",
+            listTemplate: "[列表: {n} 项]",
+        },
     },
     "ja-JP": {
         locale: "ja-JP",
@@ -314,6 +443,19 @@ export const LOCALES: Record<CalcAUYLocale, CalcAUYLocaleA11y> = {
             root_square: "平方根 ",
             root_cubic: "立方根 ",
             root_n: "{den}乗根 ",
+        },
+        mermaid: {
+            context: "コンテキスト",
+            handover: "ハンドオーバー",
+            ingestion: "摂取",
+            ingestionOperands: "オペランドの摂取",
+            operation: "操作",
+            event: "イベント",
+            closing: "最终決算 e 署名",
+            signature: "Signature",
+            today: "今日",
+            objectLabel: "[オブジェクト]",
+            listTemplate: "[リスト: {n} 項目]",
         },
     },
 };

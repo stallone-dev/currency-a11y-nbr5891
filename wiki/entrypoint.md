@@ -73,6 +73,7 @@ Como extrair resultados e provas matemáticas após o `commit()`.
 *   **Destaques:**
     *   [`toMonetary()`](./output-methods/toMonetary.md): Formatação localizada de moeda.
     *   [`toAuditTrace()`](./output-methods/toAuditTrace.md): O rastro técnico definitivo.
+    *   [`toMermaidGraph()`](./output-methods/toMermaidGraph.md): Visualização em Ledger (Sequence Diagram).
     *   [`toVerbalA11y()`](./output-methods/toVerbalA11y.md): Acessibilidade fonética.
 
 ### 4. Segurança e Auditoria

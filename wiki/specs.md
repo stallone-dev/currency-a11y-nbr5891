@@ -20,6 +20,7 @@ Para entender os fundamentos matemáticos e as decisões de design da CalcAUY, c
 - **[Spec 09: Interface de Saída](./specs/09-Output-Interface.md)** - Contrato do CalcAUYOutput.
 - **[Spec 14: Internacionalização](./specs/14-Locales-Currencies.md)** - Suporte a múltiplos idiomas e moedas.
 - **[Spec 16: Customização](./specs/16-Custom-Output-Processors.md)** - Injeção de formatadores externos (XML, CSV, etc).
+- **[Spec 21: Linhagem Mermaid](./specs/21-Mermaid-Ledger-Auditory.md)** - Diagrama de Sequência e Ledger de Eventos.
 
 ## 🛡️ Infraestrutura e Segurança (Infra)
 - **[Spec 00: Visão Panorâmica](./specs/00-Panoramic-Overview.md)** - Ponto de entrada e resumo arquitetural.

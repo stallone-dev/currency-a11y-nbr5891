@@ -35,7 +35,7 @@ A **CalcAUY** trata o cálculo não como um resultado volátil, mas como um **do
 - **`commit(roundStrategy)`**: Finaliza, colapsa e assina o cálculo (**Promise**).
 
 ### Classe `CalcAUYOutput` (Result)
-- `toMonetary()`, `toStringNumber()`, `toLaTeX()`, `toHTML()`, `toUnicode()`, `toImageBuffer()`
+- `toMonetary()`, `toStringNumber()`, `toLaTeX()`, `toHTML()`, `toUnicode()`, `toImageBuffer()`, `toMermaidGraph()`
 - **`toASTObject()`**: Retorna o objeto de rastro completo (**Record<string, unknown>**).
 - **`toSlice()` / `toSliceByRatio()`**: Rateio exato de centavos (Algoritmo de Maior Resto).
 - `toVerbalA11y()`: Tradução humana da fórmula.
