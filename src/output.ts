@@ -9,9 +9,9 @@
 import type { CalculationNode, RationalValue, SerializedCalculation } from "./ast/types.ts";
 import type { RationalNumber } from "./core/rational.ts";
 import { DEFAULT_DECIMAL_PRECISION, ROUNDING_IDS, type RoundingStrategy } from "./core/constants.ts";
-import { applyRounding } from "./rounding/rounding.ts";
-import { type CalcAUYLocaleA11y, getLocale } from "./i18n/i18n.ts";
-import { toSubscript } from "./utils/unicode.ts";
+import { applyRounding } from "./core/rounding.ts";
+import { type CalcAUYLocaleA11y, getLocale } from "./output_internal/i18n.ts";
+import { toSubscript } from "./output_internal/unicode.ts";
 import { renderAST } from "./output_internal/renderer.ts";
 import { performSlice, performSliceByRatio } from "./output_internal/slicer.ts";
 import { renderMermaidSequence } from "./output_internal/mermaid_sequence_renderer.ts";

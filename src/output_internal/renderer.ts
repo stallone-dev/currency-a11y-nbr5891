@@ -7,8 +7,8 @@
  */
 
 import type { CalculationNode } from "../ast/types.ts";
-import type { CalcAUYLocaleA11y } from "../i18n/i18n.ts";
-import { toSuperscript } from "../utils/unicode.ts";
+import type { CalcAUYLocaleA11y } from "./i18n.ts";
+import { toSuperscript } from "./unicode.ts";
 
 /**
  * Helper to extract fractional power information from a node.

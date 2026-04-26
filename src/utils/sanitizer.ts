@@ -8,7 +8,7 @@
 
 import type { CalculationNode } from "../ast/types.ts";
 import type { InstanceConfig } from "../core/types.ts";
-import { BIRTH_TICKET_MOCK } from "../core/symbols.ts";
+import { BIRTH_TICKET_MOCK } from "./symbols.ts";
 
 const REDACTED = "[PII]";
 

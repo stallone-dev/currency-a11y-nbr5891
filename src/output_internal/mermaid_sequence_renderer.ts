@@ -8,7 +8,7 @@
 
 import type { CalculationNode, MetadataValue } from "../ast/types.ts";
 import type { InstanceConfig } from "../core/types.ts";
-import type { CalcAUYLocaleA11y } from "../i18n/i18n.ts";
+import type { CalcAUYLocaleA11y } from "./i18n.ts";
 
 type SequenceEvent = {
     type: "note" | "transition" | "action";
