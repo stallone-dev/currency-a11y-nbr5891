@@ -10,13 +10,13 @@ import type { CalculationNode, MetadataValue } from "../ast/types.ts";
 import type { InstanceConfig } from "../core/types.ts";
 import type { CalcAUYLocaleA11y } from "../i18n/i18n.ts";
 
-interface SequenceEvent {
+type SequenceEvent = {
     type: "note" | "transition" | "action";
     context: string;
     message: string;
     fromContext?: string;
     metadata?: string; // Metadados de negócio separados para ações
-}
+};
 
 /**
  * Motor de renderização para Diagramas de Sequência Mermaid.
@@ -38,7 +38,7 @@ export function renderMermaidSequence(
     /**
      * Helper para atualizar a profundidade máxima de um participante.
      */
-    function updateDepth(ctx: string, depth: number) {
+    function updateDepth(ctx: string, depth: number): void {
         const current = participantDepths.get(ctx) || 0;
         if (depth > current) {
             participantDepths.set(ctx, depth);
@@ -53,7 +53,7 @@ export function renderMermaidSequence(
      * Ex: 26-04-25 10:30 (iso)
      */
     function formatTime(iso?: MetadataValue): string {
-        if (typeof iso !== "string") return "";
+        if (typeof iso !== "string") { return ""; }
         try {
             const d = new Date(iso);
             const yy = String(d.getFullYear()).slice(-2);
@@ -75,7 +75,7 @@ export function renderMermaidSequence(
         const skipKeys = ["timestamp", "pii", "previousContextLabel", "previousSignature", "previousRoundStrategy"];
 
         for (const [key, value] of Object.entries(meta)) {
-            if (skipKeys.includes(key) || (key === "timestamp" && isRoot)) continue;
+            if (skipKeys.includes(key) || (key === "timestamp" && isRoot)) { continue; }
 
             let displayVal: string;
             if (isPII) {
@@ -98,8 +98,8 @@ export function renderMermaidSequence(
     /**
      * Helper para descarregar o buffer de literais em uma única nota agrupada.
      */
-    function flushLiterals(ctx: string) {
-        if (literalBuffer.length === 0) return;
+    function flushLiterals(ctx: string): void {
+        if (literalBuffer.length === 0) { return; }
 
         if (literalBuffer.length === 1) {
             const lit = literalBuffer[0];
@@ -130,7 +130,7 @@ export function renderMermaidSequence(
     /**
      * Varredura recursiva para extrair a linhagem de eventos e profundidades.
      */
-    function walk(node: CalculationNode, ctx: string, depth: number, isRoot = false) {
+    function walk(node: CalculationNode, ctx: string, depth: number, isRoot = false): void {
         updateDepth(ctx, depth);
         const meta = node.metadata || {};
         const isPII = meta.pii === true || (config.sensitive && meta.pii !== false);
@@ -144,39 +144,38 @@ export function renderMermaidSequence(
 
             walk(node.child, prevCtx, depth + 1);
             flushLiterals(prevCtx);
-events.push({
-    type: "transition",
-    fromContext: prevCtx,
-    context: ctx,
-    message: `${loc.mermaid.handover} (Sig: ${prevSig.slice(0, 8)}...)`,
-});
+            events.push({
+                type: "transition",
+                fromContext: prevCtx,
+                context: ctx,
+                message: `${loc.mermaid.handover} (Sig: ${prevSig.slice(0, 8)}...)`,
+            });
 
-const timePrefix = timestamp ? `${timestamp}<br/>` : "";
-events.push({
-    type: "note",
-    context: ctx,
-    message: `${timePrefix}${loc.mermaid.event}: ${node.type}${
-        userMeta.length ? "<br/>" + userMeta.join("<br/>") : ""
-    }`,
-});
-return;
-}
+            const timePrefix = timestamp ? `${timestamp}<br/>` : "";
+            events.push({
+                type: "note",
+                context: ctx,
+                message: `${timePrefix}${loc.mermaid.event}: ${node.type}${
+                    userMeta.length ? "<br/>" + userMeta.join("<br/>") : ""
+                }`,
+            });
+            return;
+        }
 
-if (node.kind === "operation") {
-for (const op of node.operands) {
-    walk(op, ctx, depth);
-}
-flushLiterals(ctx);
-// Operações são 'actions' (Self-calls)
-events.push({
-    type: "action",
-    context: ctx,
-    message: `${timestamp ? timestamp + "<br/>" : ""}${loc.mermaid.operation}: ${node.type}`,
-    metadata: userMeta.join("<br/>"),
-});
-return;
-}
-
+        if (node.kind === "operation") {
+            for (const op of node.operands) {
+                walk(op, ctx, depth);
+            }
+            flushLiterals(ctx);
+            // Operações são 'actions' (Self-calls)
+            events.push({
+                type: "action",
+                context: ctx,
+                message: `${timestamp ? timestamp + "<br/>" : ""}${loc.mermaid.operation}: ${node.type}`,
+                metadata: userMeta.join("<br/>"),
+            });
+            return;
+        }
 
         if (node.kind === "group") {
             walk(node.child, ctx, depth);
@@ -189,6 +188,7 @@ return;
         }
     }
 
+    // deno-lint-ignore no-boolean-literal-for-arguments
     walk(ast, currentContext, 0, true);
     flushLiterals(currentContext);
 
@@ -221,6 +221,7 @@ return;
         }
 
         if (ev.type === "transition") {
+            // deno-lint-ignore no-non-null-assertion
             const fromAlias = getAlias(ev.fromContext!);
             if (!activeParticipants.has(fromAlias)) {
                 dsl += `    activate ${fromAlias}\n`;

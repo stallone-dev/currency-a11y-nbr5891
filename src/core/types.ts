@@ -13,7 +13,7 @@ import type { BIRTH_TICKET_MOCK } from "./symbols.ts";
 /**
  * Configuração de segurança e comportamento de uma instância CalcAUY.
  */
-export interface InstanceConfig {
+export type InstanceConfig = {
     /**
      * Se true (padrão), assume que os dados SÃO sensíveis e devem ser OCULTOS nos logs.
      */
@@ -39,7 +39,7 @@ export interface InstanceConfig {
      * @internal
      */
     [BIRTH_TICKET_MOCK]?: string;
-}
+};
 
 /**
  * Supported Locales for verbal and monetary formatting.
@@ -56,25 +56,6 @@ export type CalcAUYLocale =
     | "ja-JP";
 
 /**
- * Minimal interface for KaTeX library to ensure strict typing.
- */
-export interface IKatex {
-    /**
-     * Renders a TeX expression into an HTML string.
-     */
-    renderToString(latex: string, options?: KaTeXOptions): string;
-}
-
-/**
- * Simplified KaTeX options interface.
- */
-export interface KaTeXOptions {
-    displayMode?: boolean;
-    throwOnError?: boolean;
-    [key: string]: unknown;
-}
-
-/**
  * Supported Currencies based on Locales, allowing custom strings as well.
  */
 export type CalcAUYCurrency =
@@ -89,9 +70,9 @@ export type CalcAUYCurrency =
 /**
  * Global configuration options for outputs.
  */
-export interface OutputOptions {
+export type OutputOptions = {
     decimalPrecision?: number;
     locale?: CalcAUYLocale;
     currency?: CalcAUYCurrency;
     roundStrategy?: RoundingStrategy;
-}
+};

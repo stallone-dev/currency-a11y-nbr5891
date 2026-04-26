@@ -6,6 +6,9 @@ import { getSubLogger } from "@src/utils/logger.ts"; // Import for mocking
 import { securityPolicy } from "@src/utils/sanitizer.ts"; // Import for mocking
 import { CalcAUYOutput, ICalcAUYCustomOutput, ICalcAUYCustomOutputContext } from "@src/output.ts"; // Import CalcAUYOutput and its interfaces
 
+import { htmlProcessor } from "@processor/html";
+import { imageBufferProcessor } from "@processor/image-buffer";
+
 // Type for valid log levels
 type LogLevel = "trace" | "debug" | "info" | "warning" | "error" | "fatal";
 
@@ -14,52 +17,39 @@ const outputLogger = getSubLogger("output"); // Use output sublogger
 const originalIsEnabledFor = outputLogger.isEnabledFor;
 const originalsecurityPolicySensitive = securityPolicy.sensitive; // Store original state
 
-describe("CalcAUYOutput - HTML & Image Generation", () => {
-    const mockKatex = {
-        renderToString: (latex: string) => `<span class="katex">${latex}</span>`,
-    };
+describe("CalcAUYOutput - HTML & Image Generation (Extracted Processors)", () => {
+    // Note: mockKatex is no longer needed if we use the real htmlProcessor which imports katex,
+    // but for unit tests we might want to keep mocking if we don't want real dependencies.
+    // However, the instruction said to use real dependencies in processor.
+    // I'll use real processors in tests to validate the extraction.
 
-    // Restore mocks and logging policy after each test
-    beforeEach(() => {
-        outputLogger.isEnabledFor = originalIsEnabledFor;
-        securityPolicy.sensitive = originalsecurityPolicySensitive; // Reset logging policy
-    });
-
-    it("toHTML deve lançar erro se o katex for inválido", async () => {
+    it("toHTML (via CustomOutput) deve gerar HTML com CSS e rastro de auditoria", async () => {
         const res = await CalcAUY.from(10).add(5).commit({ roundStrategy: "NBR5891" });
-        assertThrows(() => res.toHTML({} as any), CalcAUYError, "O módulo 'katex' é obrigatório");
-    });
-
-    it("toHTML deve gerar HTML com CSS e rastro de auditoria", async () => {
-        const res = await CalcAUY.from(10).add(5).commit({ roundStrategy: "NBR5891" });
-        const html = res.toHTML(mockKatex, { decimalPrecision: 2 });
+        const html = res.toCustomOutput(htmlProcessor);
 
         assertStringIncludes(html, '<div class="calc-auy-result"');
         assertStringIncludes(html, 'aria-label="10 mais 5 é igual a 15 vírgula 00');
         assertStringIncludes(html, "<style>");
         assertStringIncludes(html, ".calc-auy-result { margin: 1em 0; overflow-x: auto; }");
-        // Check audit trail in LaTeX with full name
         assertStringIncludes(html, "\\text{round}_{\\text{NBR-5891}}(10 + 5, 2) = 15.00");
     });
 
-    it("toImageBuffer deve gerar um buffer contendo SVG com rastro e metadados", async () => {
+    it("toImageBuffer (via CustomOutput) deve gerar um buffer contendo SVG com rastro e metadados", async () => {
         const res = await CalcAUY.from(10).add(5).commit({ roundStrategy: "NBR5891" });
-        const buffer = res.toImageBuffer(mockKatex, { decimalPrecision: 2 });
+        const buffer = res.toCustomOutput(imageBufferProcessor);
         const svg = new TextDecoder().decode(buffer);
 
         assertStringIncludes(svg, "<svg");
         assertStringIncludes(svg, 'viewBox="0 0');
         assertStringIncludes(svg, "<foreignObject");
-        // Check audit trail in LaTeX with full name
         assertStringIncludes(svg, "\\text{round}_{\\text{NBR-5891}}(10 + 5, 2) = 15.00");
     });
 
     it("toImageBuffer deve ajustar altura para frações e raízes", async () => {
         const res = await CalcAUY.from(10).div(3).commit({ roundStrategy: "HALF_UP" });
-        const buffer = res.toImageBuffer(mockKatex);
+        const buffer = res.toCustomOutput(imageBufferProcessor);
         const svg = new TextDecoder().decode(buffer);
 
-        // Heurística de altura deve ser maior que 80 para frações
         const heightMatch = svg.match(/height="(\d+)"/);
         const height = heightMatch ? parseInt(heightMatch[1]) : 0;
         assertEquals(height >= 80, true);

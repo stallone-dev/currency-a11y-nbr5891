@@ -19,11 +19,11 @@ export type TokenType =
     | "RPAREN"
     | "EOF";
 
-export interface Token {
+export type Token = {
     type: TokenType;
     value: string;
     pos: number;
-}
+};
 
 export class Lexer {
     private readonly input: string;

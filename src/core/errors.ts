@@ -26,12 +26,12 @@ export type ErrorCategory =
     | "math-overflow";
 
 /** Contexto técnico da falha para auditoria. */
-export interface ErrorContext {
+export type ErrorContext = {
     operation?: string;
     rawInput?: unknown;
     partialAST?: unknown;
     [key: string]: unknown;
-}
+};
 
 /**
  * Erro customizado da CalcAUYLogic seguindo o padrão RFC 7807.

@@ -12,13 +12,11 @@ import type { CalcAUYLocale } from "../core/types.ts";
 /**
  * Define a estrutura de tradução e regras de verbalização (A11y) para a CalcAUYLogic.
  *
- * **Engenharia:** Esta interface permite a internacionalização completa do rastro de auditoria
+ * **Engenharia:** Este tipo permite a internacionalização completa do rastro de auditoria
  * falado. Ao fornecer uma implementação customizada, é obrigatório preencher todos os tokens
  * para garantir que a reconstrução da frase seja fluida e sem termos indefinidos.
- *
- * @interface
  */
-export interface CalcAUYLocaleA11y {
+export type CalcAUYLocaleA11y = {
     /** Código do locale (ex: "pt-BR", "en-US"). */
     locale: string;
     /** Símbolo da moeda padrão para este locale (ISO 4217). */
@@ -92,7 +90,7 @@ export interface CalcAUYLocaleA11y {
         /** Template para metadados do tipo Lista (deve conter {n}). */
         listTemplate: string;
     };
-}
+};
 
 /**
  * Map of supported locales.

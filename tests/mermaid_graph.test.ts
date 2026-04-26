@@ -39,7 +39,7 @@ describe("Output toMermaidGraph - Sequence Diagram (Ledger-view)", () => {
 
         assertStringIncludes(graph, "participant Ctx_logistica as Contexto: logistica");
         assertStringIncludes(graph, "participant Ctx_financeiro as Contexto: financeiro");
-        
+
         // Transição de Logística para Financeiro
         assertStringIncludes(graph, "Ctx_logistica->>+Ctx_financeiro: Handover");
         assertStringIncludes(graph, "deactivate Ctx_logistica");
@@ -60,7 +60,7 @@ describe("Output toMermaidGraph - Sequence Diagram (Ledger-view)", () => {
         assertStringIncludes(graph, "Ingestão de Operandos:");
         assertStringIncludes(graph, "• 10");
         assertStringIncludes(graph, "• 20");
-        
+
         // Verifica as operações como self-calls
         assertStringIncludes(graph, "Ctx_engine->>Ctx_engine: Operação: add");
         assertStringIncludes(graph, "Ctx_engine->>Ctx_engine: Operação: sub");
@@ -120,11 +120,15 @@ describe("Output toMermaidGraph - Sequence Diagram (Ledger-view)", () => {
 
             // Padrão: 26-04-25 10:30 (iso)<br/>Fechamento e Assinatura Final
             assertStringIncludes(graph, "(iso)<br/>");
-            
+
             const lines = graph.split("\n");
-            const finalLine = lines.find(l => l.includes("Fechamento e Assinatura Final"));
+            const finalLine = lines.find((l) => l.includes("Fechamento e Assinatura Final"));
             // Regex procura por yy-MM-dd HH:mm (iso)
-            assertEquals(/\d{2}-\d{2}-\d{2} \d{2}:\d{2} \(iso\)/.test(finalLine!), true, "Deve conter timestamp no padrão ISO simplificado");
+            assertEquals(
+                /\d{2}-\d{2}-\d{2} \d{2}:\d{2} \(iso\)/.test(finalLine!),
+                true,
+                "Deve conter timestamp no padrão ISO simplificado",
+            );
         });
     });
 });

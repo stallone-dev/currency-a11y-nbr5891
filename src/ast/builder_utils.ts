@@ -40,9 +40,9 @@ const MAX_OPERANDS = 100;
 /**
  * Estado compartilhado para validação recursiva da AST.
  */
-interface ValidationState {
+type ValidationState = {
     nodeCount: number;
-}
+};
 
 /**
  * Valida recursivamente a estrutura de um nó da AST.

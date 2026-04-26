@@ -21,10 +21,10 @@ export type OperationType =
     | "crossContextAdd";
 
 /** Representação serializável de um RationalNumber para hibernação. */
-export interface RationalValue {
+export type RationalValue = {
     n: string;
     d: string;
-}
+};
 
 /**
  * Tipos permitidos para metadados de auditoria.
@@ -37,41 +37,41 @@ export type MetadataValue =
     | MetadataValue[]
     | { [key: string]: MetadataValue };
 
-/** Interface base para todos os nós, garantindo rastreabilidade. */
-export interface BaseNode {
+/** Tipo base para todos os nós, garantindo rastreabilidade. */
+export type BaseNode = {
     kind: NodeKind;
     /** Nome amigável do nó para relatórios de auditoria. */
     label?: string;
     /** Dados customizados (ex: ID de uma parcela, nome de um imposto). */
     metadata?: Record<string, MetadataValue>;
-}
+};
 
 /** Representa um valor fixo (ex: "10", "3.14"). Mantém o input original para precisão visual. */
-export interface LiteralNode extends BaseNode {
+export type LiteralNode = BaseNode & {
     kind: "literal";
     value: RationalValue;
     originalInput: string;
-}
+};
 
 /** Representa uma operação matemática e seus operandos. */
-export interface OperationNode extends BaseNode {
+export type OperationNode = BaseNode & {
     kind: "operation";
     type: OperationType;
     operands: CalculationNode[];
-}
+};
 
 /** Representa um agrupamento lógico, essencial para a verbalização (A11y). */
-export interface GroupNode extends BaseNode {
+export type GroupNode = BaseNode & {
     kind: "group";
     child: CalculationNode;
     isRedundant?: boolean;
-}
+};
 
 /**
  * Representa um nó de controle para rastreabilidade de jurisdição.
  * Engenharia: Usado em reidratação (hydrate) ou união de contextos externos.
  */
-export interface ControlNode extends BaseNode {
+export type ControlNode = BaseNode & {
     kind: "control";
     type: "reanimation_event";
     metadata: {
@@ -79,23 +79,21 @@ export interface ControlNode extends BaseNode {
         previousSignature: string;
     } & Record<string, MetadataValue>;
     child: CalculationNode;
-}
+};
 
 /** Tipo unificado para navegação na árvore. */
 export type CalculationNode = LiteralNode | OperationNode | GroupNode | ControlNode;
 
-/** Representa a estrutura de um cálculo serializado (hibernado). */
-export interface SerializedCalculation {
-    /** A árvore de sintaxe (AST) no estado atual ou legado. */
-    data?: CalculationNode;
+/** Representa a estrutura de um cálculo serializado (hibernado) e assinado. */
+export type SerializedCalculation = {
+    /** A árvore de sintaxe (AST) completa. */
+    ast: CalculationNode;
     /** Assinatura digital BLAKE3 para garantia de integridade. */
     signature: string;
-    /** Identificador do contexto original. */
-    contextLabel?: string;
-    /** Campo legado para AST. */
-    ast?: CalculationNode;
+    /** Identificador da jurisdição (contexto) original. */
+    contextLabel: string;
     /** Resultado consolidado (apenas em traces de auditoria). */
     finalResult?: RationalValue;
     /** Estratégia de arredondamento aplicada (apenas em traces). */
     roundStrategy?: string;
-}
+};

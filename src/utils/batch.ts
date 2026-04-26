@@ -19,7 +19,7 @@ const logger = getSubLogger("batch");
  *
  * @template ResultType - O tipo do valor resultante de cada tarefa ou do acúmulo final.
  */
-export interface BatchOptions<ResultType = unknown> {
+export type BatchOptions<ResultType = unknown> = {
     /**
      * Tamanho de cada lote antes de ceder a execução (yielding).
      *
@@ -59,7 +59,7 @@ export interface BatchOptions<ResultType = unknown> {
      * antecipadamente, permitindo que o `onProgress` reporte o percentual correto.
      */
     totalItems?: number;
-}
+};
 
 /**
  * ProcessBatchAUY - Engine de Processamento em Massa com Anti-Bloqueio.

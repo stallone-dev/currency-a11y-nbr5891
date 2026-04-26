@@ -54,7 +54,7 @@ A **CalcAUY** trata o cálculo não como um resultado volátil, mas como um **do
 
 ### Classe `CalcAUYOutput` (Result)
 - `toMonetary()`, `toStringNumber()`, `toLaTeX()`, `toHTML()`, `toUnicode()`, `toImageBuffer()`, `toMermaidGraph()`
-- **`toASTObject()`**: Retorna o objeto de rastro completo (**Record<string, unknown>**).
+- **`toLiveTrace()`**: Retorna o rastro completo como objeto vivo e tipado (**SerializedCalculation**).
 - **`toSlice()` / `toSliceByRatio()`**: Rateio exato de centavos (Algoritmo de Maior Resto).
 - `toVerbalA11y()`: Tradução humana da fórmula.
 - `toAuditTrace()`: Snapshot JSON completo com metadados e assinatura de integridade.

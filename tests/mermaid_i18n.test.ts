@@ -25,7 +25,7 @@ describe("toMermaidGraph - Internacionalização (i18n)", () => {
             // Cenário: 100 (Logistics) -> Finance + 50
             const start = Logistic.from(100);
             const rastro = await start.hibernate();
-            
+
             // É preciso informar o salt original ("s1") para hidratar com sucesso
             const rehydrated = await Finance.hydrate(rastro, { salt: "s1" });
             const final = await rehydrated.add(50)

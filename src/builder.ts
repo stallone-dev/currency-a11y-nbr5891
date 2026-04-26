@@ -238,27 +238,33 @@ export class CalcAUYLogic<Context extends string, Config extends InstanceConfig 
         config: { salt?: string; encoder?: SignatureEncoder } = {},
     ): Promise<CalcAUYLogic<Context, Config>> {
         const payload: SerializedCalculation = typeof ast === "string" ? JSON.parse(ast) : ast as SerializedCalculation;
-        const dataToVerify = payload.data || {
-            ast: payload.ast,
-            finalResult: payload.finalResult,
-            roundStrategy: payload.roundStrategy,
-        };
-
         const signature = payload.signature;
+
         if (!signature) {
             throw new CalcAUYError("integrity-critical-violation", "Assinatura ausente na hidratação.");
         }
 
-        // Usa o salt/encoder fornecido ou cai para o padrão da instância
         const verificationSalt = config.salt ?? this.#config.salt;
         const verificationEncoder = config.encoder ?? this.#config.encoder;
+
+        // Decisão de Dados para Verificação:
+        // Se o payload contém resultado e estratégia, ele é um Audit Trace (Assinado como envelope)
+        // Se não, ele é um rastro de hibernação (Assinado como AST pura)
+        const isAuditTrace = payload.finalResult !== undefined && payload.roundStrategy !== undefined;
+        const dataToVerify = isAuditTrace
+            ? {
+                ast: payload.ast,
+                finalResult: payload.finalResult,
+                roundStrategy: payload.roundStrategy,
+            }
+            : payload.ast;
 
         const expectedHash = await generateSignature(dataToVerify, verificationSalt, verificationEncoder);
         if (signature !== expectedHash) {
             throw new CalcAUYError("integrity-critical-violation", "Violação de integridade na hidratação.");
         }
 
-        const node: CalculationNode = payload.data || payload.ast || (payload as unknown as CalculationNode);
+        const node: CalculationNode = payload.ast;
         validateASTNode(node);
 
         // Extrai o birthTime original se disponível nos metadados da raiz
@@ -298,7 +304,7 @@ export class CalcAUYLogic<Context extends string, Config extends InstanceConfig 
 
         const signature = await generateSignature(ast, this.#config.salt, this.#config.encoder);
         const payload: SerializedCalculation = {
-            data: ast,
+            ast,
             signature,
             contextLabel: this.#config.contextLabel,
         };
@@ -326,7 +332,7 @@ export class CalcAUYLogic<Context extends string, Config extends InstanceConfig 
             const hibernated = await external.hibernate();
             const payload: SerializedCalculation = JSON.parse(hibernated);
             // deno-lint-ignore no-non-null-assertion
-            externalAST = (payload.data || payload.ast)!;
+            externalAST = payload.ast!;
             externalSignature = payload.signature;
             const extConfig = external.getContextConfig();
             externalContextLabel = extConfig.contextLabel;
@@ -344,7 +350,7 @@ export class CalcAUYLogic<Context extends string, Config extends InstanceConfig 
                 );
             }
             // deno-lint-ignore no-non-null-assertion
-            externalAST = (payload.data || payload.ast)!;
+            externalAST = payload.ast!;
             externalSignature = payload.signature;
             externalContextLabel = payload.contextLabel || "";
             externalStrategy = payload.roundStrategy || "";

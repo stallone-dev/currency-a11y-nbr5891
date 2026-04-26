@@ -24,7 +24,7 @@ Abaixo estão os métodos disponíveis na classe `CalcAUYOutput` (gerada após o
 | :--- | :--- | :--- |
 | [`toLaTeX`](./output-methods/toLaTeX.md) | `res.toLaTeX()` | Fórmula em sintaxe matemática LaTeX. |
 | [`toUnicode`](./output-methods/toUnicode.md) | `res.toUnicode()` | Fórmula legível em texto puro (Unicode). |
-| [`toASTObject`](./output-methods/toASTObject.md) | `res.toASTObject()` | Objeto de auditoria puro (clonado). |
+| [`toLiveTrace`](./output-methods/toLiveTrace.md) | `res.toLiveTrace()` | Objeto de auditoria vivo e tipado (clonado). |
 | [`toAuditTrace`](./output-methods/toAuditTrace.md) | `res.toAuditTrace()` | Snapshot JSON completo da execução. |
 
 ### ♿ Acessibilidade e Web
