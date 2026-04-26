@@ -26,3 +26,33 @@ export const ROUNDING_IDS = {
 } as const;
 
 export type RoundingStrategy = keyof typeof ROUNDING_IDS;
+
+/**
+ * Chave privada para injeção de timestamp de nascimento em ambientes de teste.
+ * Permite garantir assinaturas determinísticas em suítes de teste.
+ */
+export const BIRTH_TICKET_MOCK: unique symbol = Symbol("BIRTH_TICKET_MOCK");
+
+// === Rational Number Constants ===
+//Limites internos para prevenção de vazamento de memória/stack exhaustion.
+export const MAX_BI_BITS = 1_000_000n;
+export const MAX_BI_LIMIT = 1n << MAX_BI_BITS;
+export const HOT_CACHE_LIMIT = 512;
+
+// === Rounding Constants ===
+export const CACHE_ARRAY_SIZE = 128;
+
+// === AST Constants ===
+// Limite de profundidade da árvore para evitar estouro da pilha de chamadas (Stack Overflow).
+export const MAX_RECURSION_DEPTH = 500;
+
+//Limites de segurança para a estrutura da AST durante a hidratação e construção.
+export const MAX_HYDRATE_DEPTH = 500;
+export const MAX_HYDRATE_NODES = 1000;
+
+/**
+ * Largura máxima de um nó de operação antes de criar uma nova camada (Hierarchical Flattening).
+ * Mantém a construção em O(N) e a profundidade em O(log N), evitando o custo O(N²) de cópia
+ * de arrays em acúmulos massivos.
+ */
+export const MAX_OPERANDS = 100;

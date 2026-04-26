@@ -4,7 +4,7 @@ import { CalcAUY } from "@calcauy";
 import { CalcAUYError } from "@src/core/errors.ts";
 import { getSubLogger } from "@src/utils/logger.ts"; // Import for mocking
 import { securityPolicy } from "@src/utils/sanitizer.ts"; // Import for mocking
-import { CalcAUYOutput, ICalcAUYCustomOutput, ICalcAUYCustomOutputContext } from "@src/output.ts"; // Import CalcAUYOutput and its interfaces
+import { CalcAUYCustomOutput, CalcAUYCustomOutputContext, CalcAUYOutput } from "@src/output.ts"; // Import CalcAUYOutput and its interfaces
 
 import { htmlProcessor } from "@processor/html";
 import { imageBufferProcessor } from "@processor/image-buffer";
@@ -113,9 +113,9 @@ describe("CalcAUYOutput - Output Methods and Customization", () => {
             decimal: string;
         }
 
-        const customProcessor: ICalcAUYCustomOutput<CustomOutput> = function (
+        const customProcessor: CalcAUYCustomOutput<CustomOutput> = function (
             this: CalcAUYOutput,
-            context: ICalcAUYCustomOutputContext,
+            context: CalcAUYCustomOutputContext,
         ): CustomOutput {
             return {
                 numerator: context.result.n.toString(),

@@ -8,12 +8,7 @@
 
 import { CalcAUYError } from "./errors.ts";
 import { PRECISION_BIGINT } from "./constants.ts";
-
-/**
- * Internal safety limits to avoid memory/stack exhaustion.
- */
-const MAX_BI_BITS = 1_000_000n;
-const MAX_BI_LIMIT = 1n << MAX_BI_BITS;
+import { HOT_CACHE_LIMIT, MAX_BI_BITS, MAX_BI_LIMIT } from "./constants.ts";
 
 /**
  * FinalizationRegistry para limpeza automática de chaves no cache global.
@@ -32,7 +27,6 @@ const cacheRegistry = new FinalizationRegistry<string | bigint>((key) => {
  * números mais comuns, acelerando loops de alta frequência.
  */
 const hotLiteralCache = new Map<string | bigint, RationalNumber>();
-const HOT_CACHE_LIMIT = 512;
 
 /**
  * Cache Global Inteligente usando Referências Fracas (WeakRef).

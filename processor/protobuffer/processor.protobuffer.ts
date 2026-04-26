@@ -1,7 +1,7 @@
-import { 
-    type ICalcAUYCustomOutput, 
+import {
+    type CalcAUYCustomOutput,
+    InternalType,
     type OperationType,
-    InternalType 
 } from "@st-all-one/calc-auy";
 import protobuf from "protobufjs";
 
@@ -120,13 +120,15 @@ interface IProtoPayload {
 /**
  * Processador oficial para exportação em formato Protobuf v3.
  */
-export const protobufProcessor: ICalcAUYCustomOutput<Uint8Array> = function (
+export const protobufProcessor: CalcAUYCustomOutput<Uint8Array> = function (
     ctx,
 ) {
     const obj = ctx.methods.toLiveTrace();
 
     if (!obj.finalResult || !obj.roundStrategy) {
-        throw new Error("Incomplete Audit Trace: finalResult and roundStrategy are required for serialization.");
+        throw new Error(
+            "Incomplete Audit Trace: finalResult and roundStrategy are required for serialization.",
+        );
     }
 
     const payload: IProtoPayload = {
@@ -183,7 +185,9 @@ function transformNode(node: CalculationNode): IProtoNode {
     } else if (node.kind === "operation") {
         res.operation = {
             type: OP_MAP[node.type] || 0,
-            operands: node.operands.map((o: CalculationNode) => transformNode(o)),
+            operands: node.operands.map((o: CalculationNode) =>
+                transformNode(o)
+            ),
         };
     } else if (node.kind === "group") {
         res.group = {
@@ -196,7 +200,8 @@ function transformNode(node: CalculationNode): IProtoNode {
             child: transformNode(node.child),
             previousContextLabel: node.metadata.previousContextLabel,
             previousSignature: node.metadata.previousSignature,
-            previousRoundStrategy: node.metadata.previousRoundStrategy as string || "",
+            previousRoundStrategy:
+                node.metadata.previousRoundStrategy as string || "",
         };
     }
     return res;
@@ -222,7 +227,9 @@ function reverseTransformNode(node: IProtoNode): CalculationNode {
             ...base,
             kind: "operation",
             type: REV_OP_MAP[node.operation.type] || "add",
-            operands: node.operation.operands.map((o) => reverseTransformNode(o)),
+            operands: node.operation.operands.map((o) =>
+                reverseTransformNode(o)
+            ),
         } as OperationNode;
     }
 
@@ -250,10 +257,14 @@ function reverseTransformNode(node: IProtoNode): CalculationNode {
         } as ControlNode;
     }
 
-    throw new Error(`Invalid node structure during Protobuf hydration: ${node.kind}`);
+    throw new Error(
+        `Invalid node structure during Protobuf hydration: ${node.kind}`,
+    );
 }
 
-function transformMetadata(meta: Record<string, MetadataValue>): Record<string, unknown> {
+function transformMetadata(
+    meta: Record<string, MetadataValue>,
+): Record<string, unknown> {
     const fields: Record<string, unknown> = {};
     for (const [key, val] of Object.entries(meta)) {
         fields[key] = wrapValue(val);

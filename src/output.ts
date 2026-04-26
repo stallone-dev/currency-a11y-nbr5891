@@ -10,7 +10,8 @@ import type { CalculationNode, RationalValue, SerializedCalculation } from "./as
 import type { RationalNumber } from "./core/rational.ts";
 import { DEFAULT_DECIMAL_PRECISION, ROUNDING_IDS, type RoundingStrategy } from "./core/constants.ts";
 import { applyRounding } from "./core/rounding.ts";
-import { type CalcAUYLocaleA11y, getLocale } from "./output_internal/i18n.ts";
+import { getLocale } from "./output_internal/i18n.ts";
+import type { CalcAUYCustomOutput, CalcAUYCustomOutputContext, CalcAUYLocaleA11y } from "./output_internal/types.ts";
 import { toSubscript } from "./output_internal/unicode.ts";
 import { renderAST } from "./output_internal/renderer.ts";
 import { performSlice, performSliceByRatio } from "./output_internal/slicer.ts";
@@ -20,60 +21,6 @@ import { getSubLogger, startSpan } from "./utils/logger.ts";
 import type { InstanceConfig } from "./core/types.ts";
 
 const logger = getSubLogger("output");
-
-/**
- * Assinatura para processadores de saída customizados.
- *
- * Permite estender a CalcAUYLogic com novos formatos (XML, CSV, Protobuf, etc)
- * sem modificar o core da biblioteca.
- *
- * @typeParam Toutput - O tipo de retorno esperado pelo processador.
- */
-export type ICalcAUYCustomOutput<Toutput> = (
-    this: CalcAUYOutput,
-    context: ICalcAUYCustomOutputContext,
-) => Toutput;
-
-/**
- * Contexto de dados fornecido aos processadores customizados.
- *
- * **Engenharia:** Fornece acesso direto à AST e ao RationalNumber (n/d),
- * além de referências pré-bound para todos os métodos de exportação padrão.
- */
-export type ICalcAUYCustomOutputContext = {
-    /** O valor final consolidado em forma racional absoluta. */
-    result: RationalNumber;
-    /** A árvore de sintaxe completa para reconstrução customizada. */
-    ast: CalculationNode;
-    /** A estratégia de arredondamento aplicada no commit. */
-    roundStrategy: RoundingStrategy;
-    /** Rastros auditáveis pré-gerados. */
-    audit: {
-        latex: string;
-        unicode: string;
-        verbal: string;
-    };
-    /** Opções de saída ativas. */
-    options: Readonly<OutputOptions>;
-    /** Referências prontas para uso dos métodos de exportação da classe. */
-    methods: Pick<
-        CalcAUYOutput,
-        | "toStringNumber"
-        | "toFloatNumber"
-        | "toScaledBigInt"
-        | "toRawInternalNumber"
-        | "toLiveTrace"
-        | "toMonetary"
-        | "toLaTeX"
-        | "toUnicode"
-        | "toMermaidGraph"
-        | "toVerbalA11y"
-        | "toSlice"
-        | "toSliceByRatio"
-        | "toAuditTrace"
-        | "toJSON"
-    >;
-};
 
 /**
  * Chaves de saída suportadas pelo método toJSON.
@@ -110,7 +57,7 @@ export class CalcAUYOutput {
     readonly #cache: Map<number, RationalNumber> = new Map<number, RationalNumber>();
     readonly #outputCache: Map<string, string | Uint8Array> = new Map();
     #cachedLiveTrace: SerializedCalculation | null = null;
-    #cachedMethods: ICalcAUYCustomOutputContext["methods"] | null = null;
+    #cachedMethods: CalcAUYCustomOutputContext["methods"] | null = null;
     #cachedResultJSON: RationalValue | null = null;
 
     static readonly #formatterCache = new Map<string, Intl.NumberFormat>();
@@ -400,7 +347,7 @@ export class CalcAUYOutput {
         return JSON.stringify(res, (_key, value) => typeof value === "bigint" ? value.toString() : value);
     }
 
-    public toCustomOutput<T>(processor: ICalcAUYCustomOutput<T>): T {
+    public toCustomOutput<T>(processor: CalcAUYCustomOutput<T>): T {
         using _span = startSpan("toCustomOutput", logger, {});
 
         if (!this.#cachedMethods) {
@@ -422,7 +369,7 @@ export class CalcAUYOutput {
             });
         }
 
-        const context: ICalcAUYCustomOutputContext = {
+        const context: CalcAUYCustomOutputContext = {
             result: this.#result,
             ast: this.#ast,
             roundStrategy: this.#roundStrategy,

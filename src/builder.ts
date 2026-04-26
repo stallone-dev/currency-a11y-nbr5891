@@ -29,7 +29,7 @@ import { sanitizeAST, type SignatureEncoder } from "./utils/sanitizer.ts";
 import { generateSignature } from "./utils/security.ts";
 import { CalcAUYError } from "./core/errors.ts";
 import type { InstanceConfig } from "./core/types.ts";
-import { BIRTH_TICKET_MOCK } from "./utils/symbols.ts";
+import { BIRTH_TICKET_MOCK } from "./core/constants.ts";
 
 const logger = getSubLogger("engine");
 

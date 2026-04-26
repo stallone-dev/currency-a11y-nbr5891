@@ -124,7 +124,7 @@ const binaryCache = output.toCustomOutput(ctx => {
 
 | Componente | Tipo | Descrição |
 | :--- | :--- | :--- |
-| `processor` | `ICalcAUYCustomOutput` | Função que recebe o `ICalcAUYCustomOutputContext`. |
+| `processor` | `CalcAUYCustomOutput` | Função que recebe o `CalcAUYCustomOutputContext`. |
 
 ## 💡 Recomendações
 - **Use o rastro auditável.** O `ctx.audit` já contém LaTeX e Unicode prontos, economizando processamento no seu custom output.

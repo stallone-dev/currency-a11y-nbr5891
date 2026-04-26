@@ -8,7 +8,7 @@
 
 import type { RoundingStrategy } from "./constants.ts";
 import type { SignatureEncoder } from "../utils/sanitizer.ts";
-import type { BIRTH_TICKET_MOCK } from "../utils/symbols.ts";
+import type { BIRTH_TICKET_MOCK } from "../core/constants.ts";
 
 /**
  * Configuração de segurança e comportamento de uma instância CalcAUY.

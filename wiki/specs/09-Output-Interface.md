@@ -79,7 +79,7 @@ Definir o contrato final de consumo dos resultados do cálculo. A classe `CalcAU
 - **Descrição:** Consolida múltiplos outputs em uma única string JSON.
 - **Tipagem Estática:** Exige a instância de `katex` via generics se `toHTML` ou `toImageBuffer` forem solicitados.
 
-### `toCustomOutput<Toutput>(processor: ICalcAUYCustomOutput<Toutput>): Toutput`
+### `toCustomOutput<Toutput>(processor: CalcAUYCustomOutput<Toutput>): Toutput`
 - **Descrição:** Permite injetar um formatador externo com acesso total ao rastro e ao valor racional.
 
 ## Interface de Opções

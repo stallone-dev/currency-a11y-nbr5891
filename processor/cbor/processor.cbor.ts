@@ -1,7 +1,7 @@
-import { 
-    type ICalcAUYCustomOutput, 
+import {
+    type CalcAUYCustomOutput,
+    InternalType,
     type OperationType,
-    InternalType 
 } from "@st-all-one/calc-auy";
 import { type CborType, decodeCbor, encodeCbor } from "@std/cbor";
 
@@ -15,11 +15,13 @@ type ControlNode = InternalType.ControlNode;
 /**
  * Processador oficial para exportação em formato binário CBOR (RFC 8949).
  */
-export const cborProcessor: ICalcAUYCustomOutput<Uint8Array> = function (ctx) {
+export const cborProcessor: CalcAUYCustomOutput<Uint8Array> = function (ctx) {
     const obj = ctx.methods.toLiveTrace();
 
     if (!obj.finalResult || !obj.roundStrategy) {
-        throw new Error("Incomplete Audit Trace: finalResult and roundStrategy are required for serialization.");
+        throw new Error(
+            "Incomplete Audit Trace: finalResult and roundStrategy are required for serialization.",
+        );
     }
 
     // Engenharia: Construção rigorosa do payload.
@@ -29,7 +31,10 @@ export const cborProcessor: ICalcAUYCustomOutput<Uint8Array> = function (ctx) {
         ast: transformNode(obj.ast),
         signature: obj.signature,
         contextLabel: obj.contextLabel,
-        finalResult: { n: obj.finalResult.n, d: obj.finalResult.d } as unknown as CborType,
+        finalResult: {
+            n: obj.finalResult.n,
+            d: obj.finalResult.d,
+        } as unknown as CborType,
         roundStrategy: obj.roundStrategy,
     };
 
@@ -78,7 +83,7 @@ function transformNode(node: CalculationNode): CborType {
         kind: (KIND_MAP[node.kind] || 0) as CborType,
     };
 
-    if (node.label) { res.label = node.label; }
+    if (node.label) res.label = node.label;
     if (node.metadata && Object.keys(node.metadata).length > 0) {
         res.metadata = node.metadata as unknown as CborType;
     }
@@ -88,16 +93,20 @@ function transformNode(node: CalculationNode): CborType {
         res.originalInput = node.originalInput;
     } else if (node.kind === "operation") {
         res.type = (OP_MAP[node.type] || 0) as CborType;
-        res.operands = node.operands.map((o: CalculationNode) => transformNode(o)) as unknown as CborType;
+        res.operands = node.operands.map((o: CalculationNode) =>
+            transformNode(o)
+        ) as unknown as CborType;
     } else if (node.kind === "group") {
         res.child = transformNode(node.child);
-        if (node.isRedundant !== undefined) { res.isRedundant = node.isRedundant; }
+        if (node.isRedundant !== undefined) res.isRedundant = node.isRedundant;
     } else if (node.kind === "control") {
         res.type = node.type;
         res.child = transformNode(node.child);
-        res.previousContextLabel = node.metadata.previousContextLabel as CborType;
+        res.previousContextLabel = node.metadata
+            .previousContextLabel as CborType;
         res.previousSignature = node.metadata.previousSignature as CborType;
-        res.previousRoundStrategy = (node.metadata.previousRoundStrategy as string || "") as CborType;
+        res.previousRoundStrategy =
+            (node.metadata.previousRoundStrategy as string || "") as CborType;
     }
     return res as CborType;
 }
@@ -188,5 +197,7 @@ function reverseTransformNode(node: ICborNode): CalculationNode {
         } as ControlNode;
     }
 
-    throw new Error(`Invalid node structure during CBOR hydration: ${node.kind}`);
+    throw new Error(
+        `Invalid node structure during CBOR hydration: ${node.kind}`,
+    );
 }

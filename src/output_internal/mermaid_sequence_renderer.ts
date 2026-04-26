@@ -8,9 +8,9 @@
 
 import type { CalculationNode, MetadataValue } from "../ast/types.ts";
 import type { InstanceConfig } from "../core/types.ts";
-import type { CalcAUYLocaleA11y } from "./i18n.ts";
+import type { CalcAUYLocaleA11y } from "./types.ts";
 
-type SequenceEvent = {
+type MermaidSequenceEvent = {
     type: "note" | "transition" | "action";
     context: string;
     message: string;
@@ -28,7 +28,7 @@ export function renderMermaidSequence(
     finalSignature: string,
     loc: CalcAUYLocaleA11y,
 ): string {
-    const events: SequenceEvent[] = [];
+    const events: MermaidSequenceEvent[] = [];
     const participantDepths = new Map<string, number>();
 
     // O contexto atual (raiz) inicia com profundidade 0

@@ -10,18 +10,18 @@ flowchart LR
 ## Objetivo
 Prover um mecanismo de "Injeção de Lógica de Saída" que permita à CalcAUY suportar qualquer formato de exportação (Protobuf, XML, Excel, JSON-LD, etc.) sem sobrecarregar o core da biblioteca.
 
-## 1. A Interface Funcional (`ICalcAUYCustomOutput`)
+## 1. A Interface Funcional (`CalcAUYCustomOutput`)
 
 O coração da extensibilidade é um tipo funcional genérico que permite ao desenvolvedor definir o contrato de retorno.
 
 ```typescript
-export type ICalcAUYCustomOutput<Toutput> = (
-  this: CalcAUYOutput, 
-  context: ICalcAUYCustomOutputContext
+export type CalcAUYCustomOutput<Toutput> = (
+  this: CalcAUYOutput,
+  context: CalcAUYCustomOutputContext
 ) => Toutput;
 ```
 
-## 2. O Contexto de Dados (`ICalcAUYCustomOutputContext`)
+## 2. O Contexto de Dados (`CalcAUYCustomOutputContext`)
 
 Diferente da versão anterior que passava apenas um BigInt escalado, o novo contexto fornece acesso à precisão absoluta do `RationalNumber` e à estrutura completa da AST.
 
@@ -45,10 +45,10 @@ Diferente da versão anterior que passava apenas um BigInt escalado, o novo cont
 ## 4. Exemplo de Implementação: Exportador de Nota Fiscal Eletrônica (XML)
 
 ```typescript
-const xmlExporter: ICalcAUYCustomOutput<string> = (ctx) => {
+const xmlExporter: CalcAUYCustomOutput<string> = (ctx) => {
   const cents = ctx.methods.toScaledBigInt({ decimalPrecision: 2 });
   const valFormatado = ctx.methods.toString({ decimalPrecision: 2 });
-  
+
   return `
     <imposto roundStrategy="${ctx.roundStrategy}">
       <valor_bruto>${ctx.result.n}/${ctx.result.d}</valor_bruto>

@@ -1,7 +1,7 @@
 import type {
+    CalcAUYCustomOutput,
+    CalcAUYCustomOutputContext,
     CalculationNode,
-    ICalcAUYCustomOutput,
-    ICalcAUYCustomOutputContext,
 } from "@st-all-one/calc-auy";
 
 /**
@@ -19,9 +19,9 @@ export interface ICalcAUYPersistenceRecord {
 /**
  * Processador oficial para mapeamento de persistência denormalizada.
  */
-export const persistenceProcessor: ICalcAUYCustomOutput<
+export const persistenceProcessor: CalcAUYCustomOutput<
     ICalcAUYPersistenceRecord
-> = function (ctx: ICalcAUYCustomOutputContext): ICalcAUYPersistenceRecord {
+> = function (ctx: CalcAUYCustomOutputContext): ICalcAUYPersistenceRecord {
     const trace = ctx.methods.toLiveTrace();
 
     if (!trace.finalResult) {

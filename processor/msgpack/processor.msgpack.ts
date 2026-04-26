@@ -1,7 +1,7 @@
-import { 
-    type ICalcAUYCustomOutput, 
+import {
+    type CalcAUYCustomOutput,
+    InternalType,
     type OperationType,
-    InternalType 
 } from "@st-all-one/calc-auy";
 import { decode, encode, type ValueType } from "@std/msgpack";
 
@@ -15,11 +15,15 @@ type ControlNode = InternalType.ControlNode;
 /**
  * Processador oficial para exportação em formato MessagePack.
  */
-export const msgpackProcessor: ICalcAUYCustomOutput<Uint8Array> = function (ctx) {
+export const msgpackProcessor: CalcAUYCustomOutput<Uint8Array> = function (
+    ctx,
+) {
     const obj = ctx.methods.toLiveTrace();
 
     if (!obj.finalResult || !obj.roundStrategy) {
-        throw new Error("Incomplete Audit Trace: finalResult and roundStrategy are required for serialization.");
+        throw new Error(
+            "Incomplete Audit Trace: finalResult and roundStrategy are required for serialization.",
+        );
     }
 
     // Engenharia: Construção rigorosa do payload.
@@ -29,7 +33,10 @@ export const msgpackProcessor: ICalcAUYCustomOutput<Uint8Array> = function (ctx)
         ast: transformNode(obj.ast),
         signature: obj.signature,
         contextLabel: obj.contextLabel,
-        finalResult: { n: obj.finalResult.n, d: obj.finalResult.d } as unknown as ValueType,
+        finalResult: {
+            n: obj.finalResult.n,
+            d: obj.finalResult.d,
+        } as unknown as ValueType,
         roundStrategy: obj.roundStrategy,
     };
 
@@ -78,27 +85,34 @@ function transformNode(node: CalculationNode): ValueType {
         kind: (KIND_MAP[node.kind] || 0) as ValueType,
     };
 
-    if (node.label) { res.label = node.label; }
+    if (node.label) res.label = node.label;
     if (node.metadata && Object.keys(node.metadata).length > 0) {
         res.metadata = node.metadata as unknown as ValueType;
     }
 
     if (node.kind === "literal") {
-        res.value = { n: node.value.n, d: node.value.d } as unknown as ValueType;
+        res.value = {
+            n: node.value.n,
+            d: node.value.d,
+        } as unknown as ValueType;
         res.originalInput = node.originalInput;
     } else if (node.kind === "operation") {
         res.type = (OP_MAP[node.type] || 0) as ValueType;
-        res.operands = node.operands.map((o: CalculationNode) => transformNode(o)) as unknown as ValueType;
+        res.operands = node.operands.map((o: CalculationNode) =>
+            transformNode(o)
+        ) as unknown as ValueType;
     } else if (node.kind === "group") {
         res.child = transformNode(node.child);
-        if (node.isRedundant !== undefined) { res.isRedundant = node.isRedundant; }
+        if (node.isRedundant !== undefined) res.isRedundant = node.isRedundant;
     } else if (node.kind === "control") {
         res.type = node.type;
         res.child = transformNode(node.child);
         // Os metadados de controle são obrigatórios no schema
-        res.previousContextLabel = node.metadata.previousContextLabel as ValueType;
+        res.previousContextLabel = node.metadata
+            .previousContextLabel as ValueType;
         res.previousSignature = node.metadata.previousSignature as ValueType;
-        res.previousRoundStrategy = (node.metadata.previousRoundStrategy as string || "") as ValueType;
+        res.previousRoundStrategy =
+            (node.metadata.previousRoundStrategy as string || "") as ValueType;
     }
     return res as ValueType;
 }
@@ -189,5 +203,7 @@ function reverseTransformNode(node: IMsgPackNode): CalculationNode {
         } as ControlNode;
     }
 
-    throw new Error(`Invalid node structure during MsgPack hydration: ${node.kind}`);
+    throw new Error(
+        `Invalid node structure during MsgPack hydration: ${node.kind}`,
+    );
 }

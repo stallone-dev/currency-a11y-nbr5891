@@ -8,6 +8,7 @@
 
 import type { CalculationNode, OperationType } from "./types.ts";
 import { CalcAUYError } from "../core/errors.ts";
+import { MAX_HYDRATE_DEPTH, MAX_HYDRATE_NODES, MAX_OPERANDS } from "../core/constants.ts";
 
 /**
  * Tabela de precedência para operações matemáticas.
@@ -23,19 +24,6 @@ export const PRECEDENCE: Record<OperationType, number> = {
     sub: 4,
     crossContextAdd: 4,
 };
-
-/**
- * Limites de segurança para a estrutura da AST durante a hidratação e construção.
- */
-const MAX_HYDRATE_DEPTH = 500;
-const MAX_HYDRATE_NODES = 1000;
-
-/**
- * Largura máxima de um nó de operação antes de criar uma nova camada (Hierarchical Flattening).
- * Mantém a construção em O(N) e a profundidade em O(log N), evitando o custo O(N²) de cópia
- * de arrays em acúmulos massivos.
- */
-const MAX_OPERANDS = 100;
 
 /**
  * Estado compartilhado para validação recursiva da AST.

@@ -7,7 +7,7 @@
  */
 
 import type { CalculationNode } from "../ast/types.ts";
-import type { CalcAUYLocaleA11y } from "./i18n.ts";
+import type { CalcAUYLocaleA11y } from "./types.ts";
 import { toSuperscript } from "./unicode.ts";
 
 /**

@@ -1,4 +1,7 @@
-import type { ICalcAUYCustomOutput, ICalcAUYCustomOutputContext } from "@st-all-one/calc-auy";
+import type {
+    CalcAUYCustomOutput,
+    CalcAUYCustomOutputContext,
+} from "@st-all-one/calc-auy";
 import { htmlProcessor } from "../html/processor.html.ts";
 import { generateSVG } from "./image_utils.ts";
 
@@ -7,8 +10,8 @@ const encoder = new TextEncoder();
 /**
  * Processador oficial para geração de buffers de imagem (SVG) da fórmula.
  */
-export const imageBufferProcessor: ICalcAUYCustomOutput<Uint8Array> = function (
-    ctx: ICalcAUYCustomOutputContext,
+export const imageBufferProcessor: CalcAUYCustomOutput<Uint8Array> = function (
+    ctx: CalcAUYCustomOutputContext,
 ): Uint8Array {
     const { audit } = ctx;
 

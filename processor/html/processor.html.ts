@@ -1,4 +1,4 @@
-import type { ICalcAUYCustomOutput } from "@st-all-one/calc-auy";
+import type { CalcAUYCustomOutput } from "@st-all-one/calc-auy";
 import { KATEX_CSS_MINIFIED } from "./vendor.ts";
 import katex from "katex";
 
@@ -8,7 +8,7 @@ import katex from "katex";
  * **Engenharia:** Injeta o motor KaTeX e o CSS minificado (com fontes)
  * diretamente no rastro, gerando um fragmento auto-contido e acessível.
  */
-export const htmlProcessor: ICalcAUYCustomOutput<string> = function (
+export const htmlProcessor: CalcAUYCustomOutput<string> = function (
     ctx,
 ): string {
     const { audit } = ctx;

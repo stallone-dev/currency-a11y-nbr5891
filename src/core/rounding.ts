@@ -8,25 +8,25 @@
 
 import { RationalNumber } from "../core/rational.ts";
 import type { RoundingStrategy } from "../core/constants.ts";
+import { CACHE_ARRAY_SIZE } from "../core/constants.ts";
 
 /**
  * Cache O(1) para Divisores e Pontos Médios.
- * Suporta até 128 casas decimais, cobrindo com folga o requisito de 50 casas do projeto.
  * Utilizamos bigint[] em vez de BigInt64Array para evitar overflow acima de 18 casas.
  */
-const POWERS_CACHE: bigint[] = new Array(128);
-const HALVES_CACHE: bigint[] = new Array(128);
+const POWERS_CACHE: bigint[] = new Array(CACHE_ARRAY_SIZE);
+const HALVES_CACHE: bigint[] = new Array(CACHE_ARRAY_SIZE);
 
 POWERS_CACHE[0] = 1n;
 HALVES_CACHE[0] = 0n;
-for (let i = 1; i < 128; i++) {
+for (let i = 1; i < CACHE_ARRAY_SIZE; i++) {
     const p = POWERS_CACHE[i - 1] * 10n;
     POWERS_CACHE[i] = p;
     HALVES_CACHE[i] = p / 2n;
 }
 
 function getPowerOf10(p: number): bigint {
-    if (p >= 0 && p < 128) { return POWERS_CACHE[p]; }
+    if (p >= 0 && p < CACHE_ARRAY_SIZE) { return POWERS_CACHE[p]; }
     return 10n ** BigInt(p);
 }
 
@@ -210,7 +210,7 @@ export function roundToPrecisionNBR5891(
     const isNegative = value < 0n;
     const absValue = isNegative ? -value : value;
     const divisor = getPowerOf10(diff);
-    const halfDivisor = diff < 128 ? HALVES_CACHE[diff] : divisor / 2n;
+    const halfDivisor = diff < CACHE_ARRAY_SIZE ? HALVES_CACHE[diff] : divisor / 2n;
 
     const integralPart = absValue / divisor;
     const remainder = absValue % divisor;

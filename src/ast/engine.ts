@@ -11,14 +11,9 @@ import { RationalNumber } from "../core/rational.ts";
 import { CalcAUYError } from "../core/errors.ts";
 import { getSubLogger, measureTime } from "../utils/logger.ts";
 import { sanitizeAST } from "../utils/sanitizer.ts";
+import { MAX_RECURSION_DEPTH } from "../core/constants.ts";
 
 const logger = getSubLogger("engine");
-
-/**
- * Limite de profundidade da árvore para evitar estouro da pilha de chamadas (Stack Overflow).
- * Em sistemas auditáveis, expressões extremamente profundas devem ser divididas em sub-cálculos.
- */
-const MAX_RECURSION_DEPTH = 500;
 
 /**
  * Colapsa recursivamente um nó da AST em um resultado final (RationalNumber).
