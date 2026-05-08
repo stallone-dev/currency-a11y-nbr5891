@@ -178,7 +178,7 @@ O que torna isso possível é a implementação destes três pilares:
 
 ### 1. Integridade Matemática
 
-- **Aritmética Racional**: Operação baseada em frações verdadeiras `(n/d)` utilizando `BigInt`, com simplificações via **Algoritmo de Euclides (MCD)** em cada etapa, garantindo que o erro acumulado seja estruturalmente **zero**.
+- **Aritmética Racional**: Operação baseada em frações verdadeiras `(n/d)` utilizando `BigInt`, com simplificações via [**Algoritmo de Euclides**](https://pt.wikipedia.org/wiki/Algoritmo_de_Euclides) em cada etapa, garantindo que o erro acumulado seja estruturalmente **zero**.
 
 - **Determinismo Lógico**: Implementação rigorosa de **precedência matemática** [`(PEMDAS/BODMAS)`](https://pt.wikipedia.org/wiki/Ordem_de_opera%C3%A7%C3%B5es), garantindo que as operações alinhem a **intenção da conta** com as regras matemáticas, independente da plataforma de implantação.
 
@@ -200,14 +200,14 @@ O que torna isso possível é a implementação destes três pilares:
 
 - **Segurança Estrutural**: Construída sob o dogma de **Zero tolerânica a Ambiguidades**, a **`CalcAUY`** aplica o `Strict Mode` máximo do TypeScript junto a `Type Guards`, campos privados (`#`) e **`parsers`** rigorosos, garantindo que a integridade dos dados seja aplicada da codificação à execução, retornando erros no padrão [`RFC 7807`](https://datatracker.ietf.org/doc/html/rfc7807) diante de qualquer inconsistência.
 
+- **Separação de responsabilidades**: 
+
 - **Outputs Multiformato**: Processadores de saída que traduzem a lógica interna em representações úteis para fins técnicos, de auditoria e de inclusividade digital:
     - `.toUnicode()`: Representação visual para interfaces de terminal (CLI).
     - `.toLaTeX() / .toHTML()`: Documentação técnica para relatórios e exibição via [KaTeX](https://katex.org/).
     - `.toVerbalA11y()` Para tradução da AST em linguagem natural em 8 idiomas; útil para adesão às diretrizes [`WCAG`](https://www.w3.org/WAI/standards-guidelines/wcag/) e [`eMAG`](https://emag.governoeletronico.gov.br/), com possibilidade de extensão.
     - `.toAuditTrace()`: JSON detalhado contendo o **"DNA do cálculo"** para auditoria profunda.
     - `.toCustomOutput(processor)`: Extensor do `output` para novos formatos (_protobuf, XML, Excel..._) sem interferência no resultado original.
-
-- **Processamento Industrial**: Implementado o utilitário `ProcessBatchAUY(...)`, um motor de alta vazão projetado para processar volumes massivos _(1M+ registros)_ e fluxos contínuos (`Streaming`) sob complexidade `O(N)`, utilizando `workers lógicos`, `scheduler.yield()` e **redutores de memória** para prevenir o bloqueio do `Event Loop`.
 
 ## 🔍 Testes
 
