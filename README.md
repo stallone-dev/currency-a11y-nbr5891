@@ -10,7 +10,7 @@
 
 </div>
 
-A **`CalcAUY`** é uma infraestrutura aritmética que resolve o risco sistêmico do padrão **IEEE 754** ao fundir precisão racional, integridade criptográfica e rastreabilidade total. Através de uma arquitetura baseada em **Imutabilidade Estrita e Árvore de Sintaxe Abstrata (AST)**, a biblioteca permite cálculos determinísticos, contextualizados e com lacre de integridade, servindo como evidência matemática confiável, transparente, inclusiva e auditável.
+A **`CalcAUY`** é uma infraestrutura aritmética que resolve o risco sistêmico do padrão **IEEE 754**, utilizando **Imutabilidade Estrita e Árvore de Sintaxe Abstrata (AST)** para fundir precisão racional, contextualização e lacre de integridade em um único resultado, servindo como evidência matemática confiável, transparente, inclusiva e auditável.
 
 ---
 
