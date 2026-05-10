@@ -184,7 +184,7 @@ export const LOCALES: Record<CalcAUYLocale, CalcAUYLocaleA11y> = {
             add: "plus",
             sub: "moins",
             mul: "multiplié par",
-            div: "divisé por",
+            div: "divisé par",
             pow: "puissance",
             mod: "modulo",
             divInt: "division entière par",

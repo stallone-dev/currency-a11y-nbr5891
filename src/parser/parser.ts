@@ -76,11 +76,11 @@ export class Parser {
      * Resolve Multiplicação, Divisão, Divisão Inteira e Módulo.
      */
     private term(): CalculationNode {
-        let left: CalculationNode = this.power();
+        let left: CalculationNode = this.unary();
 
         while (this.match("STAR", "SLASH", "DOUBLE_SLASH", "PERCENT")) {
             const token: Token = this.previous();
-            const right: CalculationNode = this.power();
+            const right: CalculationNode = this.unary();
             let type: OperationType;
 
             if (token.type === "STAR") { type = "mul"; }
@@ -97,6 +97,30 @@ export class Parser {
         }
 
         return left;
+    }
+
+    /**
+     * Resolve Operações Unárias (+ e -).
+     */
+    private unary(): CalculationNode {
+        if (this.match("PLUS")) {
+            return this.unary();
+        }
+        if (this.match("MINUS")) {
+            const right = this.unary();
+            const zero: LiteralNode = {
+                kind: "literal",
+                value: { n: "0", d: "1" },
+                originalInput: "0",
+            };
+            return {
+                kind: "operation",
+                type: "sub",
+                operands: [zero, right],
+            } as OperationNode;
+        }
+
+        return this.power();
     }
 
     /**
