@@ -30,6 +30,7 @@ export type RoundingStrategy = keyof typeof ROUNDING_IDS;
 /**
  * Chave privada para injeção de timestamp de nascimento em ambientes de teste.
  * Permite garantir assinaturas determinísticas em suítes de teste.
+ * @internal
  */
 export const BIRTH_TICKET_MOCK: unique symbol = Symbol("BIRTH_TICKET_MOCK");
 
