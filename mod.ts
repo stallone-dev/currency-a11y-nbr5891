@@ -11,6 +11,7 @@ import type * as InternalTypes from "./internal-types.ts";
 
 export { CalcAUY } from "./src/main.ts";
 export { CalcAUYError } from "./src/core/errors.ts";
+export type { CalcAUYLogic } from "./src/builder.ts";
 export type { CalcAUYOutput } from "./src/output.ts";
 
 export type {
