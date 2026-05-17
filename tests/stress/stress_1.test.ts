@@ -5,14 +5,13 @@ import { CalcAUY } from "@calcauy";
 import { CalcAUYError } from "@src/core/errors.ts";
 
 /**
- * ABSURD STRESS TESTS - PROJECT "SINGULARITY"
  * These tests are designed to reach the architectural limits of CalcAUY and the Deno runtime.
  * We are targeting BigInt bit-depth, GCD recursion depth, and signature avalanche complexity.
  */
-describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
+describe("CalcAUY - Stress Tests", () => {
     const report: Record<string, string> = {};
 
-    describe("1. The Primorial Singularity (GCD Torture)", () => {
+    describe("1. GCD Limits", () => {
         it("should handle the sum of the first 100 primes as denominators", async () => {
             // Primos menores para evitar estouro rápido, mas muitos para explodir o denominador comum
             const primes = [
@@ -129,7 +128,7 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             const output = await builder.commit();
             const end = performance.now();
 
-            report["1.1_primorial_sum_100"] = `${(end - start).toFixed(2)}ms`;
+            report["1.1_primorial_sum_100"] = `${(end - start).toFixed(6)}ms`;
             const raw = output.toRawInternalNumber();
             report["1.1_den_digits"] = `${raw.d.toString().length} digits`;
 
@@ -137,12 +136,10 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
         });
     });
 
-    describe("2. The Bit Horizon (Memory & Bit-limit Torture)", () => {
+    describe("2. Memory & Bit-limit Torture", () => {
         it("should reach near the 1,000,000 bits limit via multiplication avalanche", async () => {
             const instance = CalcAUY.create({ contextLabel: "singularity-bits" });
             // pow(2, 450000) já tem ~450k bits.
-            // Para chegar em ~900k sem disparar a estimativa pessimista do pow(),
-            // usamos pow() menores e multiplicamos.
             const part = instance.from(2).pow(225_000); // ~225k bits
 
             const start = performance.now();
@@ -151,7 +148,7 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             const output = await builder.commit();
             const end = performance.now();
 
-            report["2.1_multiplication_avalanche_900k_bits"] = `${(end - start).toFixed(2)}ms`;
+            report["2.1_multiplication_avalanche_900k_bits"] = `${(end - start).toFixed(6)}ms`;
             const raw = output.toRawInternalNumber();
             report["2.1_num_bits"] = `~${raw.n.toString(2).length} bits`;
 
@@ -176,12 +173,12 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             }
             const end = performance.now();
 
-            report["2.2_exact_bit_overflow_detection"] = `${(end - start).toFixed(2)}ms`;
+            report["2.2_exact_bit_overflow_detection"] = `${(end - start).toFixed(6)}ms`;
             expect(errorCaught).toBe(true);
         });
     });
 
-    describe("3. The Power Tower DoS (Structural Torture)", () => {
+    describe("3. The Power Tower DoS", () => {
         it("should handle a massive Right-Associative Power Tower (a^b^c^d)", async () => {
             const instance = CalcAUY.create({ contextLabel: "singularity-tower" });
             // Usamos uma base um pouco maior e um expoente que não estoure os bits
@@ -192,16 +189,15 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             const output = await builder.commit();
             const end = performance.now();
 
-            report["3.1_power_tower_structure"] = `${(end - start).toFixed(2)}ms`;
+            report["3.1_power_tower_structure"] = `${(end - start).toFixed(6)}ms`;
             expect(output.toFloatNumber()).toBeGreaterThan(1);
         });
     });
 
-    describe("4. Signature Avalanche (Hashing & Security Torture)", () => {
+    describe("4. Hashing & Security Test", () => {
         it("should generate a signature for an AST with 450 operations (Near Depth Limit)", async () => {
             const instance = CalcAUY.create({ contextLabel: "singularity-signature" });
             let builder = instance.from(1);
-            // MAX_RECURSION_DEPTH é 500. Vamos usar 450.
             const OPS = 450;
 
             for (let i = 0; i < OPS; i++) {
@@ -212,7 +208,7 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             const output = await builder.commit();
             const end = performance.now();
 
-            report["4.1_signature_avalanche_450_ops"] = `${(end - start).toFixed(2)}ms`;
+            report["4.1_signature_avalanche_450_ops"] = `${(end - start).toFixed(6)}ms`;
             expect(output.toAuditTrace()).toContain("signature");
         });
 
@@ -231,15 +227,15 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             const output = await builder.commit();
             const end = performance.now();
 
-            report["4.2_metadata_stress_10k_emojis"] = `${(end - start).toFixed(2)}ms`;
+            report["4.2_metadata_stress_10k_emojis"] = `${(end - start).toFixed(6)}ms`;
             const trace = output.toAuditTrace();
-            report["4.2_trace_size"] = `${(trace.length / 1024 / 1024).toFixed(2)}MB`;
+            report["4.2_trace_size"] = `${(trace.length / 1024 / 1024).toFixed(6)}MB`;
 
             expect(trace.length).toBeGreaterThan(1_000_000);
         });
     });
 
-    describe("5. Radical Newton Chaos (Internal Scalability)", () => {
+    describe("5. Radical Newton Scalability", () => {
         it("should compute nested roots of near-limit numbers", async () => {
             const instance = CalcAUY.create({ contextLabel: "singularity-roots" });
             // Raiz 100 de (2^900,000)
@@ -250,14 +246,14 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             const output = await builder.commit();
             const end = performance.now();
 
-            report["5.1_nested_roots_huge_numbers"] = `${(end - start).toFixed(2)}ms`;
+            report["5.1_nested_roots_huge_numbers"] = `${(end - start).toFixed(6)}ms`;
             expect(output.toFloatNumber()).toBeGreaterThan(0);
         });
     });
 
-    it("Singularity Final Report", () => {
+    it("Final Report", () => {
         console.log("\n========================================================");
-        console.log("   CALCAUY ABSURD STRESS REPORT (PROJECT SINGULARITY)   ");
+        console.log("   CALCAUY STRESS REPORT 1   ");
         console.log("========================================================");
         console.table(report);
         console.log("========================================================\n");

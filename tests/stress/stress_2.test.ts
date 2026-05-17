@@ -4,7 +4,7 @@ import { expect } from "@std/expect";
 import { CalcAUY } from "@calcauy";
 import { CalcAUYError } from "@src/core/errors.ts";
 
-describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
+describe("CalcAUY - Stress Tests 3", () => {
     const report: Record<string, string> = {};
 
     describe("1. Arithmetic & AST Stress (CPU & Memory)", () => {
@@ -21,7 +21,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             const output = await builder.commit();
             const end = performance.now();
 
-            report["1.1_ast_depth_10k"] = `${(end - start).toFixed(2)}ms`;
+            report["1.1_ast_depth_10k"] = `${(end - start).toFixed(6)}ms`;
             expect(output.toStringNumber({ decimalPrecision: 4 })).toBe("2.0000");
         });
 
@@ -37,7 +37,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
                 .commit();
 
             const end = performance.now();
-            report["1.2_cpu_fractional_roots"] = `${(end - start).toFixed(2)}ms`;
+            report["1.2_cpu_fractional_roots"] = `${(end - start).toFixed(6)}ms`;
             expect(output.toFloatNumber()).toBeGreaterThan(0);
         });
 
@@ -55,7 +55,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             const output = await builder.group().pow(2).commit();
             const end = performance.now();
 
-            report["1.3_gcd_explosion"] = `${(end - start).toFixed(2)}ms`;
+            report["1.3_gcd_explosion"] = `${(end - start).toFixed(6)}ms`;
             expect(output.toUnicode()).toContain("round");
         });
 
@@ -74,7 +74,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             }
             const end = performance.now();
 
-            report["1.4_math_overflow_protection"] = `${(end - start).toFixed(2)}ms (deflected: ${errorCaught})`;
+            report["1.4_math_overflow_protection"] = `${(end - start).toFixed(6)}ms (deflected: ${errorCaught})`;
             expect(errorCaught).toBe(true);
         });
     });
@@ -91,7 +91,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             }
             const end = performance.now();
 
-            report["2.1_monetary_burst_100k"] = `${(end - start).toFixed(2)}ms`;
+            report["2.1_monetary_burst_100k"] = `${(end - start).toFixed(6)}ms`;
         });
 
         it("Render Complexity: Deeply Nested LaTeX/Unicode", async () => {
@@ -107,7 +107,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             const unicode = output.toUnicode();
             const end = performance.now();
 
-            report["2.2_render_complexity_nested"] = `${(end - start).toFixed(2)}ms (latex_len: ${latex.length})`;
+            report["2.2_render_complexity_nested"] = `${(end - start).toFixed(6)}ms (latex_len: ${latex.length})`;
             expect(latex).toContain("\\frac");
             expect(unicode).toContain("÷");
         });
@@ -120,7 +120,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             const slices = output.toSlice(100_000, { decimalPrecision: 10 });
             const end = performance.now();
 
-            report["2.3_slicing_100k"] = `${(end - start).toFixed(2)}ms`;
+            report["2.3_slicing_100k"] = `${(end - start).toFixed(6)}ms`;
             expect(slices.length).toBe(100_000);
         });
 
@@ -134,7 +134,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             }
             const end = performance.now();
 
-            report["2.4_custom_processor_100k"] = `${(end - start).toFixed(2)}ms`;
+            report["2.4_custom_processor_100k"] = `${(end - start).toFixed(6)}ms`;
         });
     });
 
@@ -149,7 +149,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             await Promise.all(tasks);
             const end = performance.now();
 
-            report["3.1_concurrency_1k"] = `${(end - start).toFixed(2)}ms`;
+            report["3.1_concurrency_1k"] = `${(end - start).toFixed(6)}ms`;
         });
     });
 
@@ -176,7 +176,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             }
             const end = performance.now();
 
-            report["4.1_json_bomb_hydration"] = `${(end - start).toFixed(2)}ms (deflected: ${deflected})`;
+            report["4.1_json_bomb_hydration"] = `${(end - start).toFixed(6)}ms (deflected: ${deflected})`;
             expect(deflected).toBe(true);
         });
 
@@ -192,14 +192,14 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             const output = await builder.commit();
             const end = performance.now();
 
-            report["4.2_metadata_bloat_5k"] = `${(end - start).toFixed(2)}ms`;
+            report["4.2_metadata_bloat_5k"] = `${(end - start).toFixed(6)}ms`;
             expect(output.toFloatNumber()).toBe(100);
         });
     });
 
-    it("Summary: Final War Gaming Report", () => {
+    it("Final Report", () => {
         console.log("\n========================================================");
-        console.log("   CALCAUY EXTREME STRESS TEST REPORT (WAR GAMING)   ");
+        console.log("   CALCAUY STRESS REPORT 2  ");
         console.log("========================================================");
         console.table(report);
         console.log("========================================================\n");

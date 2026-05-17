@@ -4,14 +4,13 @@ import { expect } from "@std/expect";
 import { CalcAUY } from "@calcauy";
 
 /**
- * SINGULARITY BLACKHOLE - THE ULTIMATE STRESS TEST
  * Targeted at exploding memory, CPU, and native BigInt limits of the Deno/V8 engine.
- * We are not sparing the library. We are pushing for the "Singularity".
+ * We are not sparing the library.
  */
 describe("CalcAUY - Singularity Blackhole (Architecture Demolition)", () => {
     const report: Record<string, string> = {};
 
-    describe("1. The Hydra Nexus (Massive AST Width)", () => {
+    describe("1. Massive AST Width", () => {
         it("should process a tree with 100 operands per node and 3 levels deep (The Hydra)", async () => {
             const instance = CalcAUY.create({ contextLabel: "hydra-nexus" });
 
@@ -36,14 +35,14 @@ describe("CalcAUY - Singularity Blackhole (Architecture Demolition)", () => {
             const output = await hydra.commit();
             const end = performance.now();
 
-            report["1.1_hydra_nexus_latency"] = `${(end - start).toFixed(2)}ms`;
+            report["1.1_hydra_nexus_latency"] = `${(end - start).toFixed(6)}ms`;
             report["1.1_hydra_result"] = output.toStringNumber({ decimalPrecision: 0 });
 
             expect(output.toFloatNumber()).toBeGreaterThan(0);
         });
     });
 
-    describe("2. The Cross-Context Multiverse (Handshake Stress)", () => {
+    describe("2. Handshake Stress", () => {
         it("should link 100 distinct security jurisdictions (Multiverse)", async () => {
             const jurisdictions = Array.from(
                 { length: 100 },
@@ -66,13 +65,13 @@ describe("CalcAUY - Singularity Blackhole (Architecture Demolition)", () => {
             const output = await master.commit();
             const end = performance.now();
 
-            report["2.1_multiverse_link_latency"] = `${(end - start).toFixed(2)}ms`;
+            report["2.1_multiverse_link_latency"] = `${(end - start).toFixed(6)}ms`;
             expect(output.toAuditTrace()).toContain("reanimation_event");
             expect(output.toFloatNumber()).toBeGreaterThan(100);
         });
     });
 
-    describe("3. The Precision Supernova (GCD/MDC)", () => {
+    describe("3. GCD/MDC", () => {
         it("should calculate the sum of inverse primorials and their powers", async () => {
             const instance = CalcAUY.create({ contextLabel: "precision-supernova" });
             // Criando denominadores que são produtos de primos (Primoriais)
@@ -89,7 +88,7 @@ describe("CalcAUY - Singularity Blackhole (Architecture Demolition)", () => {
             const output = await builder.commit();
             const end = performance.now();
 
-            report["3.1_supernova_latency"] = `${(end - start).toFixed(2)}ms`;
+            report["3.1_supernova_latency"] = `${(end - start).toFixed(6)}ms`;
             const raw = output.toRawInternalNumber();
             report["3.1_num_digits"] = `${raw.n.toString().length} digits`;
 
@@ -97,7 +96,7 @@ describe("CalcAUY - Singularity Blackhole (Architecture Demolition)", () => {
         });
     });
 
-    describe("4. The Auditor's Nightmare (Metadata & Formatting Chaos)", () => {
+    describe("4. Metadata & Formatting Chaos", () => {
         it("should render 10,000 metadata entries in a sequence diagram", async () => {
             const instance = CalcAUY.create({ contextLabel: "auditor-nightmare" });
             let builder = instance.from(1000);
@@ -112,14 +111,14 @@ describe("CalcAUY - Singularity Blackhole (Architecture Demolition)", () => {
             const mermaid = output.toMermaidGraph();
             const end = performance.now();
 
-            report["4.1_mermaid_render_latency"] = `${(end - start).toFixed(2)}ms`;
-            report["4.1_mermaid_size"] = `${(mermaid.length / 1024).toFixed(2)}KB`;
+            report["4.1_mermaid_render_latency"] = `${(end - start).toFixed(6)}ms`;
+            report["4.1_mermaid_size"] = `${(mermaid.length / 1024).toFixed(6)}KB`;
 
             expect(mermaid.length).toBeGreaterThan(1000);
         });
     });
 
-    describe("5. The Newton Blackhole (Recursive Radicalization)", () => {
+    describe("5. Recursive Radicalization", () => {
         it("should compute nested 7th roots of near-limit BigInts", async () => {
             const instance = CalcAUY.create({ contextLabel: "newton-blackhole" });
             // Chegando perto de 1M bits
@@ -135,14 +134,14 @@ describe("CalcAUY - Singularity Blackhole (Architecture Demolition)", () => {
             const output = await builder.commit();
             const end = performance.now();
 
-            report["5.1_blackhole_roots_latency"] = `${(end - start).toFixed(2)}ms`;
+            report["5.1_blackhole_roots_latency"] = `${(end - start).toFixed(6)}ms`;
             expect(output.toFloatNumber()).toBeGreaterThan(0);
         });
     });
 
-    it("Blackhole Singularity Final Report", () => {
+    it("Final Report", () => {
         console.log("\n========================================================");
-        console.log("   CALCAUY SINGULARITY BLACKHOLE REPORT (DOOMSDAY)   ");
+        console.log("   CALCAUY STRESS REPORT 3  ");
         console.log("========================================================");
         console.table(report);
         console.log("========================================================\n");

@@ -34,7 +34,7 @@ describe("Performance: Stress & Load Testing", () => {
         }
         const endTime = performance.now();
 
-        console.log(`\n  >> Processamento de ${iterations} cálculos em: ${(endTime - startTime).toFixed(2)}ms`);
+        console.log(`\n  >> Processamento de ${iterations} cálculos em: ${(endTime - startTime).toFixed(6)}ms`);
         // Apenas valida que não houve erro
         assertEquals(true, true);
     });
