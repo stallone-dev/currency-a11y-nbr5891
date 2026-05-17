@@ -62,8 +62,8 @@ describe("Security: Cryptographic Integrity & Determinism", () => {
     });
 
     it("deve validar a integridade do rastro de auditoria (commit trace)", async () => {
-        const Vault = CalcAUY.create({ contextLabel: "v", salt });
-        const output = await Vault.from(100).add(50).commit({ roundStrategy: "TRUNCATE" });
+        const Vault = CalcAUY.create({ contextLabel: "v", salt, roundStrategy: "TRUNCATE" });
+        const output = await Vault.from(100).add(50).commit();
         const auditTrace = output.toAuditTrace();
 
         // Deve hidratar com sucesso

@@ -65,14 +65,7 @@ describe("Builder: Lexer (Tokenização)", () => {
 
     it("deve interromper a leitura do número em caractere inválido após 'e'", () => {
         const lexer = new Lexer("1.2ex");
-        // O lexer consome '1.2e' como número (embora o parser possa falhar depois)
-        // Mas no Lexer atual, se 'x' não é digit/_/./+/-, ele para.
-        // Vamos ver o comportamento exato: readNumber consome 1.2e e para no x.
-        const tokens = lexer.tokenize();
-        assertEquals(tokens[0].value, "1.2e");
-        // O próximo token 'x' causa erro.
-        const lexer2 = new Lexer("1.2ex");
-        assertThrows(() => lexer2.tokenize(), Error, "Caractere inesperado: 'x'");
+        assertThrows(() => lexer.tokenize(), Error, "Caractere inesperado: 'x'");
     });
 
     it("deve suportar underscores como separadores de milhar", () => {

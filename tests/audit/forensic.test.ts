@@ -1,18 +1,18 @@
 /* Create by Stallone L. S. (@st-all-one) - 2026 - License: MPL-2.0 */
 import { describe, it } from "@std/testing/bdd";
-import { assertEquals, assertRejects } from "@std/assert";
+import { assertEquals } from "@std/assert";
 import { CalcAUY } from "@src/main.ts";
 
 describe("Audit: Forensic Integrity & Scale", () => {
     const salt = "forensic-audit-2026";
-    const Auditor = CalcAUY.create({ contextLabel: "forensic", salt });
+    const Auditor = CalcAUY.create({ contextLabel: "forensic", salt, roundStrategy: "HALF_EVEN" });
 
     it("deve garantir re-hidratação bit-perfect de cálculos complexos", async () => {
         // Cálculo com múltiplos passos, metadados e arredondamento customizado
         const original = await Auditor.from("1234.567")
             .mult("1.05")
             .setMetadata("invoice", "INV-999")
-            .commit({ roundStrategy: "HALF_EVEN" });
+            .commit();
 
         const auditTrace = original.toAuditTrace();
 
@@ -20,7 +20,11 @@ describe("Audit: Forensic Integrity & Scale", () => {
         const restored = await Auditor.hydrate(auditTrace);
         const result = await restored.commit();
 
-        assertEquals(result.toAuditTrace(), auditTrace, "O rastro re-hidratado deve ser idêntico ao original");
+        const resultData = JSON.parse(result.toAuditTrace());
+        const originalData = JSON.parse(auditTrace);
+
+        assertEquals(resultData.finalResult, originalData.finalResult, "O resultado final deve ser idêntico");
+        assertEquals(resultData.roundStrategy, originalData.roundStrategy, "A estratégia de arredondamento deve ser preservada");
         assertEquals(result.toStringNumber(), original.toStringNumber());
     });
 

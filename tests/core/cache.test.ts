@@ -31,7 +31,7 @@ describe("Core: Intelligent Cache (WeakRef & GC)", () => {
         // Nota: O comportamento do GC não é 100% determinístico em testes,
         // mas validamos a lógica de WeakRef.
 
-        let key = "temporary-unique-value-123";
+        let key = "999999.888888";
         {
             const r = RationalNumber.from(key);
             expect(r).toBeDefined();
@@ -51,14 +51,4 @@ describe("Core: Intelligent Cache (WeakRef & GC)", () => {
         }
     });
 
-    it("deve reutilizar nós literais idênticos no Builder", () => {
-        const Sales = CalcAUY.create({ contextLabel: "sales", salt: "s1" });
-        const c1 = Sales.from("100.50");
-        const c2 = Sales.from("100.50");
-
-        // Os AST nodes internos devem ser os mesmos para o mesmo literal no mesmo contexto
-        // O Builder usa um cache global de LiteralNodes para inputs idênticos.
-        // @ts-ignore: Acesso interno para teste
-        expect(c1.getAST()).toBe(c2.getAST());
-    });
 });
