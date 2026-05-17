@@ -1,5 +1,5 @@
 import { describe, it } from "@std/testing/bdd";
-import { assertEquals, assertThrows, assertRejects } from "@std/assert";
+import { assertEquals, assertRejects, assertThrows } from "@std/assert";
 import { RationalNumber } from "@src/core/rational.ts";
 import { applyRounding } from "@src/core/rounding.ts";
 import { CalcAUYError } from "@src/core/errors.ts";
@@ -49,18 +49,18 @@ describe("Coverage: Extra Edge Cases", () => {
     it("Sanitizer: should handle edge cases", () => {
         // @ts-ignore
         assertEquals(sanitizeAST(null), { kind: "null" });
-        
+
         const obj: any = { a: 1 };
         obj.self = obj;
         assertEquals((sanitizeObject(obj) as any).self, "[CIRCULAR]");
-        
+
         const arr = [1, "123", { a: 1 }];
         const sanitizedArr = sanitizeObject(arr) as any;
         assertEquals(sanitizedArr[0], "[PII]");
 
         assertEquals(sanitizeObject("A".repeat(51)), "[PII]");
         assertEquals(sanitizeObject("123.45"), "[PII]");
-        
+
         const config = { contextLabel: "test", salt: "s", sensitive: false };
         assertEquals((sanitizeObject({ a: 1 }, config) as any).a, 1);
     });
@@ -74,7 +74,11 @@ describe("Coverage: Extra Edge Cases", () => {
         assertThrows(() => validateASTNode(node1), CalcAUYError);
 
         // Unsupported op
-        const node2 = { kind: "operation", type: "invalid", operands: [{ kind: "literal", value: { n: "1", d: "1" } }] };
+        const node2 = {
+            kind: "operation",
+            type: "invalid",
+            operands: [{ kind: "literal", value: { n: "1", d: "1" } }],
+        };
         // @ts-ignore
         assertThrows(() => evaluate(node2), CalcAUYError);
 
@@ -93,7 +97,7 @@ describe("Coverage: Extra Edge Cases", () => {
     it("Output Formatting: roots and fractions", async () => {
         const engine = CalcAUY.create({ contextLabel: "test", salt: "s" });
         const res = await engine.from("1/2").pow("1/2").commit();
-        
+
         const latex = res.toLaTeX();
         assertEquals(latex.includes("\\sqrt"), true);
         assertEquals(latex.includes("\\frac"), true);
@@ -121,7 +125,7 @@ describe("Coverage: Extra Edge Cases", () => {
 
     it("Main & Hydrate: error cases", async () => {
         assertThrows(() => CalcAUY.create({ contextLabel: "" } as any), CalcAUYError);
-        
+
         await assertRejects(() => CalcAUY.checkIntegrity("invalid json", { salt: "s" }), CalcAUYError);
         // @ts-ignore
         await assertRejects(() => CalcAUY.checkIntegrity({ salt: "s" }, { salt: "s" }), CalcAUYError);

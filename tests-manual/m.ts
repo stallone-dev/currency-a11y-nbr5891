@@ -1,6 +1,4 @@
 import { CalcAUY } from "~calc-auy";
-import { msgpackHydrator, msgpackProcessor } from "./processor/msgpack/processor.msgpack.ts";
-import { protobufHydrator, protobufProcessor } from "./processor/protobuffer/processor.protobuffer.ts";
 
 /**
  * CENÁRIO: Ledger Corporativo Multi-Jurisdicional
@@ -65,16 +63,7 @@ try {
     const output = await finalConsolidation.commit();
 
     console.log("--- ULTRA DIAGRAMA DE SEQUÊNCIA (LEDGER CORPORATIVO) ---");
-    console.log(output.toUnicode());
-    const msgpack = output.toCustomOutput(msgpackProcessor);
-    console.log(msgpack);
-    const protobuf = output.toCustomOutput(protobufProcessor);
-    console.log(protobuf);
-
-    const rehydratedMsgPack = msgpackHydrator(msgpack);
-    console.log(rehydratedMsgPack);
-    const rehydratedProtobuf = protobufHydrator(protobuf);
-    console.log(rehydratedProtobuf);
+    console.log(output.toMermaidGraph());
 } catch (e: any) {
     console.error("Falha na Consolidação do Ledger:", e);
 }

@@ -26,6 +26,7 @@
         "fmt": "deno fmt --config=deno.jsonc ./src ./tests ./deno.jsonc",
         "lint": "deno lint --config=deno.jsonc ./src",
         "test": "deno test --allow-all tests/",
+        "test:stress": "deno test --allow-all tests/stress/",
         "coverage:report": "deno task coverage && deno coverage ./tests/coverage-log --lcov > ./tests/coverage-log/coverage.lcov && genhtml -o ./tests/coverage-log ./tests/coverage-log/coverage.lcov",
         "coverage:dev": "deno task coverage && deno coverage ./tests/coverage-log",
         "coverage": "deno task test --reporter=dot --coverage=./coverage"

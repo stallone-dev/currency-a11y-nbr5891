@@ -24,7 +24,11 @@ describe("Audit: Forensic Integrity & Scale", () => {
         const originalData = JSON.parse(auditTrace);
 
         assertEquals(resultData.finalResult, originalData.finalResult, "O resultado final deve ser idêntico");
-        assertEquals(resultData.roundStrategy, originalData.roundStrategy, "A estratégia de arredondamento deve ser preservada");
+        assertEquals(
+            resultData.roundStrategy,
+            originalData.roundStrategy,
+            "A estratégia de arredondamento deve ser preservada",
+        );
         assertEquals(result.toStringNumber(), original.toStringNumber());
     });
 

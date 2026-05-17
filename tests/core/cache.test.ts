@@ -50,5 +50,4 @@ describe("Core: Intelligent Cache (WeakRef & GC)", () => {
             // mas o teste valida que o código suporta essa limpeza.
         }
     });
-
 });
