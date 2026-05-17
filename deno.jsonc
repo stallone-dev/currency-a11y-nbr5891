@@ -31,17 +31,7 @@
         "coverage:dev": "deno task coverage && deno coverage ./tests/coverage-log",
         "coverage": "deno task test --reporter=dot --coverage=./coverage"
     },
-    "workspace": [
-        "./demo",
-        "./tests",
-        "./mini-scripts",
-        "./processor/cbor",
-        "./processor/msgpack",
-        "./processor/protobuffer",
-        "./processor/html",
-        "./processor/image-buffer",
-        "./processor/persistence"
-    ],
+    "workspace": ["./demo", "./tests", "./mini-scripts"],
     "compilerOptions": {
         "lib": ["dom", "dom.iterable", "dom.asynciterable", "deno.ns"],
         "strict": true,

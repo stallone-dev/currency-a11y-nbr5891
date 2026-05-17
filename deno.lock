@@ -780,26 +780,6 @@
           "npm:puppeteer@^22.15.0"
         ]
       },
-      "processor/cbor": {
-        "dependencies": [
-          "jsr:@std/cbor@~0.1.9"
-        ]
-      },
-      "processor/html": {
-        "dependencies": [
-          "npm:katex@~0.16.45"
-        ]
-      },
-      "processor/msgpack": {
-        "dependencies": [
-          "jsr:@std/msgpack@^1.0.3"
-        ]
-      },
-      "processor/protobuffer": {
-        "dependencies": [
-          "npm:protobufjs@^8.0.1"
-        ]
-      },
       "tests": {
         "dependencies": [
           "jsr:@logtape/logtape@^2.0.5",
