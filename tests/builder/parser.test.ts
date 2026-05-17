@@ -7,7 +7,7 @@ describe("Builder: Parser (PEMDAS)", () => {
     const Engine = CalcAUY.create({
         contextLabel: "parser-test",
         salt: "salt",
-        roundStrategy: "NONE"
+        roundStrategy: "NONE",
     });
 
     it("deve resolver expressões simples", async () => {
@@ -51,7 +51,7 @@ describe("Builder: Parser (PEMDAS)", () => {
 
         const res2 = await Engine.parseExpression("1.5e-1").commit(); // 0.15
         assertEquals(res2.toFloatNumber(), 0.15);
-        
+
         const res3 = await Engine.parseExpression("10E+2").commit(); // 1000
         assertEquals(res3.toFloatNumber(), 1000);
     });
@@ -71,7 +71,7 @@ describe("Builder: Parser (PEMDAS)", () => {
     });
 
     it("deve lidar com múltiplos parênteses aninhados", async () => {
-        const expr = "((10 + 5) * (20 / (2 + 3))) ^ 2"; 
+        const expr = "((10 + 5) * (20 / (2 + 3))) ^ 2";
         // ((15) * (20 / 5))^2 = (15 * 4)^2 = 60^2 = 3600
         const res = await Engine.parseExpression(expr).commit();
         assertEquals(res.toFloatNumber(), 3600);

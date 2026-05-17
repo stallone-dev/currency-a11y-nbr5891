@@ -16,16 +16,111 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
         it("should handle the sum of the first 100 primes as denominators", async () => {
             // Primos menores para evitar estouro rápido, mas muitos para explodir o denominador comum
             const primes = [
-                2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71,
-                73, 79, 83, 89, 97, 101, 103, 107, 109, 113, 127, 131, 137, 139, 149, 151, 157, 163, 167, 173,
-                179, 181, 191, 193, 197, 199, 211, 223, 227, 229, 233, 239, 241, 251, 257, 263, 269, 271, 277, 281,
-                283, 293, 307, 311, 313, 317, 331, 337, 347, 349, 353, 359, 367, 373, 379, 383, 389, 397, 401, 409,
-                419, 421, 431, 433, 439, 443, 449, 457, 461, 463, 467, 479, 487, 491, 499, 503, 509, 521, 523, 541
+                2,
+                3,
+                5,
+                7,
+                11,
+                13,
+                17,
+                19,
+                23,
+                29,
+                31,
+                37,
+                41,
+                43,
+                47,
+                53,
+                59,
+                61,
+                67,
+                71,
+                73,
+                79,
+                83,
+                89,
+                97,
+                101,
+                103,
+                107,
+                109,
+                113,
+                127,
+                131,
+                137,
+                139,
+                149,
+                151,
+                157,
+                163,
+                167,
+                173,
+                179,
+                181,
+                191,
+                193,
+                197,
+                199,
+                211,
+                223,
+                227,
+                229,
+                233,
+                239,
+                241,
+                251,
+                257,
+                263,
+                269,
+                271,
+                277,
+                281,
+                283,
+                293,
+                307,
+                311,
+                313,
+                317,
+                331,
+                337,
+                347,
+                349,
+                353,
+                359,
+                367,
+                373,
+                379,
+                383,
+                389,
+                397,
+                401,
+                409,
+                419,
+                421,
+                431,
+                433,
+                439,
+                443,
+                449,
+                457,
+                461,
+                463,
+                467,
+                479,
+                487,
+                491,
+                499,
+                503,
+                509,
+                521,
+                523,
+                541,
             ];
 
             const instance = CalcAUY.create({ contextLabel: "singularity-gcd" });
             let builder = instance.from(0);
-            
+
             for (const p of primes) {
                 builder = builder.add(`1/${p}`);
             }
@@ -37,7 +132,7 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             report["1.1_primorial_sum_100"] = `${(end - start).toFixed(2)}ms`;
             const raw = output.toRawInternalNumber();
             report["1.1_den_digits"] = `${raw.d.toString().length} digits`;
-            
+
             expect(output.toFloatNumber()).toBeGreaterThan(0);
         });
     });
@@ -49,7 +144,7 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             // Para chegar em ~900k sem disparar a estimativa pessimista do pow(),
             // usamos pow() menores e multiplicamos.
             const part = instance.from(2).pow(225_000); // ~225k bits
-            
+
             const start = performance.now();
             // 2^225k * 2^225k * 2^225k * 2^225k = 2^900k
             const builder = part.mult(part).mult(part).mult(part);
@@ -59,7 +154,7 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             report["2.1_multiplication_avalanche_900k_bits"] = `${(end - start).toFixed(2)}ms`;
             const raw = output.toRawInternalNumber();
             report["2.1_num_bits"] = `~${raw.n.toString(2).length} bits`;
-            
+
             expect(raw.n.toString(2).length).toBeGreaterThan(890_000);
         });
 
@@ -67,7 +162,7 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             const instance = CalcAUY.create({ contextLabel: "singularity-overflow" });
             // Criamos um numero grande que passe no pow()
             const base = instance.from(2).pow(500_000); // 500k bits (OK)
-            
+
             let errorCaught = false;
             const start = performance.now();
             try {
@@ -108,7 +203,7 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             let builder = instance.from(1);
             // MAX_RECURSION_DEPTH é 500. Vamos usar 450.
             const OPS = 450;
-            
+
             for (let i = 0; i < OPS; i++) {
                 builder = builder.add(1);
             }
@@ -127,7 +222,7 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             const KEYS = 10_000;
             const emojiKey = "🚀_key_";
             const longVal = "A".repeat(100);
-            
+
             for (let i = 0; i < KEYS; i++) {
                 builder = builder.setMetadata(`${emojiKey}${i}`, longVal);
             }
@@ -139,7 +234,7 @@ describe("CalcAUY - Absurd Stress Tests (Project Singularity)", () => {
             report["4.2_metadata_stress_10k_emojis"] = `${(end - start).toFixed(2)}ms`;
             const trace = output.toAuditTrace();
             report["4.2_trace_size"] = `${(trace.length / 1024 / 1024).toFixed(2)}MB`;
-            
+
             expect(trace.length).toBeGreaterThan(1_000_000);
         });
     });

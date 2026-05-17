@@ -12,7 +12,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             const instance = CalcAUY.create({ contextLabel: "stress-depth" });
             let builder = instance.from(1);
             const DEPTH = 10_000;
-            
+
             for (let i = 0; i < DEPTH; i++) {
                 builder = builder.add("0.0001");
             }
@@ -28,14 +28,14 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
         it("CPU: Fractional Roots & High Precision", async () => {
             const instance = CalcAUY.create({ contextLabel: "stress-cpu" });
             const start = performance.now();
-            
+
             const output = await instance
                 .from("987654321.123456789")
                 .pow("123/456")
                 .mult("1.0000000001")
                 .div(instance.from("0.0000000001").pow("1/3"))
                 .commit();
-            
+
             const end = performance.now();
             report["1.2_cpu_fractional_roots"] = `${(end - start).toFixed(2)}ms`;
             expect(output.toFloatNumber()).toBeGreaterThan(0);
@@ -46,7 +46,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             // Primos grandes para forçar o cálculo do MDC
             const primes = [104729, 104743, 104759, 104773, 104779, 104789, 104801, 104803];
             let builder = instance.from(0);
-            
+
             for (const p of primes) {
                 builder = builder.add(`1/${p}`);
             }
@@ -62,7 +62,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
         it("BigInt Boundary: Prevent Math Overflow", async () => {
             const instance = CalcAUY.create({ contextLabel: "stress-overflow" });
             let errorCaught = false;
-            
+
             const start = performance.now();
             try {
                 // Tenta criar um número absurdamente grande (Tower of Power)
@@ -84,7 +84,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
             const instance = CalcAUY.create({ contextLabel: "stress-monetary" });
             const output = await instance.from("1234567.89").commit();
             const locales = ["pt-BR", "en-US", "de-DE", "ja-JP", "fr-FR"] as const;
-            
+
             const start = performance.now();
             for (let i = 0; i < 100_000; i++) {
                 output.toMonetary({ locale: locales[i % locales.length] });
@@ -115,7 +115,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
         it("High Precision Slicing: 100,000 slices", async () => {
             const instance = CalcAUY.create({ contextLabel: "stress-slicing" });
             const output = await instance.from("1000000.00").commit();
-            
+
             const start = performance.now();
             const slices = output.toSlice(100_000, { decimalPrecision: 10 });
             const end = performance.now();
@@ -127,7 +127,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
         it("Custom Processor Pressure: 100,000 runs", async () => {
             const instance = CalcAUY.create({ contextLabel: "stress-custom" });
             const output = await instance.from(42).commit();
-            
+
             const start = performance.now();
             for (let i = 0; i < 100_000; i++) {
                 output.toCustomOutput((ctx) => `Result: ${ctx.result.n}/${ctx.result.d}`);
@@ -161,9 +161,9 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
                 type: "add",
                 operands: Array.from({ length: 10_000 }).map(() => ({
                     kind: "literal",
-                    value: { n: "1", d: "1" }
+                    value: { n: "1", d: "1" },
                 })),
-                signature: "fake-sig"
+                signature: "fake-sig",
             };
 
             const start = performance.now();
@@ -183,7 +183,7 @@ describe("CalcAUY - Extreme Stress Tests (War Gaming)", () => {
         it("Metadata Bloat: 5,000 keys", async () => {
             const instance = CalcAUY.create({ contextLabel: "stress-metadata" });
             let builder = instance.from(100);
-            
+
             for (let i = 0; i < 5_000; i++) {
                 builder = builder.setMetadata(`key_${i}`, `value_${i}`);
             }

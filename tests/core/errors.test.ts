@@ -1,5 +1,5 @@
 import { describe, it } from "@std/testing/bdd";
-import { assertEquals, assertStringIncludes, assertMatch } from "@std/assert";
+import { assertEquals, assertMatch, assertStringIncludes } from "@std/assert";
 import { CalcAUYError } from "@src/core/errors.ts";
 
 describe("Core: CalcAUYError", () => {
@@ -18,7 +18,7 @@ describe("Core: CalcAUYError", () => {
     });
 
     it("deve mapear corretamente os status HTTP para cada categoria", () => {
-        const scenarios: Array<{ cat: any, status: number }> = [
+        const scenarios: Array<{ cat: any; status: number }> = [
             { cat: "invalid-syntax", status: 400 },
             { cat: "division-by-zero", status: 422 },
             { cat: "instance-mismatch", status: 403 },

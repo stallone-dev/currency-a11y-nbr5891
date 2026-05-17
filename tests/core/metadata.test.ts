@@ -28,7 +28,11 @@ describe("Core: Metadata Validation", () => {
         });
 
         it("deve rejeitar BigInt puro", () => {
-            assertThrows(() => validateMetadata(10n), CalcAUYError, "Metadados não podem conter BigInt puro. Converta para string ou use objetos planos.");
+            assertThrows(
+                () => validateMetadata(10n),
+                CalcAUYError,
+                "Metadados não podem conter BigInt puro. Converta para string ou use objetos planos.",
+            );
         });
 
         it("deve rejeitar funções e símbolos", () => {
@@ -37,8 +41,14 @@ describe("Core: Metadata Validation", () => {
         });
 
         it("deve rejeitar instâncias de classes (não-planos)", () => {
-            class MyClass { a = 1; }
-            assertThrows(() => validateMetadata(new MyClass()), CalcAUYError, "Metadados permitem apenas objetos planos (plain objects). Classes ou instâncias não são permitidas.");
+            class MyClass {
+                a = 1;
+            }
+            assertThrows(
+                () => validateMetadata(new MyClass()),
+                CalcAUYError,
+                "Metadados permitem apenas objetos planos (plain objects). Classes ou instâncias não são permitidas.",
+            );
             assertThrows(() => validateMetadata(new Date()), CalcAUYError);
             assertThrows(() => validateMetadata(new Map()), CalcAUYError);
         });
@@ -60,7 +70,7 @@ describe("Core: Metadata Validation", () => {
         it("deve validar profundamente estruturas aninhadas", () => {
             const complex = {
                 a: [1, 2, { b: 3 }],
-                c: { d: { e: "fail" } }
+                c: { d: { e: "fail" } },
             };
             // Mocking a failure inside
             (complex.c.d.e as any) = 10n;

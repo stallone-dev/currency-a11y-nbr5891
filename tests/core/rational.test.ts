@@ -186,14 +186,22 @@ describe("Core: RationalNumber", () => {
     describe("Segurança e Limites", () => {
         it("deve lançar math-overflow ao exceder o limite de bits", () => {
             // MAX_BI_LIMIT é 10^301029 approx.
-            const huge = RationalNumber.from(10n ** 400000n); 
-            assertThrows(() => huge.mul(huge), CalcAUYError, "O resultado da operação excede o limite de segurança de 1000000 bits.");
+            const huge = RationalNumber.from(10n ** 400000n);
+            assertThrows(
+                () => huge.mul(huge),
+                CalcAUYError,
+                "O resultado da operação excede o limite de segurança de 1000000 bits.",
+            );
         });
 
         it("deve prever estouro em potenciação antes de executar", () => {
             const base = RationalNumber.from(2);
             const exp = RationalNumber.from(1000001); // Acima do limite de 1M bits
-            assertThrows(() => base.pow(exp), CalcAUYError, "O expoente resultaria em um número superior ao limite de segurança (1000000 bits).");
+            assertThrows(
+                () => base.pow(exp),
+                CalcAUYError,
+                "O expoente resultaria em um número superior ao limite de segurança (1000000 bits).",
+            );
         });
     });
 

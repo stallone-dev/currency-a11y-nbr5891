@@ -6,7 +6,7 @@ describe("Output: Monetary Formatting", () => {
     const Engine = CalcAUY.create({
         contextLabel: "monetary-test",
         salt: "salt",
-        roundStrategy: "NBR5891"
+        roundStrategy: "NBR5891",
     });
 
     it("toMonetary: deve formatar em BRL (padrão pt-BR)", async () => {
@@ -36,7 +36,7 @@ describe("Output: Monetary Formatting", () => {
     it("toMonetary: deve lidar com arredondamento fiscal antes da formatação", async () => {
         const output = await Engine.from(1.225).commit(); // NBR5891 -> 1.22
         assertEquals(output.toMonetary().replace(/[\u00a0\u202f]/g, " "), "R$ 1,22");
-        
+
         const output2 = await Engine.from(1.235).commit(); // NBR5891 -> 1.24
         assertEquals(output2.toMonetary().replace(/[\u00a0\u202f]/g, " "), "R$ 1,24");
     });

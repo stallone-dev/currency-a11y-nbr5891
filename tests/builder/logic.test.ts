@@ -8,7 +8,7 @@ describe("Builder: Logic (Fluent API)", () => {
     const Finance = CalcAUY.create({
         contextLabel: "test-finance",
         salt: "test-salt",
-        roundStrategy: "NBR5891"
+        roundStrategy: "NBR5891",
     });
 
     it("deve iniciar um cálculo a partir de um valor literal", () => {
@@ -35,22 +35,22 @@ describe("Builder: Logic (Fluent API)", () => {
     it("deve suportar encadeamento imutável (Fluent API)", () => {
         const base = Finance.from(100);
         const next = base.add(50);
-        
+
         // Imutabilidade: a instância original não deve ser alterada
         assertEquals(base !== next, true);
     });
 
     it("deve suportar todas as operações matemáticas básicas", async () => {
         const res = await Finance.from(10)
-            .add(5)      // 15
-            .sub(2)      // 13
-            .mult(2)     // 26
-            .div(2)      // 13
-            .pow(2)      // 169
-            .mod(10)     // 9
-            .divInt(2)   // 4 (9 // 2)
+            .add(5) // 15
+            .sub(2) // 13
+            .mult(2) // 26
+            .div(2) // 13
+            .pow(2) // 169
+            .mod(10) // 9
+            .divInt(2) // 4 (9 // 2)
             .commit();
-        
+
         // PEMDAS: 10 + 5 - 2 * 2 / 2 ^ 2 % 10 // 2
         // 2^2 = 4
         // 2*2 = 4; 4/4 = 1; 1%10 = 1; 1//2 = 0
@@ -64,10 +64,10 @@ describe("Builder: Logic (Fluent API)", () => {
             .add(50)
             .setMetadata("reason", "bonus")
             .setMetadata("step", "updated");
-            
+
         const output = await calc.commit();
         const trace = output.toLiveTrace();
-        
+
         // O nó raiz (última operação) deve ter os metadados
         assertEquals(trace.ast.metadata!.reason, "bonus");
         assertEquals(trace.ast.metadata!.step, "updated");
@@ -77,7 +77,7 @@ describe("Builder: Logic (Fluent API)", () => {
         // Sem group: 10 + 5 * 2 = 20 (devido à precedência de operação no attachOp)
         // Nota: O builder.ts usa attachOp que pode ter sua própria lógica de precedência interna.
         // Vamos verificar se .group() força a precedência.
-        
+
         // (10 + 5) * 2 = 30
         const calc1 = Finance.from(10).add(5).group().mult(2);
         const res1 = await calc1.commit();
@@ -92,11 +92,11 @@ describe("Builder: Logic (Fluent API)", () => {
     it("deve lançar erro ao tentar misturar instâncias de contextos diferentes", () => {
         const Sales = CalcAUY.create({ contextLabel: "sales", salt: "s1" });
         const Tax = CalcAUY.create({ contextLabel: "tax", salt: "s2" });
-        
+
         const calcSales = Sales.from(100);
         // @ts-ignore: Testando mixagem de instâncias via branding
         assertThrows(() => Tax.from(calcSales), CalcAUYError, "Attempted to mix instances from different contexts");
-        
+
         const calcTax = Tax.from(50);
         // @ts-ignore: Testando mixagem em operação
         assertThrows(() => calcSales.add(calcTax), CalcAUYError, "Attempted to mix instances from different contexts");
@@ -112,7 +112,7 @@ describe("Builder: Logic (Fluent API)", () => {
         // O builder por padrão anexa operações respeitando PEMDAS via attachOp.
         const res = await Finance.from(10).add(5).mult(2).commit();
         // 10 + (5 * 2) = 20
-        assertEquals(res.toFloatNumber(), 20); 
+        assertEquals(res.toFloatNumber(), 20);
     });
 
     it("deve suportar operações com instâncias do mesmo contexto", async () => {
@@ -137,7 +137,7 @@ describe("Builder: Logic (Fluent API)", () => {
         // @ts-ignore: Testando violação de tipo em tempo de execução
         assertThrows(() => calc.setMetadata("invalid", Symbol()), CalcAUYError);
     });
-    
+
     it("deve manter o isolamento de branding (TypeScript)", () => {
         // Este teste é mais para tipagem, mas valida o design
         const Sales = CalcAUY.create({ contextLabel: "sales", salt: "s1" });
