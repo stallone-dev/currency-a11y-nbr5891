@@ -6,7 +6,15 @@
  * file, You can obtain one at https://mozilla.org/MPL/2.0/.
  */
 
-import { CalcAUYLogic, CalcAUYOutput } from "@calc-auy";
+import { CalcAUY, type CalcAUYLogic, type CalcAUYOutput } from "@calc-auy";
+
+/**
+ * Instância estável para demonstração no servidor.
+ */
+const DemoCalc = CalcAUY.create({
+    contextLabel: "demo-sandbox",
+    salt: "demo-salt-2026",
+});
 
 /**
  * Executa uma expressão de cálculo recebida via string, garantindo a auditoria
@@ -16,10 +24,10 @@ import { CalcAUYLogic, CalcAUYOutput } from "@calc-auy";
  * @param req O objeto de requisição original para validação de headers.
  * @returns Instância de CalcAUYOutput com o resultado do cálculo.
  */
-export function executeExpression(
+export async function executeExpression(
     expression: string,
     req: Request,
-): CalcAUYOutput {
+): Promise<CalcAUYOutput> {
     // 1. Validação de Origem e Headers
     // Bloqueia chamadas diretas via ferramentas como Postman/Curl para evitar abuso da API.
     const requestedWith = req.headers.get("x-requested-with");
@@ -34,8 +42,8 @@ export function executeExpression(
     }
 
     // 3. Validação de Segurança da Sintaxe Core
-    if (!expression.startsWith('CalcAUYLogic.from("')) {
-        throw new Error("A expressão deve iniciar com 'CalcAUYLogic.from(\"'");
+    if (!expression.startsWith('CalcAUY.from("')) {
+        throw new Error("A expressão deve iniciar com 'CalcAUY.from(\"'");
     }
     if (!expression.includes(".commit(")) {
         throw new Error("A expressão deve conter '.commit(...)'");
@@ -71,15 +79,20 @@ export function executeExpression(
     }
 
     // 6. Execução Controlada
-    // Injetamos a classe CalcAUYLogic no escopo da função para permitir o encadeamento dinâmico.
-    const fn = new Function("CalcAUYLogic", `return ${expression};`);
-    const result = fn(CalcAUYLogic);
+    // Injetamos a instância DemoCalc no escopo da função sob o nome "CalcAUY"
+    // para permitir o encadeamento dinâmico sem alterar a sintaxe do frontend.
+    const fn = new Function("CalcAUY", `return ${expression};`);
+    const result = await fn(DemoCalc);
 
-    if (!(result instanceof CalcAUYOutput) && !(result instanceof CalcAUYLogic)) {
+    // Verificação via duck-typing para suportar exportação apenas de tipos no mod.ts
+    const isOutput = result && typeof result === "object" && typeof result.toAuditTrace === "function";
+    const isBuilder = result && typeof result === "object" && typeof result.commit === "function";
+
+    if (!isOutput && !isBuilder) {
         throw new Error(
             "A expressão deve retornar um CalcAUYLogic ou CalcAUYOutput",
         );
     }
 
-    return result instanceof CalcAUYLogic ? result.commit() : result;
+    return isOutput ? result : await result.commit();
 }

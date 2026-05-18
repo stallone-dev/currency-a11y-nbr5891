@@ -74,7 +74,7 @@ export default Deno.serve({ port: 8087 }, async (req) => {
             }
 
             const { expression } = await req.json();
-            const output = executeExpression(expression, req);
+            const output = await executeExpression(expression, req);
             return new Response(
                 JSON.stringify(mapAllOutputs(output)),
                 {

@@ -50,7 +50,7 @@ const readOnlyFilter = EditorState.changeFilter.of((tr) => {
     const doc = tr.startState.doc;
     const docString = doc.toString();
 
-    const startFixed = 'CalcAUYLogic.from("';
+    const startFixed = 'CalcAUY.from("';
     const startLen = startFixed.length;
 
     const endFixed = ".commit(";
@@ -72,17 +72,17 @@ const readOnlyFilter = EditorState.changeFilter.of((tr) => {
 
 // Autocomplete e Hints (Restaurado)
 function customCompletions(context) {
-    // 1. Sugestão para o início (CalcAUYLogic.from)
+    // 1. Sugestão para o início (CalcAUY.from)
     const word = context.matchBefore(/\w*/);
     if (word && (word.from != word.to || context.explicit)) {
-        if ("CalcAUYLogic".startsWith(word.text)) {
+        if ("CalcAUY".startsWith(word.text)) {
             return {
                 from: word.from,
                 options: [
                     {
-                        label: "CalcAUYLogic.from",
+                        label: "CalcAUY.from",
                         type: "function",
-                        apply: snippet('CalcAUYLogic.from("${valor}")'),
+                        apply: snippet('CalcAUY.from("${valor}")'),
                         detail: "(valor)",
                         info: "Inicia um novo cálculo com o valor fornecido",
                     },
@@ -160,27 +160,27 @@ window.setupEditor = function (containerId) {
     parent.innerHTML = ""; // Limpa container
 
     // Código Inicial Restaurado
-    const startCode = `CalcAUYLogic.from("1234567.89")
+    const startCode = `CalcAUY.from("1234567.89")
         .setMetadata("transaction_id", "ABC-123")
         .pow("353/1141")
         .add(
-            CalcAUYLogic.from(0.00123).div(
-                CalcAUYLogic.from(7)
+            CalcAUY.from(0.00123).div(
+                CalcAUY.from(7)
                             .div(11)
             ).group()
             .pow(9)
         )
         .setMetadata("step", "final_audit")
         .mult(
-            CalcAUYLogic.from(3)
+            CalcAUY.from(3)
             .div(
-                CalcAUYLogic.from(7)
+                CalcAUY.from(7)
                            .div(13)
             )
             .pow("999/135")
         )
-        .group().div(CalcAUYLogic.from(0.0123).div(
-                CalcAUYLogic.from(0.007).pow("81/46")
+        .group().div(CalcAUY.from(0.0123).div(
+                CalcAUY.from(0.007).pow("81/46")
             ).group()).pow("49/189")
       .commit()`;
 
@@ -209,8 +209,8 @@ window.getUserCode = function () {
     const code = editorView.state.doc.toString();
 
     // Validações restauradas
-    if (!code.startsWith('CalcAUYLogic.from("')) {
-        throw new Error("O código deve começar com 'CalcAUYLogic.from(\"'");
+    if (!code.startsWith('CalcAUY.from("')) {
+        throw new Error("O código deve começar com 'CalcAUY.from(\"'");
     }
     if (!code.includes(".commit(")) {
         throw new Error("O código deve terminar com '.commit(...)'");

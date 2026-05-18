@@ -1,6 +1,6 @@
 
 import { manualExamples } from "./manual-examples.ts";
-import { KATEX_CSS_MINIFIED } from "../../src/core/constants.ts";
+import { KATEX_CSS_MINIFIED } from "../../processor/html/vendor.ts";
 import { encodeBase64 } from "@std/encoding/base64";
 import { join, dirname, fromFileUrl } from "@std/path";
 

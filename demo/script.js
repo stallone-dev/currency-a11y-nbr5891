@@ -28,6 +28,7 @@ function updateInteractiveDisplay(data) {
         toLaTeX: data.toLaTeX,
         toUnicode: data.toUnicode,
         toVerbalA11y: data.toVerbalA11y,
+        toMermaidGraph: `<pre class="mermaid-view">${data.toMermaidGraph}</pre>`,
         toCustomOutput: `
             <div class="processor-info"><strong>Processor:</strong> <code>${data.toCustomOutputProcessor}</code></div>
             <div class="custom-val">${data.toCustomOutput}</div>
@@ -91,8 +92,12 @@ const methodTitles = {
     "verbalA11y": "Voz (A11y)",
     "customOutput": "Custom",
     "auditTrace": "Auditoria",
-    "json": "JSON",
+    "audit": "JSON",
     "imageBuffer": "Imagem",
+    "Visual Audit (Mermaid)": "Visual Audit",
+    "Rounding Strategies": "Rounding",
+    "Cross-Context Audit": "Cross-Context",
+    "Integrity Validation": "Integrity",
 };
 
 function renderCategory(examplesByKey, container, navList) {

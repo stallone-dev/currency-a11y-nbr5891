@@ -7,7 +7,8 @@
  */
 
 import type { CalcAUYOutput } from "@calc-auy";
-import katex from "@katex";
+import { htmlProcessor } from "@html-processor";
+import { imageBufferProcessor } from "@image-buffer-processor";
 
 import { encodeBase64 } from "jsr:@std/encoding/base64";
 
@@ -21,7 +22,7 @@ import { encodeBase64 } from "jsr:@std/encoding/base64";
 export function mapAllOutputs(
     output: CalcAUYOutput,
 ): Record<string, string | number | null> {
-    // 1. Gera todos os outputs via toJSON, agora passando o katex para permitir HTML e Imagem
+    // 1. Gera outputs via toJSON (Apenas formatos básicos do core)
     const jsonStr = output.toJSON([
         "toStringNumber",
         "toFloatNumber",
@@ -32,14 +33,13 @@ export function mapAllOutputs(
         "toVerbalA11y",
         "toUnicode",
         "toAuditTrace",
-        "toHTML",
-        "toImageBuffer",
-    ], katex);
+        "toMermaidGraph",
+    ]);
     const baseData = JSON.parse(jsonStr);
 
-    // 2. Processamento de imagem (Responsabilidade da aplicação converter o Uint8Array do core para Base64)
-    // Nota: baseData.toImageBuffer vem como string JSON ou array de números dependendo do parser
-    const buffer = output.toImageBuffer(katex);
+    // 2. Processamento de HTML e Imagem via processadores externos
+    const html = output.toCustomOutput(htmlProcessor);
+    const buffer = output.toCustomOutput(imageBufferProcessor);
     const base64 = encodeBase64(buffer);
 
     // 3. Exemplos de Slicing (Demonstração fixa)
@@ -65,7 +65,8 @@ export function mapAllOutputs(
         toVerbalA11y: baseData.toVerbalA11y,
         toUnicode: baseData.toUnicode,
         toAuditTrace: baseData.toAuditTrace,
-        toHTML: baseData.toHTML,
+        toMermaidGraph: baseData.toMermaidGraph,
+        toHTML: html,
         toCustomOutput: customReport,
         toCustomOutputProcessor: processorCode,
         toImageDataBase64: `data:image/svg+xml;base64,${base64}`,

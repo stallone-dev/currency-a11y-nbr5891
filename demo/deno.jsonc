@@ -19,6 +19,8 @@
         "@codemirror/lint": "npm:@codemirror/lint@^6.8.0",
         "@logtape": "jsr:@logtape/logtape@^2.0.4",
         "@std/path": "jsr:@std/path@^1.1.4",
-        "@katex": "npm:katex@^0.16.45"
+        "@katex": "npm:katex@^0.16.45",
+        "@html-processor": "../processor/html/processor.html.ts",
+        "@image-buffer-processor": "../processor/image-buffer/processor.imagebuffer.ts"
     }
 }

@@ -7,7 +7,7 @@
         "./cbor": "./processor/cbor/processor.cbor.ts",
         "./html": "./processor/html/processor.html.ts",
         "./msgpack": "./processor/msgpack/processor.msgpack.ts",
-        "./image-buffer": "./processor/image-buffer/processor.image-buffer.ts",
+        "./image-buffer": "./processor/image-buffer/processor.imagebuffer.ts",
         "./persistence": "./processor/persistence/processor.persistence.ts"
     },
     "license": "MPL-2.0",

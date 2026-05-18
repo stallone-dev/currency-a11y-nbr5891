@@ -137,7 +137,7 @@ export function renderMermaidSequence(
     function walk(node: CalculationNode, ctx: string, depth: number, isRoot = false): void {
         updateDepth(ctx, depth);
         const meta = node.metadata || {};
-        const isPII = meta.pii === true || (config.sensitive && meta.pii !== false);
+        const isPII = meta.pii === true;
         const timestamp = (meta.timestamp && !isRoot) ? formatTime(meta.timestamp) : "";
         const userMeta = getUserMetadata(meta, isPII, isRoot);
 
